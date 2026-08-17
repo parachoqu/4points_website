@@ -282,4 +282,3 @@ Não foi adicionado um loader com timestamp no `<head>` porque isso forçaria um
 3. Abra no navegador:
    `http://localhost:8080`
 
-teste

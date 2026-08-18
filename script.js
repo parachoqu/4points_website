@@ -31,6 +31,26 @@ import * as THREE from "three";
     return () => { if (!ticking) { ticking = true; requestAnimationFrame(run); } };
   };
 
+  /* ---------- shared: colour maths for the adaptive ink field ----------
+     WCAG relative luminance needs linearised sRGB. Reading the raw channels
+     overstates a dark navy by an order of magnitude, which puts the crossover
+     between dark ink and light ink in the wrong place entirely. */
+  const clamp01 = (v) => (v < 0 ? 0 : v > 1 ? 1 : v);
+  const srgbToLinear = (c) => (c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4));
+  const relLuminance = (r, g, b) =>
+    0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
+  const contrastRatio = (l1, l2) => (Math.max(l1, l2) + 0.05) / (Math.min(l1, l2) + 0.05);
+
+  /* GLSL smoothstep, reversed-edge form included: the backdrop shader uses it */
+  const smoothstep = (edge0, edge1, x) => {
+    const t = clamp01((x - edge0) / (edge1 - edge0));
+    return t * t * (3 - 2 * t);
+  };
+
+  /* layout position, immune to the reveal transform (a client rect is not) */
+  const docOffsetTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
+  const docOffsetLeft = (el) => { let x = 0; for (let n = el; n; n = n.offsetParent) x += n.offsetLeft; return x; };
+
   /* ---------- header ---------- */
   function initHeader() {
     const header = document.querySelector("[data-header]");
@@ -666,16 +686,18 @@ import * as THREE from "three";
           });
         }
       },
-      { // 02 — NAVY → IVORY
-        top: PALETTE.navy2, bottom: PALETTE.ivory, glow: PALETTE.navy,
-        glowPos: [0.2, 0.9], glowStrength: 0.35, label: "02", labelDark: false,
-        fog: [PALETTE.ivory.getHex(), 60, 180],
+      { // 02 — NAVY DEEP: the ground the Standard section reads against
+        top: PALETTE.navyDark, bottom: PALETTE.navy2, glow: PALETTE.petrol,
+        glowPos: [0.2, 0.85], glowStrength: 0.3, label: "02", labelDark: true,
+        fog: [PALETTE.navyDark.getHex(), 40, 160],
         build: (g) => {
-          const dia = new THREE.LineLoop(makeDiamond(7), lineMaterial(PALETTE.navy.getHex(), 0.05));
+          /* the drawing is redrawn in light: navy lines are invisible now that
+             this station holds a navy ground */
+          const dia = new THREE.LineLoop(makeDiamond(7), lineMaterial(PALETTE.sand.getHex(), 0.05));
           dia.position.set(-4, 4, -2); dia.rotation.z = 0.15; g.add(dia);
           const mark = new THREE.Group();
-          const l1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.5, 0, 0), new THREE.Vector3(0.5, 0, 0)]), lineMaterial(PALETTE.navy.getHex(), 0.12));
-          const l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -0.5, 0), new THREE.Vector3(0, 0.5, 0)]), lineMaterial(PALETTE.navy.getHex(), 0.12));
+          const l1 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(-0.5, 0, 0), new THREE.Vector3(0.5, 0, 0)]), lineMaterial(PALETTE.champagne.getHex(), 0.16));
+          const l2 = new THREE.Line(new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0, -0.5, 0), new THREE.Vector3(0, 0.5, 0)]), lineMaterial(PALETTE.champagne.getHex(), 0.16));
           mark.add(l1, l2); mark.position.set(7, -3, 2); g.add(mark);
         }
       },
@@ -812,6 +834,237 @@ import * as THREE from "three";
     const labelEl = document.getElementById("surfaceLabel");
     const grainEl = document.getElementById("grainOverlay");
 
+    /* =========================================================
+       ADAPTIVE EDITORIAL INK — the Standard section
+       ---------------------------------------------------------
+       That section paints no ground of its own: its type sits straight on this
+       canvas. And the backdrop is a vertical gradient *inside the viewport* --
+       at 45 degrees of FOV, 30 units out, the screen shows uv.y 0.19-0.81 of
+       the plane -- so the heading can be over navy while pillar 04 is over
+       ivory in the very same frame. One averaged luminance describes none of
+       that. Each text block samples the light painted at its own position and
+       answers locally, while the section keeps a single shared light column and
+       a single temperature, so the four paragraphs never read as four presets.
+       ========================================================= */
+    const standardSection = document.querySelector(".standard");
+    const pillarsEl = standardSection && standardSection.querySelector(".pillars");
+    const inkBlocks = [];
+    const inkStore = {};
+
+    /* Where the ground crosses this, dark ink and light ink are equally legible
+       (about 4.1:1 each) -- and equally near their limit. So the ink never
+       blends across it: the
+       change travels as a terminator, a line of light moving over the surface,
+       and every pixel stays fully one ink or fully the other. A dissolve would
+       put mid-grey type on a mid-grey ground, which is the exact failure this
+       section had. */
+    const INK_FLIP = 0.20;
+    const INK_L_DARK = 0.0113;   /* --navy-dark */
+    const INK_L_LIGHT = 0.9770;  /* --paper */
+    const INK_L_DARK_MAT = 0.045;  /* the same ink once the material is on it */
+    const INK_L_LIGHT_MAT = 0.900;
+    const ACCENT_L = 0.4559;       /* --champagne */
+    const ACCENT_BASE_CR = 1.85;   /* champagne on the approved ivory ground */
+
+    let inkOnScreen = !("IntersectionObserver" in window);
+    let inkTemp = 0.5;
+    let inkSectionTop = 0;
+    let inkSectionH = 1;
+    let inkLastTravel = null;
+    let inkLastFront = null;
+    let inkLastDocH = -1;
+    let inkCRTarget = 5.2;
+
+    if (standardSection) {
+      /* the section itself is sampled too: the watermark and the top rule sit
+         outside the head and the pillars, and still belong to the same light */
+      inkBlocks.push({ el: standardSection, copy: null, mid: 0, cx: 0, last: inkStore });
+      const head = standardSection.querySelector(".standard-head");
+      if (head) inkBlocks.push({ el: head, copy: null, mid: 0, cx: 0, last: {} });
+      standardSection.querySelectorAll(".pillar").forEach((el) => {
+        inkBlocks.push({ el, copy: el.querySelector(".pillar-copy"), mid: 0, cx: 0, last: {} });
+      });
+    }
+
+    /* every element painted through the shared field, and its own offset in it */
+    const inkPainted = standardSection
+      ? [...standardSection.querySelectorAll(".standard-head h2, .pillar-title, .pillar-copy")]
+      : [];
+
+    /* Writes are quantised: the smoothness comes from transitions on registered
+       custom properties, not from repainting the section every frame. */
+    function writeInkVar(el, store, name, value, epsilon) {
+      const prev = store[name];
+      if (prev !== undefined && Math.abs(prev - value) < epsilon) return;
+      store[name] = value;
+      el.style.setProperty(name, value.toFixed(3));
+    }
+
+    /* geometry is read on layout changes only, never per frame */
+    function measureInk() {
+      inkLastDocH = document.documentElement.scrollHeight;
+      if (!inkBlocks.length) return;
+
+      inkCRTarget = window.matchMedia("(max-width:767px)").matches ? 6 : 5.2;
+      inkSectionTop = docOffsetTop(standardSection);
+      inkSectionH = Math.max(1, standardSection.offsetHeight);
+
+      inkBlocks.forEach((b) => {
+        b.mid = docOffsetTop(b.el) + b.el.offsetHeight / 2;
+        b.cx = docOffsetLeft(b.el) + b.el.offsetWidth / 2;
+      });
+
+      /* One surface, several windows: the field is the whole section, and each
+         block carries its own offset into it. The terminator, the atmosphere
+         and the incident light are therefore the same event everywhere -- not
+         four gradients that happen to look alike. */
+      standardSection.style.setProperty("--field-h", inkSectionH + "px");
+      inkPainted.forEach((el) => {
+        el.style.setProperty("--field-y", -Math.round(docOffsetTop(el) - inkSectionTop) + "px");
+      });
+    }
+
+    function updateStandardInk() {
+      if (!inkBlocks.length || !inkOnScreen) return;
+
+      const viewH = window.innerHeight || 800;
+      const viewW = window.innerWidth || 1200;
+      const scrollY = window.scrollY || 0;
+
+      /* screen -> backdrop-plane uv (PlaneGeometry 220x40, held 30 units out) */
+      const halfH = Math.tan((camera.fov * Math.PI) / 360) * 30;
+      const halfW = halfH * camera.aspect;
+
+      const top = backdropMat.uniforms.uColorTop.value;
+      const bottom = backdropMat.uniforms.uColorBottom.value;
+      const glowC = backdropMat.uniforms.uGlowColor.value;
+      const glowP = backdropMat.uniforms.uGlowPos.value;
+      const glowS = backdropMat.uniforms.uGlowStrength.value;
+
+      /* the shader, re-run on the CPU for a handful of points */
+      const groundAt = (screenY, screenX) => {
+        const uvY = 0.5 + ((viewH * 0.5 - screenY) / (viewH * 0.5)) * (halfH / 40);
+        const uvX = 0.5 + ((screenX - viewW * 0.5) / (viewW * 0.5)) * (halfW / 220);
+        const glow = smoothstep(0.75, 0, Math.hypot(uvX - glowP.x, uvY - glowP.y)) * glowS;
+        return relLuminance(
+          clamp01(bottom.r + (top.r - bottom.r) * uvY + glowC.r * glow),
+          clamp01(bottom.g + (top.g - bottom.g) * uvY + glowC.g * glow),
+          clamp01(bottom.b + (top.b - bottom.b) * uvY + glowC.b * glow)
+        );
+      };
+
+      /* Temperature is the atmosphere's own warmth, and it lags well behind the
+         tone. Tone has to move; temperature keeps drifting long after it
+         settled, and that lag is what reads as light moving over the page
+         rather than a script repainting the text. */
+      const warmth = clamp01(0.5 + (glowC.r - glowC.b) * 1.6);
+      inkTemp += (warmth - inkTemp) * 0.013;
+      writeInkVar(standardSection, inkStore, "--ink-temp", inkTemp, 0.02);
+
+      /* walk the light down the screen and find where it crosses the flip */
+      const cx = inkBlocks[0].cx;
+      const STEPS = 18;
+      const polOf = (L) => (L < INK_FLIP ? 1 : 0);
+      let prevY = 0;
+      let prevL = groundAt(0, cx);
+      const polTop = polOf(prevL);
+      let polBottom = polTop;
+      let front = null;
+      let nearest = Infinity;
+
+      for (let i = 1; i <= STEPS; i++) {
+        const y = (viewH * i) / STEPS;
+        const L = groundAt(y, cx);
+        if (polOf(L) !== polOf(prevL)) {
+          const cy = prevY + (y - prevY) * ((INK_FLIP - prevL) / (L - prevL));
+          const d = Math.abs(cy - viewH * 0.5);
+          if (d < nearest) { nearest = d; front = cy; }
+        }
+        polBottom = polOf(L);
+        prevY = y;
+        prevL = L;
+      }
+
+      writeInkVar(standardSection, inkStore, "--pol-t", polTop, 0.5);
+      writeInkVar(standardSection, inkStore, "--pol-b", polBottom, 0.5);
+
+      /* the terminator lives in the field's own coordinates, so the four
+         paragraphs and the two headings all report the same line of light */
+      const frontField = front === null
+        ? (polTop ? -9999 : inkSectionH + 9999)
+        : front + scrollY - inkSectionTop;
+      if (inkLastFront === null || Math.abs(frontField - inkLastFront) >= 2) {
+        inkLastFront = frontField;
+        standardSection.style.setProperty("--ink-front", Math.round(frontField) + "px");
+      }
+
+      inkBlocks.forEach((b) => {
+        const y = b.mid - scrollY;
+        const L = groundAt(y, b.cx);
+
+        /* continuous, for the hairlines and the halo's own colour */
+        writeInkVar(b.el, b.last, "--ink-mix", 1 - smoothstep(0.13, 0.28, L), 0.02);
+        /* snapped, for the two accents that cannot be painted through the field
+           (their rules and ticks are drawn in currentColor) */
+        writeInkVar(b.el, b.last, "--ink-pol", polOf(L), 0.5);
+
+        /* The envelope answers the contrast the block actually has while wearing
+           everything it is wearing -- the atmosphere and the incident light lift
+           a dark ink several times in luminance, so measuring the bare colour
+           would report a comfort the reader never gets. One refinement step:
+           the envelope retracts the material, which in turn raises the ink. */
+        const pol = polOf(L);
+        const inkPure = pol ? INK_L_LIGHT : INK_L_DARK;
+        const inkFull = pol ? INK_L_LIGHT_MAT : INK_L_DARK_MAT;
+        const first = clamp01((inkCRTarget - contrastRatio(inkFull, L)) / 2.6);
+        const inkEff = inkPure + (inkFull - inkPure) * (1 - first);
+        writeInkVar(b.el, b.last, "--envelope", clamp01((inkCRTarget - contrastRatio(inkEff, L)) / 2.6), 0.02);
+
+        /* how far the champagne numeral has to be pushed out of the ground's
+           own luminance, and in which direction. Zero wherever it can stay. */
+        if (b.copy) {
+          const accentCR = contrastRatio(ACCENT_L, L);
+          /* champagne on the approved ivory ground already reads at 1.85:1 --
+             that is the client's own baseline for this numeral, so the push
+             only fires below it. On a lit ground it is exactly zero and the
+             accent stays the approved colour. */
+          const push = clamp01((ACCENT_BASE_CR - accentCR) / 0.35);
+          const toShadow = contrastRatio(0.06, L) > contrastRatio(0.70, L);
+          /* on a dark ground the numeral is lifted well past plain champagne --
+             it is a register mark and it should carry, not merely survive */
+          const lift = Math.max(toShadow ? 0 : push, polOf(L) * 0.62);
+          writeInkVar(b.el, b.last, "--accent-dark", toShadow ? push : 0, 0.03);
+          writeInkVar(b.el, b.last, "--accent-light", lift, 0.03);
+
+          const off = (y - viewH * 0.42) / (viewH * 0.42);
+          writeInkVar(b.el, b.last, "--focus", Math.exp(-off * off * 1.35), 0.03);
+        }
+      });
+
+      if (isReduced) return;
+      /* the incident light is fixed in the room, so scrolling walks it down the
+         page: 01 -> 02 -> 03 -> 04, one event crossing four windows */
+      const progress = clamp01((viewH - (inkSectionTop - scrollY)) / (viewH + inkSectionH));
+      const travel = (progress - 0.5) * inkSectionH * 0.9;
+      if (inkLastTravel === null || Math.abs(travel - inkLastTravel) >= 1) {
+        inkLastTravel = travel;
+        standardSection.style.setProperty("--light-travel", Math.round(travel) + "px");
+      }
+    }
+
+    if (standardSection) {
+      measureInk();
+      window.addEventListener("load", measureInk);
+      if (document.fonts && document.fonts.ready) document.fonts.ready.then(measureInk);
+      if ("ResizeObserver" in window && pillarsEl) new ResizeObserver(measureInk).observe(pillarsEl);
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver((entries) => {
+          inkOnScreen = entries[0].isIntersecting;
+          if (inkOnScreen) updateStandardInk();
+        }, { rootMargin: "240px 0px" }).observe(standardSection);
+      }
+    }
+
     function updateFromScroll(progressPx) {
       const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
       const stationFloat = Math.max(0, Math.min(stations.length - 1, (progressPx / maxScroll) * (stations.length - 1)));
@@ -834,6 +1087,12 @@ import * as THREE from "three";
         THREE.MathUtils.lerp(a.glowPos[0], b.glowPos[0], t),
         THREE.MathUtils.lerp(a.glowPos[1], b.glowPos[1], t)
       );
+
+      /* every uniform for this frame is now set: the ink can read the light */
+      if (standardSection) {
+        if (document.documentElement.scrollHeight !== inkLastDocH) measureInk();
+        updateStandardInk();
+      }
 
       const fogColorA = new THREE.Color(a.fog[0]);
       const fogColorB = new THREE.Color(b.fog[0]);
@@ -863,6 +1122,7 @@ import * as THREE from "three";
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      measureInk();
     }
     window.addEventListener("resize", onResize);
 

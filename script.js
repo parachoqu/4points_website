@@ -811,7 +811,6 @@ import * as THREE from "three";
 
     const labelEl = document.getElementById("surfaceLabel");
     const grainEl = document.getElementById("grainOverlay");
-    const standardSection = document.querySelector(".standard");
 
     function updateFromScroll(progressPx) {
       const maxScroll = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
@@ -828,20 +827,6 @@ import * as THREE from "three";
 
       backdropMat.uniforms.uColorTop.value.copy(a.top).lerp(b.top, t);
       backdropMat.uniforms.uColorBottom.value.copy(a.bottom).lerp(b.bottom, t);
-
-      // Auto-contrast for .pillar-copy gradient text (4 Pillars section): derive
-      // relative luminance from the same top/bottom colors just painted to the
-      // backdrop this frame, so the text tracks what's actually rendered behind it.
-      // Runs unconditionally (not gated by isReduced) — this is contrast
-      // correctness, not decorative motion.
-      if (standardSection) {
-        const topC = backdropMat.uniforms.uColorTop.value;
-        const bottomC = backdropMat.uniforms.uColorBottom.value;
-        const topLum = 0.2126 * topC.r + 0.7152 * topC.g + 0.0722 * topC.b;
-        const bottomLum = 0.2126 * bottomC.r + 0.7152 * bottomC.g + 0.0722 * bottomC.b;
-        const bgLuminance = topLum * 0.5 + bottomLum * 0.5; // 0 = dark, 1 = light
-        standardSection.style.setProperty("--pillar-contrast-pos", ((1 - bgLuminance) * 100).toFixed(2) + "%");
-      }
 
       backdropMat.uniforms.uGlowColor.value.copy(a.glow).lerp(b.glow, t);
       backdropMat.uniforms.uGlowStrength.value = THREE.MathUtils.lerp(a.glowStrength, b.glowStrength, t);

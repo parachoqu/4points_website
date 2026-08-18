@@ -67,6 +67,18 @@
       --dur-fast: .25s;
       --dur-med: .55s;
       --dur-slow: .9s;
+
+      /* auto-contrast gradient text base position for .pillar-copy (4 Pillars);
+         JS overwrites this every frame once the Three.js background is running */
+      --pillar-contrast-pos: 15%;
+    }
+
+    /* registered so --pillar-shift can be smoothly keyframe-interpolated
+       (plain custom properties do not interpolate without @property) */
+    @property --pillar-shift {
+      syntax: '<percentage>';
+      inherits: true;
+      initial-value: 0%;
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -98,10 +110,84 @@
       margin: 0;
       font-family: var(--font-ui);
       color: var(--graphite);
-      background: var(--paper);
+      background: var(--navy-dark);
       -webkit-font-smoothing: antialiased;
       line-height: 1.55;
       overflow-x: hidden;
+    }
+
+    #main {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* =========================================================
+       02a. THREE.JS CONTINUOUS CANVAS & ATMOSPHERE
+       ========================================================= */
+    #canvas-fixed {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      display: block;
+      pointer-events: none;
+    }
+
+    .surface-id {
+      position: fixed;
+      z-index: 20;
+      font-size: 11px;
+      letter-spacing: .28em;
+      font-weight: 600;
+      text-transform: uppercase;
+      top: 32px;
+      left: clamp(20px, 5vw, 64px);
+      font-variant-numeric: tabular-nums;
+      pointer-events: none;
+      transition: color .6s ease, opacity .6s ease;
+      opacity: .22;
+    }
+
+    .grain {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 500;
+      opacity: .035;
+      mix-blend-mode: multiply;
+      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+      background-repeat: repeat;
+      transition: opacity .8s ease;
+    }
+
+    .grain.dark-grain {
+      opacity: .07;
+      mix-blend-mode: overlay;
+    }
+
+    #loading {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background: var(--navy-dark);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--sand);
+      font-size: 11px;
+      letter-spacing: .3em;
+      text-transform: uppercase;
+      opacity: .6;
+      transition: opacity .6s ease, visibility .6s ease;
+    }
+
+    #loading.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
     }
 
     img {
@@ -914,6 +1000,13 @@
     .hero-slide .hero-media {
       position: absolute;
       inset: 0;
+      display: flex;
+    }
+
+    .hero-slide .hero-media::before {
+      content: '';
+      position: absolute;
+      inset: 0;
       background-image: linear-gradient(155deg, rgba(7, 27, 46, .86) 8%, rgba(16, 42, 67, .42) 48%, rgba(7, 27, 46, .72) 100%), var(--hero-img);
       background-size: cover;
       background-position: center;
@@ -921,7 +1014,7 @@
       transition: transform 8s linear;
     }
 
-    .hero-slide.is-active .hero-media {
+    .hero-slide.is-active .hero-media::before {
       transform: scale(1);
     }
 
@@ -957,7 +1050,7 @@
       display: grid;
       grid-template-columns: 1.2fr .8fr;
       gap: 60px;
-      align-items: end;
+      align-items: center;
       width: 100%;
     }
 
@@ -1105,7 +1198,7 @@
    06. STANDARD (4 PILLARS)
    ========================================================= */
     .standard {
-      background: var(--ivory);
+      background: transparent;
       overflow: hidden;
     }
 
@@ -1226,22 +1319,48 @@
     }
 
     .pillar-copy {
+      /* fallback for browsers without background-clip:text — always applied */
       color: var(--muted);
       font-size: 1rem;
       max-width: 52ch;
       padding-top: .3em;
-      transition: color var(--dur-med) var(--ease);
+      transition: filter var(--dur-med) var(--ease);
+    }
+
+    @supports (background-clip: text) or (-webkit-background-clip: text) {
+      .pillar-copy {
+        background-image: linear-gradient(
+          90deg,
+          var(--muted) 0%,
+          var(--muted) 30%,
+          var(--surface) 70%,
+          var(--surface) 100%
+        );
+        background-size: 220% 100%;
+        /* JS-driven contrast term + CSS-keyframe shimmer term, combined only here */
+        background-position: calc(var(--pillar-contrast-pos, 15%) + var(--pillar-shift, 0%)) 0%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        color: transparent;
+        animation: pillarShimmer 9s var(--ease) infinite;
+      }
+    }
+
+    @keyframes pillarShimmer {
+      0%, 100% { --pillar-shift: -6%; }
+      50%      { --pillar-shift: 6%; }
     }
 
     .pillar:hover .pillar-copy {
-      color: var(--graphite);
+      filter: brightness(1.15) saturate(1.05);
     }
 
     /* =========================================================
    07. SERVICES
    ========================================================= */
     .services {
-      background: var(--paper);
+      background: transparent;
     }
 
     .services-grid {
@@ -1506,7 +1625,7 @@
    08. RECURRING MAINTENANCE
    ========================================================= */
     .maintenance {
-      background: var(--navy);
+      background: transparent;
       color: #fff;
       overflow: hidden;
       --glow:
@@ -1809,7 +1928,7 @@
    10. BEFORE / AFTER
    ========================================================= */
     .beforeafter {
-      background: var(--ivory);
+      background: transparent;
       overflow: hidden;
     }
 
@@ -2035,7 +2154,7 @@
    11. RESIDENTIAL
    ========================================================= */
     .residential {
-      background: var(--ivory);
+      background: transparent;
       overflow: hidden;
     }
 
@@ -2189,7 +2308,7 @@
    12. SOCIAL IMPACT
    ========================================================= */
     .impact {
-      background: var(--sage);
+      background: transparent;
       color: var(--navy-dark);
       overflow: hidden;
       --grain: .07;
@@ -2325,7 +2444,9 @@
    13. AREAS WE SERVE
    ========================================================= */
     .areas {
-      background: var(--navy-dark);
+      background: rgba(7, 27, 46, .75);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       color: #fff;
       overflow: hidden;
       --glow:
@@ -2480,7 +2601,7 @@
    14. TESTIMONIALS
    ========================================================= */
     .testimonials {
-      background: var(--paper);
+      background: transparent;
       overflow: hidden;
       --grain: .035;
       --glow: radial-gradient(50% 46% at 50% 8%, rgba(31, 111, 139, .07), transparent 70%);
@@ -2667,7 +2788,7 @@
    15. FAQ
    ========================================================= */
     .faq {
-      background: var(--ivory);
+      background: transparent;
       overflow: hidden;
     }
 
@@ -2781,7 +2902,7 @@
    16. QUOTE FORM
    ========================================================= */
     .quote {
-      background: var(--navy-dark);
+      background: transparent;
       color: #fff;
       overflow: hidden;
       --glow:
@@ -3159,7 +3280,9 @@
    17. FINAL CTA
    ========================================================= */
     .final-cta {
-      background: linear-gradient(135deg, var(--petrol-deep), var(--petrol) 38%, var(--navy));
+      background: linear-gradient(135deg, rgba(18, 85, 107, .85), rgba(31, 111, 139, .8) 38%, rgba(16, 42, 67, .9));
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
       color: #fff;
       text-align: center;
       padding: clamp(64px, 10vw, 120px) 0;
@@ -3888,15 +4011,15 @@
 
       /* deliberate framing per slide: in portrait only ~36% of a 3:2 frame
          survives, so the subject has to be aimed at, never centred by default */
-      .hero-slide .hero-media {
+      .hero-slide .hero-media::before {
         background-position: 56% center;
       }
 
-      .hero-slide:nth-of-type(2) .hero-media {
+      .hero-slide:nth-of-type(2) .hero-media::before {
         background-position: 50% center;
       }
 
-      .hero-slide:nth-of-type(3) .hero-media {
+      .hero-slide:nth-of-type(3) .hero-media::before {
         background-position: 54% center;
       }
 

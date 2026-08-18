@@ -13,10 +13,21 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=f46a1bf7353d">
+  <link rel="stylesheet" href="style.css?v=78013205559b">
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.module.js"
+    }
+  }
+  </script>
 </head>
 
 <body>
+  <div id="loading" class="hidden" aria-hidden="true">Carregando</div>
+  <canvas id="canvas-fixed" aria-hidden="true"></canvas>
+  <div class="grain" id="grainOverlay" aria-hidden="true"></div>
+  <span class="surface-id" id="surfaceLabel" aria-hidden="true">01</span>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- =========================================================
@@ -80,8 +91,8 @@
 
       <article class="hero-slide is-active" data-hero-slide aria-hidden="false"
         style="--hero-img:url('assets/images/hero-commercial.jpg')">
-        <div class="hero-media"></div>
-        <div class="container hero-content">
+        <div class="hero-media">
+          <div class="container hero-content">
           <div class="hero-text">
             <span class="eyebrow on-dark hero-eyebrow">Commercial Cleaning • Janitorial • Floor Care</span>
             <h1>Precision cleaning for spaces that need to perform.</h1>
@@ -113,13 +124,14 @@
                 </svg>Massachusetts</li>
             </ul>
           </div>
+          </div>
         </div>
       </article>
 
       <article class="hero-slide" data-hero-slide aria-hidden="true"
         style="--hero-img:url('assets/images/hero-floor-care.jpg')">
-        <div class="hero-media"></div>
-        <div class="container hero-content">
+        <div class="hero-media">
+          <div class="container hero-content">
           <div class="hero-text">
             <span class="eyebrow on-dark hero-eyebrow">Floor Care Specialists</span>
             <h1>Floors that reflect your standard.</h1>
@@ -151,13 +163,14 @@
                 </svg>Massachusetts</li>
             </ul>
           </div>
+          </div>
         </div>
       </article>
 
       <article class="hero-slide" data-hero-slide aria-hidden="true"
         style="--hero-img:url('assets/images/hero-residential.jpg')">
-        <div class="hero-media"></div>
-        <div class="container hero-content">
+        <div class="hero-media">
+          <div class="container hero-content">
           <div class="hero-text">
             <span class="eyebrow on-dark hero-eyebrow">Residential Cleaning</span>
             <h1>The same precision, brought home.</h1>
@@ -188,6 +201,7 @@
                   <circle cx="12" cy="9.5" r="2.2" />
                 </svg>Massachusetts</li>
             </ul>
+          </div>
           </div>
         </div>
       </article>
@@ -879,7 +893,7 @@
     </div>
   </footer>
 
-  <script src="script.js?v=491cf9282aa5"></script>
+  <script type="module" src="script.js?v=f04ece33b13a"></script>
 </body>
 
 </html>

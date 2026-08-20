@@ -60,6 +60,13 @@
       --mark-navy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M100 22 178 100 100 178 22 100Z' fill='none' stroke='%23102A43' stroke-width='1.5'/%3E%3Cpath d='M100 22V178M22 100H178' stroke='%23102A43' stroke-width='.75'/%3E%3Cg fill='%23102A43'%3E%3Ccircle cx='100' cy='22' r='6'/%3E%3Ccircle cx='178' cy='100' r='6'/%3E%3Ccircle cx='100' cy='178' r='6'/%3E%3Ccircle cx='22' cy='100' r='6'/%3E%3C/g%3E%3C/svg%3E");
       --mark-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cpath d='M100 22 178 100 100 178 22 100Z' fill='none' stroke='%23ffffff' stroke-width='1.5'/%3E%3Cpath d='M100 22V178M22 100H178' stroke='%23ffffff' stroke-width='.75'/%3E%3Cg fill='%23ffffff'%3E%3Ccircle cx='100' cy='22' r='6'/%3E%3Ccircle cx='178' cy='100' r='6'/%3E%3Ccircle cx='100' cy='178' r='6'/%3E%3Ccircle cx='22' cy='100' r='6'/%3E%3C/g%3E%3C/svg%3E");
 
+      /* the same device drawn as a construction, not as a logo: the axes run
+         past the diamond, the nodes are open, and a circle is inscribed. At
+         architectural scale a filled node reads as a UI dot; an open one reads
+         as a registration mark, which is what it is. */
+      --mark-figure: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23ffffff'%3E%3Cpath d='M100 14 186 100 100 186 14 100Z' stroke-width='1'/%3E%3Cpath d='M100 2V198M2 100H198' stroke-width='.5'/%3E%3Ccircle cx='100' cy='100' r='47' stroke-width='.5'/%3E%3Ccircle cx='100' cy='14' r='4.5'/%3E%3Ccircle cx='186' cy='100' r='4.5'/%3E%3Ccircle cx='100' cy='186' r='4.5'/%3E%3Ccircle cx='14' cy='100' r='4.5'/%3E%3C/g%3E%3C/svg%3E");
+      --mark-figure-navy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23102A43'%3E%3Cpath d='M100 14 186 100 100 186 14 100Z' stroke-width='1'/%3E%3Cpath d='M100 2V198M2 100H198' stroke-width='.5'/%3E%3Ccircle cx='100' cy='100' r='47' stroke-width='.5'/%3E%3Ccircle cx='100' cy='14' r='4.5'/%3E%3Ccircle cx='186' cy='100' r='4.5'/%3E%3Ccircle cx='100' cy='186' r='4.5'/%3E%3Ccircle cx='14' cy='100' r='4.5'/%3E%3C/g%3E%3C/svg%3E");
+
       /* film grain: one inline turbulence, reused by every dark surface */
       --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 
@@ -148,6 +155,90 @@
       initial-value: 0px;
     }
 
+    /* ---------------------------------------------------------
+       THE ATMOSPHERE THE WHOLE PAGE INHERITS
+
+       The Standard section samples the canvas per block and paints its type
+       through the result — that treatment is its signature and stays its own.
+       These three are the shared reading: how light the ground is, which way
+       ink has to go on it, and what colour the light happens to be. A hairline
+       in the Before/After board and a label in the FAQ are lit by the same lamp
+       as the type two chapters above them, without either of them re-deriving
+       it. JS writes in coarse steps; the transitions below supply the rest.
+       --------------------------------------------------------- */
+    @property --canvas-lum {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: 0;
+    }
+
+    @property --canvas-pol {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: 1;
+    }
+
+    @property --grain-o {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: .05;
+    }
+
+    /* the Before/After divider, read as a proportion by the board around it */
+    @property --ba-x {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: .5;
+    }
+
+    @property --ba-split {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: .5;
+    }
+
+    :root {
+      --canvas-glow: #1F6F8B;
+    }
+
+    /* A custom property is substituted on the element that declares it, so
+       these have to be restated wherever --canvas-pol is written — on the root
+       for the page at large, and on each block that answers to the light at its
+       own position rather than at the centre of the frame. */
+    /* THE ONE SMOOTHING, NOT TWO. The canvas no longer damps the position it
+       samples from — the ground is locked to the raw scroll — so every duration
+       here is the whole of the delay, not a second helping of it. What is left
+       is only what a quantised write needs to read as continuous: polarity is a
+       contrast decision and gets the shortest leash, luminance feeds the halo
+       that protects the type while the ground is changing under it, and the
+       grain keeps its long clock because it must never be caught moving. */
+    :root,
+    [data-canvas-ink] {
+      transition:
+        --canvas-lum .28s linear,
+        --canvas-pol .24s var(--ease),
+        --grain-o .7s linear;
+
+      /* ink, rules and secondary type, resolved against whatever the canvas is
+         currently holding. 1 = the ground is dark and the ink has to be light. */
+      --canvas-ink: color-mix(in oklab, var(--navy-dark) calc((1 - var(--canvas-pol)) * 100%), var(--paper));
+      --canvas-strong: color-mix(in oklab, var(--navy) calc((1 - var(--canvas-pol)) * 100%), #FFFFFF);
+      --canvas-rule: color-mix(in oklab, var(--line-light) calc((1 - var(--canvas-pol)) * 100%), var(--line-dark));
+      --canvas-rule-soft: color-mix(in oklab, var(--line-light-soft) calc((1 - var(--canvas-pol)) * 100%), var(--line-dark-soft));
+      --canvas-muted: color-mix(in oklab, var(--muted) calc((1 - var(--canvas-pol)) * 100%), var(--sage-soft));
+      --canvas-accent: color-mix(in oklab, var(--petrol) calc((1 - var(--canvas-pol)) * 100%), var(--champagne));
+
+      /* The separation the type needs while the ground is changing under it,
+         and nothing past it. The envelope is zero on a comfortably dark ground
+         and zero on a comfortably light one, and rises only across the band
+         where neither ink is winning — which is exactly where a section that
+         paints no ground of its own is at risk of losing its reader. */
+      --canvas-halo: color-mix(in oklab, var(--paper) calc((1 - var(--canvas-pol)) * 100%), var(--navy-dark));
+      --canvas-envelope: clamp(0, min((var(--canvas-lum) - .03) * 14, (.5 - var(--canvas-lum)) * 5), 1);
+      --canvas-ink-halo:
+        drop-shadow(0 0 1px color-mix(in srgb, var(--canvas-halo) calc(var(--canvas-envelope) * 72%), transparent)) drop-shadow(0 0 9px color-mix(in srgb, var(--canvas-halo) calc(var(--canvas-envelope) * 44%), transparent));
+    }
+
     @media (prefers-reduced-motion: reduce) {
 
       *,
@@ -216,6 +307,10 @@
       opacity: .22;
     }
 
+    /* The grain is one continuous quantity now, not two presets. Its density
+       follows the atmosphere, and it thins to a minimum exactly where the blend
+       mode has to change — a blend mode cannot interpolate, so the switch is
+       hidden at the one moment the layer is least visible. */
     .grain {
       position: fixed;
       inset: 0;
@@ -223,16 +318,78 @@
       height: 100%;
       pointer-events: none;
       z-index: 500;
-      opacity: .035;
+      opacity: var(--grain-o, .05);
       mix-blend-mode: multiply;
       background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
       background-repeat: repeat;
-      transition: opacity .8s ease;
     }
 
     .grain.dark-grain {
-      opacity: .07;
       mix-blend-mode: overlay;
+    }
+
+    /* ---------------------------------------------------------
+       NO WEBGL
+
+       In normal operation the WebGL canvas owns the page ground. If the context
+       fails, flat CSS grounds return here only, preserving contrast without the
+       atmospheric field.
+       --------------------------------------------------------- */
+    .no-canvas .grain {
+      display: none;
+    }
+
+    .no-canvas .surface-id {
+      display: none;
+    }
+
+    /* the polarity tokens are resolved where they are declared, so a fallback
+       cannot just flip --canvas-pol further down the tree: it has to restate
+       the readings themselves */
+    .no-canvas .hero,
+    .no-canvas .standard,
+    .no-canvas .services,
+    .no-canvas .areas,
+    .no-canvas .floorcare {
+      background-color: var(--navy-dark);
+      --canvas-ink: var(--paper);
+      --canvas-rule: var(--line-dark);
+      --canvas-rule-soft: var(--line-dark-soft);
+      --canvas-muted: var(--sage-soft);
+      --canvas-accent: var(--champagne);
+    }
+
+    .no-canvas .beforeafter,
+    .no-canvas .faq,
+    .no-canvas .quote,
+    .no-canvas .testimonials {
+      background-color: var(--paper);
+      --canvas-ink: var(--navy-dark);
+      --canvas-rule: var(--line-light);
+      --canvas-rule-soft: var(--line-light-soft);
+      --canvas-muted: var(--muted);
+      --canvas-accent: var(--petrol);
+    }
+
+    .no-canvas .maintenance {
+      background-color: var(--paper);
+    }
+
+    .no-canvas .residential {
+      background-color: var(--ivory);
+    }
+
+    .no-canvas .impact {
+      background-color: var(--sand);
+    }
+
+    .no-canvas .final-cta {
+      background-color: var(--navy-dark);
+      background-image: linear-gradient(135deg, var(--petrol-deep), var(--petrol) 38%, var(--navy-dark));
+    }
+
+    .no-canvas .site-footer {
+      background-color: var(--navy-dark);
     }
 
     #loading {
@@ -400,25 +557,15 @@
     /* =========================================================
    02b. DEPTH UTILITIES: grain, registration corners, watermark
    ========================================================= */
-    /* Two atmospheric planes for any flat surface: a light source and a grain.
-       Each section supplies its own --glow; the grain is shared. */
+    /* Full-width atmospheric planes live in WebGL. The depth class still marks
+       local stacking contexts and lets containers sit above the canvas. */
     .depth::before,
     .depth::after {
-      content: '';
+      content: none;
       position: absolute;
       inset: 0;
       pointer-events: none;
       z-index: 0;
-    }
-
-    .depth::before {
-      background: var(--glow, none);
-    }
-
-    .depth::after {
-      background-image: var(--noise);
-      opacity: var(--grain, .05);
-      mix-blend-mode: overlay;
     }
 
     .depth>.container {
@@ -477,6 +624,105 @@
     .watermark.on-dark {
       background-image: var(--mark-light);
       opacity: .04;
+    }
+
+    /* =========================================================
+       02c. SPEC LIST — the one component the three chapters share
+       =========================================================
+       It appears three times and is never restyled: as the Floor Care dossier
+       printed over a photograph, as the reading notes beside the Before/After
+       plate, and as the assurance index that balances the FAQ. Only the ink
+       changes, and the ink is not chosen locally — it comes from whatever the
+       canvas is holding at that point in the page.
+
+       That repetition is the whole argument. Three different decorations would
+       read as three sections that were each worked on. One component in three
+       grounds reads as a publication with a house style for technical
+       information, which is what the brand is claiming to be.
+       ========================================================= */
+    .spec-plate {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      font-family: var(--font-serif);
+      font-size: 1.02rem;
+      letter-spacing: .04em;
+      color: var(--canvas-accent);
+      font-variant-numeric: tabular-nums;
+      margin-bottom: 18px;
+    }
+
+    .spec-plate i {
+      font-family: var(--font-ui);
+      font-style: normal;
+      font-size: .64rem;
+      font-weight: 800;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--canvas-muted);
+    }
+
+    /* the rule runs to the edge of the column, the way a printed index does */
+    .spec-plate::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--canvas-rule);
+    }
+
+    /* no column gap: the rule under a row has to be one rule, not a label's
+       rule and a value's rule with a gap between them */
+    .spec-list {
+      display: grid;
+      grid-template-columns: minmax(84px, max-content) 1fr;
+      border-top: 1px solid var(--canvas-rule);
+      position: relative;
+    }
+
+    /* one node, on the corner where the list begins. On the Floor Care it is
+       the point the registration figure's axis is aimed at. */
+    .spec-list::before {
+      content: '';
+      position: absolute;
+      top: -2.5px;
+      left: -2.5px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--canvas-accent);
+      opacity: .85;
+    }
+
+    .spec-list>dt {
+      grid-column: 1;
+      font-size: .66rem;
+      font-weight: 800;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--canvas-muted);
+      padding: 12px clamp(14px, 2vw, 26px) 12px 0;
+      white-space: nowrap;
+      transition: color var(--dur-med) var(--ease);
+    }
+
+    .spec-list>dd {
+      grid-column: 2;
+      margin: 0;
+      padding: 12px 0;
+      font-size: .93rem;
+      line-height: 1.42;
+      color: var(--canvas-ink);
+      transition: color var(--dur-med) var(--ease);
+    }
+
+    .spec-list>dt,
+    .spec-list>dd {
+      border-bottom: 1px solid var(--canvas-rule-soft);
+    }
+
+    .spec-list>dt:last-of-type,
+    .spec-list>dd:last-of-type {
+      border-bottom: 0;
     }
 
     /* numerals never reflow while they animate */
@@ -1046,7 +1292,7 @@
       display: flex;
       align-items: flex-end;
       overflow: hidden;
-      background: var(--navy-dark);
+      background: transparent;
     }
 
     .hero-slide {
@@ -1265,8 +1511,8 @@
    06. STANDARD (4 PILLARS) — ADAPTIVE EDITORIAL INK
    =========================================================
    This section paints no ground of its own: its type sits directly on the
-   Three.js canvas, and that canvas is a vertical gradient inside the viewport —
-   the heading can be over navy while pillar 04 is over ivory in the same frame.
+   Three.js canvas, and that canvas samples the document-space ground field —
+   the heading can be over one chapter while pillar 04 is over another.
    So the type is not letters filled with a gradient. It is ink on a surface
    that light keeps crossing:
 
@@ -1340,13 +1586,19 @@
 
       /* Nothing here snaps. The terminator and the light column are eased
          rather than driven, so the sampler can write in coarse steps and the
-         surface still moves like light instead of like a value changing. */
+         surface still moves like light instead of like a value changing.
+
+         The two lengths are positions, and the sampler now rewrites them on
+         almost every frame: anything longer than the gap between writes stops
+         being smoothing and becomes a standing lag, with the line of light
+         trailing the scroll that is producing it. Temperature is the opposite
+         case — it is meant to keep drifting long after the tone has settled. */
       transition:
         --ink-temp 2.4s linear,
         --pol-t .45s var(--ease),
         --pol-b .45s var(--ease),
-        --ink-front .55s var(--ease),
-        --light-travel .7s var(--ease);
+        --ink-front .18s var(--ease),
+        --light-travel .22s var(--ease);
     }
 
     /* Read by each block from the light at its own position. These must be
@@ -1375,8 +1627,7 @@
       --accent-shadow: color-mix(in oklab, var(--champagne-deep) 38%, var(--navy-dark));
       --accent-lifted: color-mix(in oklab, var(--champagne) 55%, var(--paper));
       --ink-accent: color-mix(in oklab,
-          color-mix(in oklab, var(--champagne) calc((1 - var(--accent-dark)) * 100%), var(--accent-shadow))
-          calc((1 - var(--accent-light)) * 100%),
+          color-mix(in oklab, var(--champagne) calc((1 - var(--accent-dark)) * 100%), var(--accent-shadow)) calc((1 - var(--accent-light)) * 100%),
           var(--accent-lifted));
       --ink-accent-strong: color-mix(in oklab, var(--ink-accent) 82%, var(--champagne-deep));
       --eyebrow-ink: color-mix(in oklab, var(--petrol) calc((1 - var(--ink-pol)) * 100%), var(--sage-soft));
@@ -1387,14 +1638,16 @@
          stay in the foreground, and nothing past it. */
       --halo: color-mix(in oklab, var(--paper) calc((1 - var(--ink-pol)) * 100%), var(--navy-dark));
       --ink-halo:
-        drop-shadow(0 0 1px color-mix(in srgb, var(--halo) calc(var(--envelope) * 82%), transparent))
-        drop-shadow(0 0 4px color-mix(in srgb, var(--halo) calc(var(--envelope) * 52%), transparent))
-        drop-shadow(0 0 10px color-mix(in srgb, var(--halo) calc(var(--envelope) * 34%), transparent));
+        drop-shadow(0 0 1px color-mix(in srgb, var(--halo) calc(var(--envelope) * 82%), transparent)) drop-shadow(0 0 4px color-mix(in srgb, var(--halo) calc(var(--envelope) * 52%), transparent)) drop-shadow(0 0 10px color-mix(in srgb, var(--halo) calc(var(--envelope) * 34%), transparent));
 
+      /* Polarity is a legibility decision and the envelope is what protects the
+         type while the ground crosses under it: both have to be there for the
+         crossing, not after it. Mix, accents and focus are appearance and may
+         keep drifting. */
       transition:
-        --ink-pol .55s var(--ease),
+        --ink-pol .38s var(--ease),
         --ink-mix .85s var(--ease),
-        --envelope .75s var(--ease),
+        --envelope .5s var(--ease),
         --accent-dark .7s var(--ease),
         --accent-light .7s var(--ease);
     }
@@ -1463,9 +1716,9 @@
         background var(--dur-med) var(--ease),
         opacity var(--dur-slow) var(--ease),
         transform var(--dur-slow) var(--ease),
-        --ink-pol .55s var(--ease),
+        --ink-pol .38s var(--ease),
         --ink-mix .85s var(--ease),
-        --envelope .75s var(--ease),
+        --envelope .5s var(--ease),
         --accent-dark .7s var(--ease),
         --accent-light .7s var(--ease),
         --focus .95s var(--ease);
@@ -1591,8 +1844,15 @@
     /* the surface keeps breathing when the scroll stops, at a rate closer to a
        room than to an animation */
     @keyframes inkBreath {
-      0%, 100% { --breath: -6px; }
-      50%      { --breath: 6px; }
+
+      0%,
+      100% {
+        --breath: -6px;
+      }
+
+      50% {
+        --breath: 6px;
+      }
     }
 
     @supports (background-clip: text) or (-webkit-background-clip: text) {
@@ -1632,11 +1892,11 @@
       --focus-boost: 1.5;
     }
 
-/* =========================================================
+    /* =========================================================
    07. SERVICES
    ========================================================= */
     .services {
-      background: var(--navy);
+      background: transparent;
     }
 
     .services .section-head h2 {
@@ -1904,13 +2164,13 @@
     /* =========================================================
    08. RECURRING MAINTENANCE
    ========================================================= */
+    /* The readable light ground for this chapter is supplied by the measured
+       WebGL field; the section keeps only content and local UI surfaces. */
     .maintenance {
-      background: var(--paper);
+      background-color: transparent;
+      background-image: none;
       color: var(--navy-dark);
       overflow: hidden;
-      --glow:
-        radial-gradient(58% 55% at 80% 26%, rgba(42, 142, 170, .14), transparent 70%),
-        radial-gradient(46% 46% at 4% 92%, rgba(139, 174, 139, .08), transparent 70%);
     }
 
     .maintenance-inner {
@@ -2076,45 +2336,122 @@
     }
 
     /* =========================================================
-   09. FLOOR CARE
+   09. FLOOR CARE — SPECIALIST MANIFESTO
+   =========================================================
+   This chapter used to end the way a slide ends: navy at the top, a strip of
+   ivory painted at the bottom, and a horizontal line between them that a
+   gradient was asked to hide. It does not end any more. The photograph and its
+   scrim lose *alpha* at both edges, and what is revealed underneath is the
+   canvas — which has already been migrating for half a section. Nothing changes
+   colour at the boundary because nothing at the boundary is painted.
+
+   Above the fold of the chapter: a manifesto, large, cinematic, photographic.
+   Beside it: the proof that the manifesto is earned — a specialty dossier set
+   in the shared spec-list, printed straight onto the composition. And behind
+   the dossier, registered to it, the 4POINTS mark at architectural scale, on
+   its own plane, drifting against the photograph rather than with it.
    ========================================================= */
     .floorcare {
-      background-color: var(--navy);
+      background-color: transparent;
       color: #fff;
-      min-height: 640px;
+      min-height: min(100vh, 1000px);
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       position: relative;
       overflow: hidden;
+
+      /* The dissolve is not a visual length that happens to look right — it is
+         the section's own padding. Solid photograph for exactly as far as the
+         content box reaches, then the fade, in the band where by construction
+         there is nothing to read. A percentage would have put the fade through
+         the dossier at some viewport height, and white type on a dissolving
+         photograph over a lightening canvas is the one failure this chapter
+         cannot have. */
+      --fc-fade-top: clamp(88px, 11vh, 132px);
+      --fc-fade: clamp(210px, 27vh, 330px);
+      padding: calc(var(--fc-fade-top) + 34px) 0 var(--fc-fade);
+
+      /* 0 as the chapter arrives, 1 once it owns the frame; 0 until it starts
+         handing over, 1 as it finishes. Written every frame, reduced motion
+         included: these are not motion, they are the seam. */
+      --fc-enter: 1;
+      --fc-exit: 0;
+
+      /* Where the photograph exists. Not where it is tinted — where it is at
+         all. Both ends are the padding, so the image is solid across the whole
+         content box at every viewport and dissolves only outside it. */
+      --fc-mask: linear-gradient(to bottom,
+          rgba(0, 0, 0, 0) 0,
+          rgba(0, 0, 0, .5) calc(var(--fc-fade-top) * .38),
+          #000 var(--fc-fade-top),
+          #000 calc(100% - var(--fc-fade)),
+          rgba(0, 0, 0, .28) calc(100% - var(--fc-fade) * .36),
+          rgba(0, 0, 0, 0) 100%);
+
+      /* No haze is painted on this element. An earlier pass put the petrol
+         handover here and it drew the very edge it was meant to remove: a
+         gradient on a section ends where the section ends, and the eye finds
+         that line immediately. The handover belongs to the canvas, which does
+         not know where sections stop. All this element does is stop holding
+         the photograph. */
+
+      /* This content sits on a photograph, not on the canvas, so its ink is a
+         known quantity and is stated rather than read. That is also why the
+         canvas is not allowed to go light while any of it is on screen —
+         see the floorcare-out station's seam window. */
+      --canvas-ink: rgba(255, 255, 255, .9);
+      --canvas-rule: rgba(255, 255, 255, .22);
+      --canvas-rule-soft: rgba(255, 255, 255, .11);
+      --canvas-muted: var(--sage-soft);
+      --canvas-accent: var(--champagne);
     }
 
     /* the photograph on its own plane, so it can drift against the copy */
     .floorcare::before {
       content: '';
       position: absolute;
-      inset: -12% 0;
+      inset: 0;
       background-image: var(--img-floor-lg);
       background-size: cover;
-      background-position: center;
-      transform: translate3d(0, var(--parallax, 0px), 0);
+      /* a 2:3 portrait in a 16:9 band: the subject of the picture is the floor
+         and the pad on it, and the default centre crop shows neither */
+      background-position: 60% calc(74% + var(--parallax, 0px));
+      -webkit-mask-image: var(--fc-mask);
+      mask-image: var(--fc-mask);
     }
 
-    /* directional scrim for the copy, plus fades that stitch this band to the
-       navy section above and the ivory section below */
+    /* Directional scrim, masked with the photograph so the two dissolve as one
+       object rather than the scrim outliving the image. It is heavy under the
+       manifesto, opens across the middle so the picture can be seen at all,
+       and closes again — less far — under the dossier. */
     .floorcare::after {
       content: '';
       position: absolute;
       inset: 0;
       pointer-events: none;
       background:
-        linear-gradient(to bottom, var(--navy) 0%, rgba(16, 42, 67, 0) 14%),
-        linear-gradient(to top, var(--ivory) 0%, rgba(247, 244, 239, 0) 6%),
-        linear-gradient(100deg, rgba(7, 27, 46, .93) 0%, rgba(7, 27, 46, .58) 52%, rgba(7, 27, 46, .84) 100%);
+        linear-gradient(100deg,
+          rgba(7, 27, 46, .93) 0%,
+          rgba(7, 27, 46, .72) 32%,
+          rgba(7, 27, 46, .38) 55%,
+          rgba(7, 27, 46, .66) 78%,
+          rgba(7, 27, 46, .8) 100%),
+        radial-gradient(58% 62% at 50% 100%, rgba(7, 27, 46, .5), transparent 72%);
+      -webkit-mask-image: var(--fc-mask);
+      mask-image: var(--fc-mask);
     }
 
     .floorcare .container {
       position: relative;
       z-index: 1;
+      width: 100%;
+    }
+
+    .floorcare-inner {
+      display: grid;
+      grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+      gap: clamp(30px, 5vw, 84px);
+      align-items: center;
     }
 
     .floorcare-content {
@@ -2123,10 +2460,58 @@
 
     .floorcare h2 {
       color: #fff;
-      font-size: clamp(2.4rem, 5.5vw, 4rem);
+      font-size: clamp(2.4rem, 5.2vw, 3.9rem);
       line-height: 1.02;
       margin-top: 16px;
       text-shadow: 0 2px 30px rgba(7, 27, 46, .4);
+    }
+
+    .fc-manifesto {
+      margin-top: 24px;
+      max-width: 46ch;
+      color: rgba(255, 255, 255, .82);
+      font-size: 1.02rem;
+      line-height: 1.62;
+    }
+
+    /* ---------- the dossier ---------- */
+    .fc-dossier {
+      position: relative;
+      --fc-fig: min(74vh, 640px);
+    }
+
+    /* The mark at architectural scale, registered to the information: its
+       vertical axis falls on the dossier's own left edge and its horizontal
+       axis on the dossier's centre. It is not placed near the text — the text
+       is what it is aligned to. */
+    .fc-figure {
+      position: absolute;
+      top: 50%;
+      left: calc(var(--fc-fig) * -.5);
+      width: var(--fc-fig);
+      height: var(--fc-fig);
+      background: var(--mark-figure) center / contain no-repeat;
+      transform: translate3d(0, calc(-50% + var(--fc-figure, 0px)), 0);
+      /* it arrives with the chapter and leaves before it: the drawing is the
+         last thing to fade, and it fades on the way out, not on the way in */
+      opacity: calc((.12 + var(--fc-enter) * .07) * (1 - var(--fc-exit) * .75));
+      pointer-events: none;
+    }
+
+    /* an edgeless treatment under the dossier, not a panel: the information is
+       printed onto a part of the picture that has been quieted for it */
+    .fc-dossier::before {
+      content: '';
+      position: absolute;
+      inset: -14% -18% -14% -12%;
+      background: radial-gradient(70% 60% at 52% 50%, rgba(7, 27, 46, .58), rgba(7, 27, 46, 0) 74%);
+      pointer-events: none;
+    }
+
+    .fc-dossier .spec-plate,
+    .fc-dossier .spec-list {
+      position: relative;
+      text-shadow: 0 1px 16px rgba(7, 27, 46, .85);
     }
 
     /* three specialties, arriving in the order they are performed */
@@ -2209,19 +2594,26 @@
     }
 
     /* =========================================================
-   10. BEFORE / AFTER
+   10. BEFORE / AFTER — EDITORIAL CASE STUDY
+   =========================================================
+   The comparison used to be a widget on a white band. It is now an object
+   presented on a board: hairlines top and bottom, registration corners, a
+   measurement scale that reports where the divider is standing, and reading
+   notes in the margin that say what is being looked at.
+
+   The section paints no ground of its own. Paper here is the canvas, which has
+   been travelling since the Floor Care photograph began to dissolve — so the
+   ring that was a small far circle behind that photograph is the same ring,
+   now large enough to run off both edges, sitting behind this board.
+
+   The two photographs are the same lobby from the same camera position. That is
+   the whole argument, so nothing is done to them that would weaken it: the worn
+   side is given density, the restored side is given light, and neither is given
+   a filter that invents a difference the floor did not have.
    ========================================================= */
     .beforeafter {
-      background: var(--paper);
+      background: transparent;
       overflow: hidden;
-    }
-
-    .beforeafter .watermark {
-      right: -6%;
-      bottom: -8%;
-      width: clamp(200px, 26vw, 360px);
-      height: clamp(200px, 26vw, 360px);
-      opacity: .05;
     }
 
     .beforeafter .container {
@@ -2229,13 +2621,118 @@
       z-index: 1;
     }
 
+    .ba-board {
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      column-gap: clamp(18px, 2.4vw, 36px);
+      row-gap: clamp(24px, 3vw, 40px);
+      padding: clamp(26px, 3.2vw, 48px) clamp(20px, 2.6vw, 40px);
+      border-top: 1px solid var(--canvas-rule);
+      border-bottom: 1px solid var(--canvas-rule);
+      --corner: var(--canvas-rule);
+      --ba-x: .5;
+      --ba-split: .5;
+    }
+
+    .ba-head {
+      grid-column: 1 / 9;
+      grid-row: 1;
+      margin-bottom: 0;
+      max-width: none;
+    }
+
+    /* the board's type is lit by the canvas at its own position, not by the
+       centre of the frame: during the crossing the heading is near the bottom
+       edge, where the light is already a chapter ahead of the middle */
+    .ba-head h2,
+    .ba-caption,
+    .ba-scale,
+    .ba-notes {
+      filter: var(--canvas-ink-halo);
+    }
+
+    .ba-head h2 {
+      color: var(--canvas-strong);
+    }
+
+    .ba-head .eyebrow {
+      color: var(--canvas-accent);
+    }
+
+    .ba-plate {
+      grid-column: 1 / 9;
+      grid-row: 2;
+      min-width: 0;
+    }
+
+    .ba-notes {
+      grid-column: 9 / 13;
+      grid-row: 2;
+      align-self: end;
+      padding-bottom: 6px;
+      min-width: 0;
+    }
+
+    /* ---------- the measurement scale ---------- */
+    .ba-scale {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: end;
+      gap: 14px;
+      margin-bottom: 26px;
+      font-size: .62rem;
+      letter-spacing: .17em;
+      text-transform: uppercase;
+      font-weight: 800;
+      color: var(--canvas-muted);
+    }
+
+    .ba-scale-rule {
+      position: relative;
+      height: 9px;
+      background-image: repeating-linear-gradient(to right, var(--canvas-rule) 0 1px, transparent 1px 5%);
+      background-position: bottom left;
+      background-size: 100% 6px;
+      background-repeat: no-repeat;
+      border-bottom: 1px solid var(--canvas-rule);
+    }
+
+    /* the reading rides the divider, and a hairline drops from it to the plate:
+       the number and the split are one object, not a label about one */
+    .ba-scale-rule b {
+      position: absolute;
+      left: calc(var(--ba-x) * 100%);
+      bottom: 12px;
+      transform: translateX(-50%);
+      font-family: var(--font-serif);
+      font-size: .92rem;
+      letter-spacing: .02em;
+      color: var(--canvas-accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .ba-scale-rule b::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: calc(100% + 3px);
+      width: 1px;
+      height: 34px;
+      background: linear-gradient(to bottom, var(--canvas-accent), transparent);
+      opacity: .75;
+    }
+
+    /* ---------- the plate ---------- */
     .ba-frame {
       position: relative;
       width: 100%;
-      aspect-ratio: 16/9;
-      border-radius: var(--radius-lg);
+      aspect-ratio: 3/2;
+      border-radius: 2px;
       overflow: hidden;
-      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .16), var(--shadow-lg);
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, .2),
+        0 1px 2px rgba(7, 27, 46, .16),
+        0 18px 46px rgba(7, 27, 46, .16);
       user-select: none;
       touch-action: pan-y;
     }
@@ -2244,62 +2741,96 @@
       position: absolute;
       inset: 0;
       background-size: cover;
-      background-position: center;
+      background-position: center 62%;
     }
 
+    /* density, not a filter: a graphite wash and the page's own grain */
     .ba-before {
-      background-image: linear-gradient(160deg, rgba(58, 63, 66, .52), rgba(28, 31, 33, .42)), var(--img-before);
+      background-image: linear-gradient(180deg, rgba(43, 47, 50, .3), rgba(30, 34, 37, .2)), var(--img-before);
       background-color: #2B2F32;
     }
 
-    .ba-after {
-      background-image: linear-gradient(160deg, rgba(233, 243, 239, .18), rgba(207, 230, 222, .28)), var(--img-after);
-      background-color: var(--sage-soft);
+    .ba-before::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image: var(--noise);
+      opacity: .1;
+      mix-blend-mode: multiply;
+      pointer-events: none;
     }
 
+    /* light, not a tint: a cool edge on the side that was restored */
+    .ba-after {
+      background-image:
+        linear-gradient(180deg, rgba(226, 240, 245, .16), rgba(226, 240, 245, 0) 38%),
+        var(--img-after);
+      background-color: var(--sand);
+    }
+
+    .ba-caption {
+      margin-top: 18px;
+      font-family: var(--font-serif);
+      font-style: italic;
+      font-size: .95rem;
+      line-height: 1.5;
+      color: var(--canvas-muted);
+      max-width: 52ch;
+    }
+
+    /* ---------- the notes lean with the divider ---------- */
+    .ba-notes .lean-worn {
+      --lean: calc(1 - var(--ba-split));
+    }
+
+    .ba-notes .lean-restored {
+      --lean: var(--ba-split);
+    }
+
+    .ba-notes dt.lean-worn,
+    .ba-notes dt.lean-restored {
+      color: color-mix(in oklab, var(--canvas-muted) calc((1 - var(--lean)) * 100%), var(--canvas-accent));
+    }
+
+    /* the two states are captions on a plate, not badges on a card */
     .ba-label {
       position: absolute;
-      top: 20px;
-      font-size: .68rem;
-      letter-spacing: .16em;
+      top: 18px;
+      font-size: .64rem;
+      letter-spacing: .2em;
       text-transform: uppercase;
       font-weight: 800;
       color: #fff;
-      background: rgba(7, 27, 46, .5);
-      padding: 8px 15px;
-      border-radius: 100px;
       display: inline-flex;
       align-items: center;
       gap: 9px;
-      border: 1px solid rgba(255, 255, 255, .2);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      text-shadow: 0 1px 14px rgba(7, 27, 46, .95);
     }
 
     .ba-label::before {
       content: '';
-      width: 5px;
-      height: 5px;
-      border-radius: 50%;
+      width: 18px;
+      height: 1px;
       background: currentColor;
-      opacity: .8;
+      opacity: .7;
       flex: none;
     }
 
+    /* Each caption lives inside the layer it names, which is correct and also
+       means the divider will eventually cut through it. So each retires just
+       before the cut reaches it: a caption is either readable or absent, never
+       sliced down the middle of a word. */
     .ba-before .ba-label {
       left: 20px;
+      opacity: clamp(0, (var(--ba-x, .5) - .22) * 12, 1);
+      transition: opacity var(--dur-fast) linear;
     }
 
     .ba-after .ba-label {
       right: 20px;
-      color: var(--navy-dark);
-      background: rgba(255, 255, 255, .72);
-      border-color: rgba(255, 255, 255, .6);
-    }
-
-    .ba-after .ba-label::before {
-      background: var(--petrol);
-      opacity: 1;
+      flex-direction: row-reverse;
+      opacity: clamp(0, (.78 - var(--ba-x, .5)) * 12, 1);
+      transition: opacity var(--dur-fast) linear;
     }
 
     .ba-handle-track {
@@ -2319,16 +2850,22 @@
       transform: translateX(-50%);
     }
 
+    /* a drawn line, not a bar: it thins towards both ends so it reads as an
+       instrument's cursor rather than a divider bolted over a photograph */
     .ba-handle::before {
       content: '';
       position: absolute;
       top: 0;
       bottom: 0;
       left: 50%;
-      width: 2px;
-      background: #fff;
+      width: 1px;
+      background: linear-gradient(to bottom,
+          rgba(255, 255, 255, .38),
+          #fff 14%,
+          #fff 86%,
+          rgba(255, 255, 255, .38));
       transform: translateX(-50%);
-      box-shadow: 0 0 18px rgba(7, 27, 46, .45);
+      box-shadow: 0 0 16px rgba(7, 27, 46, .5);
     }
 
     /* a measuring rule beside the split: the section is about precision */
@@ -2337,19 +2874,25 @@
       position: absolute;
       top: 0;
       bottom: 0;
-      left: calc(50% + 5px);
-      width: 7px;
-      background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, .6) 0 1px, transparent 1px 16px);
-      opacity: .4;
+      left: calc(50% + 6px);
+      width: 6px;
+      background: repeating-linear-gradient(to bottom, rgba(255, 255, 255, .7) 0 1px, transparent 1px 14px);
+      opacity: .34;
       pointer-events: none;
     }
 
+    /* a zero-width flex parent will otherwise shrink this to the width of its
+       own glyph, and the divider's handle stops looking like a handle */
     .ba-grip {
-      width: 52px;
-      height: 52px;
+      flex: none;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
-      background: #fff;
-      box-shadow: var(--shadow-md);
+      background: rgba(255, 253, 248, .95);
+      border: 1px solid rgba(255, 255, 255, .85);
+      box-shadow:
+        0 1px 2px rgba(7, 27, 46, .3),
+        0 10px 26px rgba(7, 27, 46, .3);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2403,17 +2946,17 @@
       bottom: 20px;
       transform: translateX(-50%);
       z-index: 4;
-      font-size: .7rem;
-      letter-spacing: .14em;
+      font-size: .66rem;
+      letter-spacing: .18em;
       text-transform: uppercase;
-      font-weight: 700;
+      font-weight: 800;
       color: #fff;
-      background: rgba(7, 27, 46, .5);
-      border: 1px solid rgba(255, 255, 255, .2);
+      background: rgba(7, 27, 46, .42);
+      border: 1px solid rgba(255, 255, 255, .28);
       backdrop-filter: blur(10px);
       -webkit-backdrop-filter: blur(10px);
       padding: 8px 16px;
-      border-radius: 100px;
+      border-radius: 2px;
       pointer-events: none;
       transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
     }
@@ -2437,8 +2980,11 @@
     /* =========================================================
    11. RESIDENTIAL
    ========================================================= */
+    /* The ivory ground is part of the document-space WebGL field; this wrapper
+       remains transparent. */
     .residential {
-      background: var(--ivory);
+      background-color: transparent;
+      background-image: none;
       overflow: hidden;
     }
 
@@ -2592,13 +3138,9 @@
    12. SOCIAL IMPACT
    ========================================================= */
     .impact {
-      background: var(--sand);
+      background: transparent;
       color: var(--navy-dark);
       overflow: hidden;
-      --grain: .07;
-      --glow:
-        radial-gradient(52% 60% at 18% 24%, rgba(255, 255, 255, .34), transparent 68%),
-        radial-gradient(60% 60% at 92% 96%, rgba(16, 42, 67, .12), transparent 70%);
     }
 
     .impact-inner {
@@ -2728,14 +3270,11 @@
    13. AREAS WE SERVE
    ========================================================= */
     .areas {
-      background: rgba(7, 27, 46, .75);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background: transparent;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       color: #fff;
       overflow: hidden;
-      --glow:
-        radial-gradient(52% 58% at 76% 50%, rgba(31, 111, 139, .3), transparent 68%),
-        radial-gradient(40% 40% at 6% 12%, rgba(139, 174, 139, .1), transparent 70%);
     }
 
     .areas-inner {
@@ -2887,8 +3426,6 @@
     .testimonials {
       background: transparent;
       overflow: hidden;
-      --grain: .035;
-      --glow: radial-gradient(50% 46% at 50% 8%, rgba(31, 111, 139, .07), transparent 70%);
     }
 
     /* an editorial surface, so the register corners have an edge to mark */
@@ -3069,19 +3606,22 @@
     }
 
     /* =========================================================
-   15. FAQ
+   15. FAQ — TECHNICAL REASSURANCE
+   =========================================================
+   The accordion is untouched as a mechanism, and almost untouched as a shape:
+   rows, hairlines, one champagne rule marking the open question. What changes
+   is that it is no longer alone on a white page. A second informative mass —
+   the same spec-list the Floor Care and the Before/After use — sits opposite
+   it and holds the composition, so the density comes from proportion and
+   typography rather than from seven boxes.
+
+   The depth comes from the canvas: a four-point figure larger than the
+   viewport, entering and leaving the frame as the camera travels, with the
+   accordion perfectly stable in front of it. There is nothing decorative in
+   the DOM here at all.
    ========================================================= */
     .faq {
       background: transparent;
-      overflow: hidden;
-    }
-
-    .faq .watermark {
-      right: -8%;
-      top: 12%;
-      width: clamp(200px, 24vw, 340px);
-      height: clamp(200px, 24vw, 340px);
-      opacity: .035;
     }
 
     .faq .container {
@@ -3089,9 +3629,41 @@
       z-index: 1;
     }
 
+    .faq-board {
+      display: grid;
+      grid-template-columns: minmax(0, 4.4fr) minmax(0, 7fr);
+      column-gap: clamp(34px, 5.5vw, 104px);
+      align-items: start;
+    }
+
+    /* The context stays with the reader while the questions scroll past it.
+       It deliberately does not sample the canvas at its own position the way
+       the Before/After board does: a sticky element's layout offset is not
+       where it is on screen, so the reading would be taken from the wrong
+       place. This ground is light for the whole chapter by design, and the
+       page-level reading is the correct one here. */
+    .faq-intro {
+      position: sticky;
+      top: calc(var(--header-h) + 44px);
+    }
+
+    .faq-intro h2 {
+      font-size: clamp(1.9rem, 3.2vw, 2.8rem);
+      line-height: 1.08;
+      margin-top: 14px;
+      color: var(--canvas-strong);
+    }
+
+    .faq-intro .eyebrow {
+      color: var(--canvas-accent);
+    }
+
+    .faq-assurance {
+      margin-top: clamp(26px, 3.6vw, 42px);
+    }
+
     .faq-list {
       border-top: 1px solid var(--line-light);
-      max-width: 880px;
     }
 
     .faq-item {
@@ -3114,9 +3686,11 @@
       transition: transform var(--dur-med) var(--ease);
     }
 
+    /* a wash, not a panel: it has to fade out well before the column does, or
+       the open row starts reading as a card */
     .faq-item:hover,
     .faq-item.is-open {
-      background: linear-gradient(90deg, rgba(16, 42, 67, .035), transparent 70%);
+      background: linear-gradient(90deg, rgba(16, 42, 67, .026), transparent 88%);
     }
 
     .faq-item:hover::before,
@@ -3124,8 +3698,14 @@
       transform: scaleY(1);
     }
 
+    /* the open question is a line of a publication being held up for a moment,
+       so it gains presence in type rather than in chrome */
     .faq-item.is-open .faq-q {
       color: var(--navy-dark);
+      font-family: var(--font-serif);
+      font-weight: 400;
+      font-size: 1.24rem;
+      letter-spacing: -.005em;
     }
 
     .faq-q {
@@ -3133,15 +3713,27 @@
       background: none;
       border: none;
       text-align: left;
-      padding: 26px 0;
+      padding: 24px 0;
+      padding-left: 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 20px;
       color: var(--navy);
-      font-size: 1.08rem;
+      font-size: 1.06rem;
       font-weight: 600;
-      transition: color var(--dur-fast) var(--ease);
+      /* the type itself is not transitioned: a serif easing out of a sans reads
+         as a glitch, while an instant reset reads as the line having been set
+         differently, which is what it is */
+      transition:
+        color var(--dur-fast) var(--ease),
+        padding-left var(--dur-med) var(--ease);
+    }
+
+    .faq-item:hover .faq-q,
+    .faq-item.is-open .faq-q,
+    .faq-q:focus-visible {
+      padding-left: 12px;
     }
 
     .faq-q .icon {
@@ -3162,11 +3754,13 @@
       border-color: rgba(31, 111, 139, .45);
     }
 
+    /* the open control answers to the champagne rule marking the open row,
+       instead of turning into a filled application button */
     .faq-q[aria-expanded="true"] .icon {
       transform: rotate(45deg);
-      background: var(--petrol);
-      border-color: var(--petrol);
-      color: #fff;
+      background: rgba(200, 169, 106, .18);
+      border-color: var(--champagne);
+      color: var(--navy-dark);
     }
 
     .faq-a {
@@ -3175,23 +3769,39 @@
       transition: max-height var(--dur-med) var(--ease);
     }
 
+    /* the answer hangs off its own rule, with a node where it begins: the same
+       four-point vocabulary as everything else, used once */
     .faq-a p {
-      padding: 0 0 26px 20px;
-      border-left: 1px solid var(--line-gold);
+      position: relative;
+      margin-left: 12px;
+      padding: 2px 0 30px 26px;
+      border-left: 1px solid var(--line-light);
       color: var(--charcoal);
-      max-width: 70ch;
+      max-width: 66ch;
+      font-size: .98rem;
+      line-height: 1.66;
+    }
+
+    .faq-a p::before {
+      content: '';
+      position: absolute;
+      left: -3px;
+      top: .78em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--champagne);
     }
 
     /* =========================================================
    16. QUOTE FORM
    ========================================================= */
+    /* Quote reads on the explicit paper ground supplied by the WebGL field. */
     .quote {
-      background: var(--paper);
+      background-color: transparent;
+      background-image: none;
       color: var(--navy-dark);
       overflow: hidden;
-      --glow:
-        radial-gradient(50% 52% at 84% 14%, rgba(31, 111, 139, .16), transparent 68%),
-        radial-gradient(44% 44% at 0% 88%, rgba(200, 169, 106, .08), transparent 70%);
     }
 
     .quote-inner {
@@ -3566,35 +4176,17 @@
     /* =========================================================
    17. FINAL CTA
    ========================================================= */
+    /* The closing petrol/navy face is part of the WebGL ground field. */
     .final-cta {
-      background: linear-gradient(135deg, rgba(18, 85, 107, .85), rgba(31, 111, 139, .8) 38%, rgba(7, 27, 46, .9));
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
+      background-color: transparent;
+      background-image: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
       color: #fff;
       text-align: center;
       padding: clamp(64px, 10vw, 120px) 0;
       position: relative;
       overflow: hidden;
-      --grain: .06;
-      --glow:
-        radial-gradient(46% 60% at 50% 0%, rgba(255, 255, 255, .16), transparent 68%),
-        radial-gradient(40% 50% at 88% 96%, rgba(200, 169, 106, .16), transparent 70%);
-    }
-
-    @media (prefers-reduced-motion: no-preference) {
-      .final-cta::before {
-        animation: ctaDrift 20s ease-in-out infinite alternate;
-      }
-    }
-
-    @keyframes ctaDrift {
-      from {
-        transform: translate3d(-3%, 0, 0);
-      }
-
-      to {
-        transform: translate3d(3%, 0, 0);
-      }
     }
 
     /* a medallion on the seam between the quote form and the closing call */
@@ -3662,13 +4254,11 @@
    18. FOOTER
    ========================================================= */
     .site-footer {
-      background: var(--navy-dark);
+      background: transparent;
       color: rgba(255, 255, 255, .7);
       padding: 56px 0 32px;
       position: relative;
       overflow: hidden;
-      --grain: .045;
-      --glow: radial-gradient(60% 70% at 12% 0%, rgba(31, 111, 139, .18), transparent 70%);
     }
 
     /* the closing seam, carrying the mark */
@@ -3950,10 +4540,84 @@
         border-radius: calc(var(--radius-lg) + 4px);
       }
 
-      .standard .watermark,
-      .faq .watermark,
-      .beforeafter .watermark {
+      .standard .watermark {
         opacity: .03;
+      }
+
+      /* ---- the three chapters lose their second column ----
+         Below this width the dossier, the reading notes and the trust index
+         are all too narrow to be read beside what they annotate, so each one
+         moves under it and stays the same component. */
+      .floorcare {
+        min-height: auto;
+        align-items: stretch;
+        padding: 0;
+        --fc-fade-top: 70px;
+        --fc-fade: 210px;
+      }
+
+      /* the photograph runs past the poster by exactly its own dissolve, so it
+         is solid under every line of the poster and fades out over the first
+         rows of the dossier instead of ending at an edge */
+      .floorcare::before,
+      .floorcare::after {
+        bottom: auto;
+        height: calc(80vh + 210px);
+      }
+
+      .floorcare-inner {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+
+      .floorcare-content {
+        max-width: none;
+        min-height: 76vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: clamp(72px, 11vh, 132px) 0 32px;
+      }
+
+      .floorcare .badge {
+        align-self: flex-start;
+      }
+
+      .fc-dossier {
+        padding-bottom: clamp(72px, 11vh, 132px);
+        --fc-fig: min(84vw, 600px);
+      }
+
+      .fc-figure {
+        opacity: calc(.1 + var(--fc-enter) * .05);
+      }
+
+      .ba-board {
+        grid-template-columns: 1fr;
+      }
+
+      .ba-head,
+      .ba-plate,
+      .ba-notes {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .ba-notes {
+        align-self: start;
+        padding-bottom: 0;
+      }
+
+      .faq-board {
+        grid-template-columns: 1fr;
+      }
+
+      .faq-intro {
+        position: static;
+      }
+
+      .faq-assurance {
+        margin-bottom: clamp(30px, 4.5vw, 48px);
       }
     }
 
@@ -4786,27 +5450,89 @@
         padding: 6px;
       }
 
-      /* ---------- 09. FLOOR CARE — signature three: a vertical poster ---------- */
+      /* ---------- 02c. SPEC LIST — a narrow column reads it stacked ----------
+         Two columns in 346px leaves the value about 250px, which turns
+         "Greater Boston & Massachusetts" into three ragged lines against a
+         label that is on one. The label goes above its value instead, and the
+         rule under each pair keeps it an index rather than a paragraph. */
+      .spec-list {
+        grid-template-columns: 1fr;
+      }
+
+      .spec-list>dt {
+        grid-column: 1;
+        padding: 13px 0 0;
+        border-bottom: 0;
+        font-size: .62rem;
+        letter-spacing: .17em;
+        white-space: normal;
+      }
+
+      .spec-list>dd {
+        grid-column: 1;
+        padding: 3px 0 13px;
+        font-size: .95rem;
+      }
+
+      .spec-list>dt:last-of-type {
+        border-bottom: 0;
+      }
+
+      .spec-plate {
+        font-size: .95rem;
+        margin-bottom: 14px;
+      }
+
+      /* ---------- 09. FLOOR CARE — signature three: a vertical poster ----------
+         The poster is untouched: photograph and headline still own a screen of
+         their own. The dossier is not squeezed in beside them — it continues
+         underneath, on the same photograph, as the next page of the same
+         chapter. */
       .floorcare {
-        min-height: 88svh;
-        align-items: flex-end;
-        padding: 0 0 58px;
+        min-height: auto;
+        align-items: stretch;
+        padding: 0;
+        --fc-fade-top: 62px;
+        --fc-fade: 210px;
+      }
+
+      /* The photograph is given the poster plus its own dissolve, and no more.
+         Stretched over the whole section — poster plus dossier — a 2:3 portrait
+         in a 0.28 box survives as a narrow vertical strip of somebody's waist.
+         Held to the poster it keeps its full height, and the dossier below
+         continues on the ground it dissolves into. */
+      .floorcare::before,
+      .floorcare::after {
+        bottom: auto;
+        height: calc(92svh + 210px);
       }
 
       .floorcare::before {
-        inset: 0;
-        background-position: 55% center;
+        background-position: 56% center;
       }
 
       .floorcare::after {
         background:
-          linear-gradient(to bottom, var(--navy) 0%, rgba(16, 42, 67, 0) 16%),
-          linear-gradient(to top, var(--ivory) 0%, rgba(247, 244, 239, 0) 4%),
-          linear-gradient(to top, rgba(7, 27, 46, .94) 6%, rgba(7, 27, 46, .7) 34%, rgba(7, 27, 46, .18) 62%, rgba(7, 27, 46, .5) 100%);
+          linear-gradient(to top,
+            rgba(7, 27, 46, .93) 8%,
+            rgba(7, 27, 46, .72) 38%,
+            rgba(7, 27, 46, .3) 66%,
+            rgba(7, 27, 46, .58) 100%),
+          radial-gradient(80% 46% at 50% 100%, rgba(7, 27, 46, .5), transparent 76%);
+      }
+
+      .floorcare-inner {
+        grid-template-columns: 1fr;
+        gap: 0;
       }
 
       .floorcare-content {
         max-width: none;
+        min-height: 88svh;
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding: var(--pad-lg) 0 32px;
       }
 
       .floorcare h2 {
@@ -4816,10 +5542,18 @@
         margin-top: 14px;
       }
 
+      .fc-manifesto {
+        margin-top: 18px;
+        font-size: .96rem;
+        line-height: 1.58;
+        max-width: none;
+      }
+
       .floorcare .badge {
         margin-top: 22px;
         font-size: .74rem;
         padding: 9px 15px;
+        align-self: flex-start;
       }
 
       .floorcare .btn {
@@ -4827,9 +5561,43 @@
         width: 100%;
       }
 
+      .fc-dossier {
+        padding-bottom: var(--pad-lg);
+        --fc-fig: 104vw;
+      }
+
+      /* the mark keeps its registration to the dossier's left edge and simply
+         runs off the side of the phone, which is what it does on the desktop */
+      .fc-figure {
+        opacity: calc(.09 + var(--fc-enter) * .05);
+      }
+
+      .fc-dossier::before {
+        inset: -8% -30% -8% -30%;
+      }
+
       /* ---------- 10. BEFORE / AFTER — the comparison, made physical ---------- */
-      .beforeafter .watermark {
-        display: none;
+      .ba-board {
+        grid-template-columns: 1fr;
+        padding: clamp(22px, 6vw, 30px) 0;
+        row-gap: 26px;
+      }
+
+      .ba-head,
+      .ba-plate,
+      .ba-notes {
+        grid-column: 1;
+        grid-row: auto;
+      }
+
+      .ba-notes {
+        align-self: start;
+        padding-bottom: 0;
+      }
+
+      .ba-scale {
+        margin-bottom: 18px;
+        font-size: .58rem;
       }
 
       .ba-frame {
@@ -4838,6 +5606,11 @@
         width: var(--bleed-w);
         border-radius: 0;
         box-shadow: none;
+      }
+
+      .ba-caption {
+        margin-top: 16px;
+        font-size: .9rem;
       }
 
       /* the two frames are the same lobby from the same camera, and the whole
@@ -5041,7 +5814,7 @@
         padding-bottom: 8px;
       }
 
-      .areas-inner > div:first-child {
+      .areas-inner>div:first-child {
         position: relative;
         z-index: 1;
       }
@@ -5180,9 +5953,44 @@
         font-size: .74rem;
       }
 
-      /* ---------- 15. FAQ — the pace changes: scan, don't read ---------- */
-      .faq .watermark {
+      /* ---------- 15. FAQ — the pace changes: scan, don't read ----------
+         The trust column stops being a column. Three lines of it stay, above
+         the questions, because that is context the reader wants before they
+         start asking — and six would push the first question off the screen,
+         which is the one thing this section may not do. */
+      .faq-board {
+        grid-template-columns: 1fr;
+      }
+
+      .faq-intro {
+        position: static;
+      }
+
+      .faq-intro h2 {
+        font-size: clamp(1.95rem, 7.4vw, 2.5rem);
+        line-height: 1.12;
+        letter-spacing: -.015em;
+      }
+
+      .faq-assurance {
+        margin: 24px 0 34px;
+      }
+
+      .faq-assurance>dt:nth-of-type(n+4),
+      .faq-assurance>dd:nth-of-type(n+4) {
         display: none;
+      }
+
+      .faq-assurance>dt:nth-of-type(3) {
+        border-bottom: 0;
+      }
+
+      .faq-assurance>dd:nth-of-type(3) {
+        border-bottom: 0;
+      }
+
+      .faq-item.is-open .faq-q {
+        font-size: 1.12rem;
       }
 
       .faq-q {
@@ -5297,7 +6105,7 @@
         background-size: 10px 10px;
       }
 
-      .q-options > .q-option:last-child:nth-child(odd) {
+      .q-options>.q-option:last-child:nth-child(odd) {
         grid-column: 1 / -1;
       }
 
@@ -5394,25 +6202,25 @@
         gap: 26px 22px;
       }
 
-      .footer-grid > div:first-child,
-      .footer-grid > div:last-child {
+      .footer-grid>div:first-child,
+      .footer-grid>div:last-child {
         grid-column: 1 / -1;
       }
 
-      .footer-grid > div:first-child {
+      .footer-grid>div:first-child {
         order: 1;
       }
 
       /* contact outranks navigation on a phone */
-      .footer-grid > div:last-child {
+      .footer-grid>div:last-child {
         order: 2;
       }
 
-      .footer-grid > div:nth-child(2) {
+      .footer-grid>div:nth-child(2) {
         order: 3;
       }
 
-      .footer-grid > div:nth-child(3) {
+      .footer-grid>div:nth-child(3) {
         order: 4;
       }
 
@@ -5423,24 +6231,24 @@
       }
 
       .footer-col ul,
-      .footer-grid > div:last-child ul {
+      .footer-grid>div:last-child ul {
         gap: 0;
       }
 
-      .footer-grid > div:last-child li:first-child a {
+      .footer-grid>div:last-child li:first-child a {
         font-family: var(--font-serif);
         font-size: 1.35rem;
         color: #fff;
       }
 
-      .footer-grid > div:last-child li:first-child a::before {
+      .footer-grid>div:last-child li:first-child a::before {
         display: none;
       }
 
       /* a link the width of its own word is a poor target in a two-column
          list: let each one claim its column */
       .footer-col a,
-      .footer-grid > div:last-child a {
+      .footer-grid>div:last-child a {
         display: flex;
         font-size: .89rem;
         padding: 11px 0;
@@ -5503,5 +6311,497 @@
         top: 50%;
         bottom: auto;
         margin-top: -8px;
+      }
+
+      /* the three chapters, at the width where every extra word costs a line */
+      .floorcare h2 {
+        font-size: 2.15rem;
+      }
+
+      .fc-manifesto {
+        font-size: .92rem;
+      }
+
+      .fc-dossier {
+        --fc-fig: 118vw;
+      }
+
+      .spec-list>dd {
+        font-size: .9rem;
+      }
+
+      /* "Restored" and "Worn" plus a reading in 280px of rule: the ends of the
+         scale go, the reading stays, because the reading is the measurement */
+      .ba-scale {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .ba-scale-end {
+        display: none;
+      }
+
+      .ba-caption {
+        font-size: .86rem;
+      }
+
+      .faq-intro h2 {
+        font-size: 1.8rem;
+      }
+
+      .faq-item.is-open .faq-q {
+        font-size: 1.05rem;
+      }
+    }
+
+    /* =========================================================
+   21. DESKTOP FULL-VIEWPORT / SCROLL SNAP
+   =========================================================
+   One chapter, one viewport. Above 1200px the page stops being a continuous
+   column of sections with their own heights and becomes a sequence of scenes:
+   when the scroll settles, a single chapter owns the frame, top to bottom.
+
+   The only layer that still crosses a boundary is the WebGL atmosphere, which
+   is intentional — it does not know where sections stop. Nothing here paints a
+   ground, and nothing here hides content to make it fit: every chapter is
+   re-framed by compressing space, never by cropping, clipping or shrinking
+   what it has to say.
+
+   WHY THIS BREAKPOINT. 1200px is where `.services-grid` collapses to a single
+   column (§19). Below it the asymmetric desktop composition does not exist, so
+   the scene system has nothing to frame. `min-height: 640px` keeps it away
+   from window shapes where a full-viewport chapter would be absurd. The block
+   lives last in the file so it wins by source order over the base rules for
+   `.section`, `.hero`, `.floorcare` and `[id]`, which share its specificity —
+   and it can never reach the Mobile Edition, whose range is disjoint.
+   ========================================================= */
+    @media (min-width:1201px) and (min-height:640px) {
+
+      /* Native snapping, and nothing else. No wheel handler, no preventDefault,
+         no nextSection(): the browser owns the movement, the momentum and the
+         keyboard. `stop: always` is what makes a chapter a chapter — the scroll
+         cannot fly past one without it having held the frame. */
+      html {
+        scroll-snap-type: y mandatory;
+      }
+
+      /* released for the duration of a fragment jump only — see initSnapAnchors */
+      html.is-snap-released {
+        scroll-snap-type: none;
+      }
+
+      :root {
+        /* Every compression below is derived from viewport height, so 1920x1080
+           breathes, 1440x900 sits comfortably and 1366x768 tightens itself
+           without a second breakpoint and without touching a single font-size.
+           The top pad is measured from the header, because the header is a
+           layer over the scene and the scene has to clear it. */
+        --scene-pad-top: calc(var(--header-h) + clamp(16px, 3.2dvh, 48px));
+        --scene-pad-bottom: clamp(44px, 6.5dvh, 96px);
+        --scene-gap: clamp(20px, 3.4dvh, 48px);
+        --scene-row: clamp(8px, 1.4dvh, 12px);
+      }
+
+      /* ---------------------------------------------------------
+         THE STRUCTURAL CLASS — shared responsibilities only
+
+         Composition stays with .hero, .standard, .services and the rest. This
+         carries four things: where the chapter snaps, how tall a scene is, that
+         it clears the header, and that its content is centred in the frame.
+         --------------------------------------------------------- */
+      .scroll-snap-section {
+        scroll-snap-align: start;
+        scroll-snap-stop: always;
+
+        /* CRITICAL. The base rule gives every [id] a scroll-margin-top of one
+           header, and scroll-margin also expands the *snap area*: with it, an
+           aligned chapter would come to rest ~102px below its own top edge and
+           the previous chapter's last rows would sit under the header. The
+           header clearance is the scene's padding, not the snap offset. */
+        scroll-margin-top: 0;
+
+        min-height: 100vh;
+        min-height: 100dvh;
+
+        /* A scene is a column that centres its content. Because the height is a
+           minimum, a chapter that grows — an open FAQ answer, the tallest step
+           of the quote form — pushes the scene taller instead of overflowing
+           it, and the reader keeps travelling through the same chapter. Per
+           CSS Scroll Snap, a snap area larger than the snapport makes every
+           position that covers the snapport valid, so nothing traps them. */
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: stretch;
+        padding-block: var(--scene-pad-top) var(--scene-pad-bottom);
+      }
+
+      /* ---------- HERO ----------
+         Already a viewport chapter; it only stops capping itself. The slides
+         stay absolute, so the composition, the crossfade, the autoplay, the
+         swipe and the keyboard are untouched — the scene simply owns the
+         height and the copy clears the header by its own padding. */
+      .hero.scroll-snap-section {
+        height: auto;
+        max-height: none;
+        padding-block: 0;
+      }
+
+      .hero .hero-content {
+        padding-top: calc(var(--header-h) + clamp(30px, 6.5dvh, 104px));
+        padding-bottom: clamp(34px, 6dvh, 96px);
+      }
+
+      /* ---------- STANDARD ----------
+         The headline and the four points become one scene. The pillars stay
+         rows on a hairline: only the air between them is rationed. */
+      .standard .standard-head h2 {
+        line-height: .96;
+      }
+
+      .standard .pillars {
+        margin-top: clamp(20px, 3.4dvh, 56px);
+      }
+
+      .standard .pillar {
+        padding-block: clamp(14px, 2.4dvh, 34px);
+      }
+
+      /* ---------- SERVICES ----------
+         Section head, then the grid taking exactly what is left of the frame.
+         The asymmetry is the hierarchy and it does not move: Commercial spans
+         both rows and owns the full height of the grid, Floor Care and
+         Residential split the secondary column. What goes is the pair of fixed
+         card heights, which is what used to push this chapter past the fold. */
+      .services.scroll-snap-section>.container {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-rows: auto minmax(0, 1fr);
+      }
+
+      .services .section-head {
+        margin-bottom: var(--scene-gap);
+      }
+
+      .services-grid {
+        grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+        gap: clamp(14px, 2.2dvh, 24px);
+        margin-top: 0;
+        min-height: 0;
+      }
+
+      .service-card,
+      .service-card.is-commercial {
+        min-height: 0;
+      }
+
+      /* the expanded state has to fit inside the card it grew in, so the card's
+         own interior is rationed on the same clock as the scene */
+      .card-body {
+        padding: clamp(18px, 2.8dvh, 34px);
+      }
+
+      .card-body h3 {
+        line-height: 1.08;
+      }
+
+      .card-tag {
+        margin-bottom: clamp(7px, 1.3dvh, 14px);
+      }
+
+      .card-more {
+        margin-top: clamp(7px, 1.3dvh, 16px);
+      }
+
+      .card-more p {
+        margin-top: clamp(6px, 1dvh, 10px);
+      }
+
+      .card-more ul {
+        gap: clamp(5px, .9dvh, 8px);
+      }
+
+      .card-cta {
+        margin-top: clamp(9px, 1.5dvh, 18px);
+      }
+
+      /* ---------- MAINTENANCE ----------
+         Headline, copy, tabs and the Daily Plan as one composition rather than
+         two columns hanging from the top edge. The selector is untouched. */
+      .maintenance-inner {
+        align-items: center;
+      }
+
+      .maintenance-copy {
+        margin-top: clamp(12px, 2dvh, 20px);
+      }
+
+      .freq-tabs {
+        margin-top: clamp(18px, 3dvh, 38px);
+      }
+
+      .freq-panel {
+        padding: clamp(24px, 3.6dvh, 38px);
+      }
+
+      .freq-panel-head {
+        margin-bottom: clamp(12px, 2dvh, 22px);
+        padding-bottom: clamp(10px, 1.7dvh, 18px);
+      }
+
+      .freq-list li {
+        padding-block: clamp(8px, 1.4dvh, 12px);
+      }
+
+      /* ---------- FLOOR CARE ----------
+         The dissolve IS the padding: --fc-mask goes solid exactly where the
+         content box begins and ends, at any viewport. So the scene is not
+         given a padding of its own — the two fade lengths are rescaled and the
+         padding is rebuilt from them, keeping that identity intact. Break it
+         and white type dissolves over a lightening canvas. */
+      .floorcare.scroll-snap-section {
+        --fc-fade-top: clamp(84px, 10dvh, 132px);
+        --fc-fade: clamp(190px, 25dvh, 330px);
+        padding-block: calc(var(--fc-fade-top) + clamp(20px, 3dvh, 34px)) var(--fc-fade);
+        min-height: 100dvh;
+      }
+
+      /* ---------- BEFORE / AFTER ----------
+         The whole plate in one frame. The comparator is not made small: the
+         board's air is rationed first, and only then does the plate answer to
+         the height of the room — same width, a wider crop of the same
+         photograph, which is already a cover background. */
+      .ba-board {
+        padding-block: clamp(18px, 2.7dvh, 48px);
+        row-gap: clamp(16px, 2.6dvh, 40px);
+      }
+
+      .ba-scale {
+        margin-bottom: clamp(14px, 2.2dvh, 26px);
+      }
+
+      .ba-caption {
+        margin-top: clamp(10px, 1.7dvh, 18px);
+      }
+
+      @media (max-height:980px) {
+        .ba-frame {
+          aspect-ratio: 16/9;
+        }
+      }
+
+      @media (max-height:820px) {
+        .ba-frame {
+          aspect-ratio: 2/1;
+        }
+      }
+
+      /* ---------- RESIDENTIAL ----------
+         The photograph adapts its height to the room and keeps its proportion
+         and its crop; the column of content centres against it. */
+      .residential-inner {
+        align-items: center;
+      }
+
+      .residential-media {
+        height: clamp(320px, 58dvh, 620px);
+        width: auto;
+        max-width: 100%;
+        justify-self: center;
+        align-self: center;
+      }
+
+      .residential-list {
+        margin-top: clamp(16px, 2.6dvh, 30px);
+      }
+
+      .residential-list li {
+        padding-block: clamp(10px, 1.7dvh, 16px);
+      }
+
+      .residential .btn {
+        margin-top: clamp(18px, 3dvh, 32px);
+      }
+
+      /* ---------- IMPACT ----------
+         5:1 stays dominant and stays the size it is. The chapter already fits;
+         it only needed centring. */
+      .impact-viz {
+        margin-top: clamp(16px, 2.6dvh, 30px);
+      }
+
+      .impact-partners {
+        margin-top: clamp(14px, 2.4dvh, 26px);
+      }
+
+      /* ---------- AREAS ----------
+         The radar is the signature, so it is rescaled by the height of the
+         room rather than cropped or dropped. */
+      .areas-graphic {
+        max-width: min(440px, 52dvh);
+      }
+
+      .areas-tags {
+        margin-top: clamp(14px, 2.4dvh, 26px);
+      }
+
+      /* ---------- TESTIMONIALS ----------
+         Centred in the frame, and not one pixel wider: the negative space
+         around the card is the composition. */
+      .t-track {
+        min-height: clamp(180px, 24dvh, 220px);
+      }
+
+      .t-stars {
+        margin-bottom: clamp(16px, 2.6dvh, 28px);
+      }
+
+      .t-controls {
+        margin-top: clamp(22px, 3.4dvh, 40px);
+      }
+
+      /* ---------- FAQ ----------
+         Seven closed questions, the sticky intro and the assurance index in one
+         frame. Open one and the scene grows: no overflow, no inner scrollbar,
+         no cropped answer — the reader simply keeps travelling through the same
+         chapter until it ends. */
+      .faq-q {
+        padding-block: clamp(14px, 2.2dvh, 24px);
+      }
+
+      .faq-assurance {
+        margin-top: clamp(18px, 3dvh, 42px);
+      }
+
+      .faq-a p {
+        padding-bottom: clamp(16px, 2.6dvh, 30px);
+      }
+
+      /* the shared spec-list appears in three chapters and is still never
+         restyled — only the row height answers to the room */
+      .spec-list>dt,
+      .spec-list>dd {
+        padding-block: clamp(9px, 1.5dvh, 12px);
+      }
+
+      /* ---------- QUOTE ----------
+         Step 04 is the tallest state of this chapter — five fields and a
+         textarea — so it is the one the scene is measured against. No inner
+         scrollbar, and the four steps keep sharing one panel. */
+      .quote-inner {
+        align-items: center;
+      }
+
+      .quote-progress {
+        margin-top: clamp(18px, 3dvh, 34px);
+      }
+
+      .quote-form {
+        /* the rule above the nav is drawn from the same gap it sits in: change
+           one without the other and the hairline detaches from the row */
+        --q-nav-gap: clamp(16px, 2.6dvh, 30px);
+        padding: clamp(22px, 3.4dvh, 44px);
+      }
+
+      .q-step h3 {
+        margin-bottom: clamp(12px, 2.2dvh, 24px);
+      }
+
+      .q-options {
+        gap: clamp(8px, 1.4dvh, 12px);
+      }
+
+      .q-option {
+        padding-block: clamp(12px, 2dvh, 18px);
+      }
+
+      .q-field {
+        margin-bottom: clamp(8px, 1.4dvh, 18px);
+        gap: clamp(5px, .9dvh, 8px);
+      }
+
+      .q-field input,
+      .q-field textarea {
+        padding-block: clamp(9px, 1.5dvh, 14px);
+      }
+
+      .q-field textarea {
+        min-height: clamp(64px, 9dvh, 100px);
+      }
+
+      .q-nav {
+        margin-top: var(--q-nav-gap);
+      }
+
+      .q-nav::before {
+        top: calc(var(--q-nav-gap) * -1);
+      }
+
+      .q-success {
+        padding-block: clamp(18px, 3dvh, 30px);
+      }
+
+      /* ---------- CLOSING SCENE (final CTA + footer) ----------
+         One snap, one frame. The invitation owns the flex space above the
+         footer and centres itself inside it; the footer arrives underneath
+         as a compact signature, not a second chapter. The seam between them
+         is negative space, not a second joint. */
+      .closing-scene.scroll-snap-section {
+        padding-block: var(--scene-pad-top) clamp(28px, 4dvh, 48px);
+        gap: var(--scene-gap);
+      }
+
+      .closing-scene .final-cta {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding-block: 0;
+      }
+
+      .closing-scene .final-cta .hero-cta {
+        margin-top: clamp(22px, 3.4dvh, 36px);
+      }
+
+      .closing-scene .site-footer {
+        flex: none;
+        padding-block: 0;
+      }
+
+      .closing-scene .footer-joint {
+        margin-bottom: clamp(18px, 2.6dvh, 28px);
+      }
+
+      .closing-scene .footer-grid {
+        gap: clamp(26px, 3.2dvh, 40px);
+      }
+
+      .closing-scene .footer-bottom {
+        margin-top: clamp(18px, 2.6dvh, 28px);
+        padding-top: clamp(14px, 2dvh, 22px);
+      }
+
+      /* ---------------------------------------------------------
+         SHORT DESKTOP ROOMS (1366x768 and the like)
+
+         Spacing has already given what it has. The last of it comes from the
+         two densest interiors — the expanded service card and the quote
+         panel — as tighter micro-copy, not as a smaller composition. Display
+         type, headlines and body copy are never touched.
+         --------------------------------------------------------- */
+      @media (max-height:880px) {
+        .card-more p {
+          font-size: .86rem;
+        }
+
+        .card-more li {
+          font-size: .74rem;
+          padding: 5px 11px;
+        }
+
+        .card-tag {
+          padding: 5px 11px;
+        }
       }
     }

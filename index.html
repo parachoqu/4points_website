@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=4cd48fe4feae">
+  <link rel="stylesheet" href="style.css?v=e47541d84148">
   <script type="importmap">
   {
     "imports": {
@@ -87,7 +87,8 @@
     <!-- =========================================================
      HERO
      ========================================================= -->
-    <section class="hero" data-hero-slider aria-roledescription="carousel" aria-label="Featured services" tabindex="0">
+    <section class="hero scroll-snap-section" data-hero-slider aria-roledescription="carousel"
+      aria-label="Featured services" tabindex="0">
 
       <article class="hero-slide is-active" data-hero-slide aria-hidden="false"
         style="--hero-img:url('assets/images/hero-commercial.jpg')">
@@ -210,7 +211,7 @@
     <!-- =========================================================
      THE 4POINTS STANDARD
      ========================================================= -->
-    <section class="section standard">
+    <section class="section standard scroll-snap-section">
       <span class="watermark on-light" aria-hidden="true"></span>
       <div class="container">
         <div class="standard-head" data-reveal>
@@ -250,7 +251,7 @@
     <!-- =========================================================
      SERVICES
      ========================================================= -->
-    <section class="section services" id="services">
+    <section class="section services scroll-snap-section" id="services">
       <div class="container">
         <div class="section-head" data-reveal>
           <span class="eyebrow on-dark">What We Do</span>
@@ -348,7 +349,7 @@
     <!-- =========================================================
      RECURRING MAINTENANCE
      ========================================================= -->
-    <section class="section maintenance depth">
+    <section class="section maintenance depth scroll-snap-section">
       <div class="container maintenance-inner">
         <div class="maintenance-head" data-reveal>
           <span class="eyebrow">For Facility Managers</span>
@@ -376,16 +377,41 @@
     <!-- =========================================================
      FLOOR CARE
      ========================================================= -->
-    <section class="floorcare" id="floorcare" style="--img-floor-lg:url('assets/images/floor-care.jpg')">
+    <section class="floorcare scroll-snap-section" id="floorcare"
+      style="--img-floor-lg:url('assets/images/floor-care.jpg')">
       <div class="container">
-        <div class="floorcare-content" data-reveal>
-          <span class="eyebrow on-dark">Floor Care Specialists</span>
-          <h2><span>Polishing.</span><span>Waxing.</span><span>Restoring.</span></h2>
-          <span class="badge"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px">
-              <circle cx="12" cy="12" r="9" />
-              <path d="M12 7v5l3 2" />
-            </svg>Sunday Service Available</span>
-          <div><a class="btn btn-champagne" href="#quote">Request Floor Care Quote</a></div>
+        <div class="floorcare-inner">
+
+          <div class="floorcare-content" data-reveal>
+            <span class="eyebrow on-dark">Floor Care Specialists</span>
+            <h2><span>Polishing.</span><span>Waxing.</span><span>Restoring.</span></h2>
+            <p class="fc-manifesto">A floor is the first thing anyone reads about a building, and the
+              hardest surface to keep saying the right thing. We polish, wax and restore high-traffic
+              commercial floors around your operation, so the room opens as though nothing happened.</p>
+            <span class="badge"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg>Sunday Service Available</span>
+            <div><a class="btn btn-champagne" href="#quote">Request Floor Care Quote</a></div>
+          </div>
+
+          <aside class="fc-dossier" data-reveal>
+            <span class="fc-figure" aria-hidden="true"></span>
+            <span class="spec-plate">FC—01<i>Specialty</i></span>
+            <dl class="spec-list">
+              <dt>Surface</dt>
+              <dd>High-traffic commercial floors</dd>
+              <dt>Service</dt>
+              <dd>Polishing · Waxing · Restoration</dd>
+              <dt>Schedule</dt>
+              <dd>Sundays &amp; after hours</dd>
+              <dt>Contract</dt>
+              <dd>Recurring or one-time</dd>
+              <dt>Coverage</dt>
+              <dd>Greater Boston &amp; Massachusetts</dd>
+            </dl>
+          </aside>
+
         </div>
       </div>
     </section>
@@ -393,32 +419,59 @@
     <!-- =========================================================
      BEFORE / AFTER
      ========================================================= -->
-    <section class="section beforeafter">
-      <span class="watermark on-light" aria-hidden="true"></span>
+    <section class="section beforeafter scroll-snap-section">
       <div class="container">
-        <div class="section-head" data-reveal>
-          <span class="eyebrow">Floor Care Context</span>
-          <h2>Worn surfaces. Polished finishes.</h2>
-        </div>
+        <div class="ba-board cornered">
 
-        <div class="ba-frame" data-before-after
-          style="--img-before:url('assets/images/before-floor.jpg'); --img-after:url('assets/images/after-floor.jpg')"
-          data-reveal>
-          <div class="ba-img ba-before"><span class="ba-label">Worn surface</span></div>
-          <div class="ba-img ba-after" data-ba-after style="clip-path:inset(0 0 0 50%)"><span class="ba-label">Polished
-              finish</span></div>
-          <div class="ba-handle-track">
-            <div class="ba-handle" data-ba-handle style="left:50%">
-              <div class="ba-grip">
-                <svg class="icon" viewBox="0 0 24 24" style="width:20px;height:20px">
-                  <path d="M8 8 4 12l4 4M16 8l4 4-4 4" />
-                </svg>
-              </div>
-            </div>
+          <div class="section-head ba-head" data-canvas-ink data-reveal>
+            <span class="eyebrow">Floor Care Evidence</span>
+            <h2>Worn surfaces. Polished finishes.</h2>
           </div>
-          <span class="ba-hint" aria-hidden="true">Drag to compare</span>
-          <input class="ba-range" type="range" min="0" max="100" value="50" data-ba-range
-            aria-label="Drag to compare illustrative floor care surfaces">
+
+          <div class="ba-plate" data-reveal>
+            <div class="ba-scale" data-canvas-ink aria-hidden="true">
+              <span class="ba-scale-end">Worn</span>
+              <span class="ba-scale-rule"><b data-ba-readout>50</b></span>
+              <span class="ba-scale-end">Restored</span>
+            </div>
+
+            <div class="ba-frame" data-before-after
+              style="--img-before:url('assets/images/before-floor.jpg'); --img-after:url('assets/images/after-floor.jpg')">
+              <div class="ba-img ba-before"><span class="ba-label">Worn surface</span></div>
+              <div class="ba-img ba-after" data-ba-after style="clip-path:inset(0 0 0 50%)"><span
+                  class="ba-label">Polished finish</span></div>
+              <div class="ba-handle-track">
+                <div class="ba-handle" data-ba-handle style="left:50%">
+                  <div class="ba-grip">
+                    <svg class="icon" viewBox="0 0 24 24" style="width:19px;height:19px">
+                      <path d="M8 8 4 12l4 4M16 8l4 4-4 4" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <span class="ba-hint" aria-hidden="true">Drag to compare</span>
+              <input class="ba-range" type="range" min="0" max="100" value="50" data-ba-range
+                aria-label="Drag to compare illustrative floor care surfaces">
+            </div>
+
+            <p class="ba-caption" data-canvas-ink>One commercial lobby, one camera position, before and after a full floor
+              care pass.</p>
+          </div>
+
+          <aside class="ba-notes" data-canvas-ink data-reveal>
+            <span class="spec-plate">PL—02<i>Case</i></span>
+            <dl class="spec-list">
+              <dt>Surface</dt>
+              <dd>Commercial lobby, stone &amp; plank</dd>
+              <dt class="lean-worn">Condition</dt>
+              <dd class="lean-worn">Traffic soil, dulled finish</dd>
+              <dt>Treatment</dt>
+              <dd>Deep clean · Polish · Restore</dd>
+              <dt class="lean-restored">Result</dt>
+              <dd class="lean-restored">Even sheen across the run</dd>
+            </dl>
+          </aside>
+
         </div>
       </div>
     </section>
@@ -426,7 +479,7 @@
     <!-- =========================================================
      RESIDENTIAL
      ========================================================= -->
-    <section class="section residential" id="residential">
+    <section class="section residential scroll-snap-section" id="residential">
       <div class="container residential-inner">
         <div class="residential-media" data-reveal="scale"
           style="--img-residential:url('assets/images/residential-cleaning.jpg')">
@@ -463,7 +516,7 @@
     <!-- =========================================================
      SOCIAL IMPACT
      ========================================================= -->
-    <section class="section impact depth" id="impact">
+    <section class="section impact depth scroll-snap-section" id="impact">
       <div class="container impact-inner">
         <div data-reveal>
           <span class="impact-ratio" data-impact-counter data-target-a="5" data-target-b="1"><span
@@ -495,7 +548,7 @@
     <!-- =========================================================
      AREAS WE SERVE
      ========================================================= -->
-    <section class="section areas depth" id="areas">
+    <section class="section areas depth scroll-snap-section" id="areas">
       <div class="container areas-inner">
         <div data-reveal>
           <span class="badge">100% Mobile Service</span>
@@ -555,7 +608,7 @@
     <!-- =========================================================
      TESTIMONIALS
      ========================================================= -->
-    <section class="section testimonials depth">
+    <section class="section testimonials depth scroll-snap-section">
       <div class="container">
         <div class="t-carousel cornered" data-testimonial-carousel tabindex="0" aria-roledescription="carousel"
           aria-label="Customer testimonials">
@@ -626,12 +679,26 @@
     <!-- =========================================================
      FAQ
      ========================================================= -->
-    <section class="section faq" id="faq">
-      <span class="watermark on-light" aria-hidden="true"></span>
+    <section class="section faq scroll-snap-section" id="faq">
       <div class="container">
-        <div class="section-head" data-reveal>
+        <div class="faq-board">
+        <div class="faq-intro" data-reveal>
           <span class="eyebrow">Questions</span>
           <h2>Good to know before you book.</h2>
+          <dl class="spec-list faq-assurance">
+            <dt>Insured</dt>
+            <dd>Commercial and residential work</dd>
+            <dt>Coverage</dt>
+            <dd>Greater Boston &amp; Massachusetts</dd>
+            <dt>Floor care</dt>
+            <dd>Sundays &amp; after hours</dd>
+            <dt>Plans</dt>
+            <dd>Daily · Weekly · Bi-weekly · Monthly</dd>
+            <dt>Equipment</dt>
+            <dd>Crews arrive fully equipped</dd>
+            <dt>Contracts</dt>
+            <dd>Flexible, no long-term lock-in</dd>
+          </dl>
         </div>
 
         <div class="faq-list">
@@ -721,13 +788,14 @@
             </div>
           </div>
         </div>
+        </div>
       </div>
     </section>
 
     <!-- =========================================================
      QUOTE FORM
      ========================================================= -->
-    <section class="section quote depth" id="quote">
+    <section class="section quote depth scroll-snap-section" id="quote">
       <div class="container quote-inner">
         <div data-reveal>
           <span class="eyebrow">Get Started</span>
@@ -812,88 +880,89 @@
   </main>
 
   <!-- =========================================================
-     FINAL CTA
+     CLOSING SCENE — FINAL CTA + FOOTER
      ========================================================= -->
-  <section class="final-cta depth">
-    <span class="section-joint" aria-hidden="true"></span>
-    <div class="container">
-      <h2 data-reveal>Ready for a cleaner space?</h2>
-      <p data-reveal>Commercial, janitorial, floor care or residential: request a quote and hear back the same business
-        day.</p>
-      <div class="hero-cta" data-reveal>
-        <a class="btn btn-champagne" href="#quote">Request a Quote</a>
-        <a class="btn btn-ghost" href="tel:+18572223456">Call 4Points<small>(857) 222-3456</small></a>
-      </div>
-    </div>
-  </section>
+  <div class="closing-scene scroll-snap-section">
 
-  <!-- =========================================================
-     FOOTER
-     ========================================================= -->
-  <footer class="site-footer depth">
-    <div class="container footer-joint" aria-hidden="true"><span></span></div>
-    <div class="container footer-grid">
-      <div>
-        <div class="footer-logo">
-          <svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true">
-            <path class="mark-ring" d="M12 2.5 21.5 12 12 21.5 2.5 12Z" />
-            <circle cx="12" cy="2.5" r="2" />
-            <circle cx="21.5" cy="12" r="2" />
-            <circle cx="12" cy="21.5" r="2" />
-            <circle cx="2.5" cy="12" r="2" />
-          </svg>4POINTS<em>.</em>
+    <section class="final-cta depth">
+      <span class="section-joint" aria-hidden="true"></span>
+      <div class="container">
+        <h2 data-reveal>Ready for a cleaner space?</h2>
+        <p data-reveal>Commercial, janitorial, floor care or residential: request a quote and hear back the same business
+          day.</p>
+        <div class="hero-cta" data-reveal>
+          <a class="btn btn-champagne" href="#quote">Request a Quote</a>
+          <a class="btn btn-ghost" href="tel:+18572223456">Call 4Points<small>(857) 222-3456</small></a>
         </div>
-        <p class="footer-tagline">Mobile Cleaning Service | Serving Greater Boston &amp; Massachusetts.</p>
       </div>
-      <div class="footer-col">
-        <h4>Services</h4>
-        <ul>
-          <li><a href="#services">Commercial Cleaning</a></li>
-          <li><a href="#services">Janitorial Services</a></li>
-          <li><a href="#floorcare">Floor Care</a></li>
-          <li><a href="#residential">Residential Cleaning</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Company</h4>
-        <ul>
-          <li><a href="#areas">Areas We Serve</a></li>
-          <li><a href="#impact">Our Impact</a></li>
-          <li><a href="#faq">About</a></li>
-          <li><a href="#quote">Request a Quote</a></li>
-        </ul>
-      </div>
-      <div class="footer-col">
-        <h4>Contact</h4>
-        <ul>
-          <li><a href="tel:+18572223456">(857) 222-3456</a></li>
-          <li><a href="mailto:hello@4pointscleaning.com">hello@4pointscleaning.com</a></li>
-        </ul>
-      </div>
-    </div>
-    <div class="container footer-bottom">
-      <span>© <span data-year></span> 4Points Cleaning Services. Mobile Cleaning Service | Serving Greater Boston &amp;
-        Massachusetts.</span>
-      <div class="footer-actions">
-        <div class="footer-social">
-          <a href="#" aria-label="Facebook"><svg class="icon" viewBox="0 0 24 24">
-              <path
-                d="M14 8h3V4.4c-.5-.1-2.1-.4-4-.4-3.9 0-6.6 2.4-6.6 6.8V14H2v4h4.4v10h5.4V18h4.5l.7-4h-5.2v-2.8C11.8 10 12.2 8 14 8Z" />
-            </svg></a>
-          <a href="#" aria-label="Instagram"><svg class="icon" viewBox="0 0 24 24">
-              <rect x="3" y="3" width="18" height="18" rx="5" />
-              <circle cx="12" cy="12" r="4" />
-              <circle cx="17.5" cy="6.5" r="1" />
-            </svg></a>
-        </div>
-        <a class="footer-top" href="#main">Back to top<svg class="icon" viewBox="0 0 24 24">
-            <path d="M12 19V5M5 12l7-7 7 7" />
-          </svg></a>
-      </div>
-    </div>
-  </footer>
+    </section>
 
-  <script type="module" src="script.js?v=77e2b4e117d8"></script>
+    <footer class="site-footer depth">
+      <div class="container footer-joint" aria-hidden="true"><span></span></div>
+      <div class="container footer-grid">
+        <div>
+          <div class="footer-logo">
+            <svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true">
+              <path class="mark-ring" d="M12 2.5 21.5 12 12 21.5 2.5 12Z" />
+              <circle cx="12" cy="2.5" r="2" />
+              <circle cx="21.5" cy="12" r="2" />
+              <circle cx="12" cy="21.5" r="2" />
+              <circle cx="2.5" cy="12" r="2" />
+            </svg>4POINTS<em>.</em>
+          </div>
+          <p class="footer-tagline">Mobile Cleaning Service | Serving Greater Boston &amp; Massachusetts.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Services</h4>
+          <ul>
+            <li><a href="#services">Commercial Cleaning</a></li>
+            <li><a href="#services">Janitorial Services</a></li>
+            <li><a href="#floorcare">Floor Care</a></li>
+            <li><a href="#residential">Residential Cleaning</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#areas">Areas We Serve</a></li>
+            <li><a href="#impact">Our Impact</a></li>
+            <li><a href="#faq">About</a></li>
+            <li><a href="#quote">Request a Quote</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Contact</h4>
+          <ul>
+            <li><a href="tel:+18572223456">(857) 222-3456</a></li>
+            <li><a href="mailto:hello@4pointscleaning.com">hello@4pointscleaning.com</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="container footer-bottom">
+        <span>© <span data-year></span> 4Points Cleaning Services. Mobile Cleaning Service | Serving Greater Boston &amp;
+          Massachusetts.</span>
+        <div class="footer-actions">
+          <div class="footer-social">
+            <a href="#" aria-label="Facebook"><svg class="icon" viewBox="0 0 24 24">
+                <path
+                  d="M14 8h3V4.4c-.5-.1-2.1-.4-4-.4-3.9 0-6.6 2.4-6.6 6.8V14H2v4h4.4v10h5.4V18h4.5l.7-4h-5.2v-2.8C11.8 10 12.2 8 14 8Z" />
+              </svg></a>
+            <a href="#" aria-label="Instagram"><svg class="icon" viewBox="0 0 24 24">
+                <rect x="3" y="3" width="18" height="18" rx="5" />
+                <circle cx="12" cy="12" r="4" />
+                <circle cx="17.5" cy="6.5" r="1" />
+              </svg></a>
+          </div>
+          <a class="footer-top" href="#main">Back to top<svg class="icon" viewBox="0 0 24 24">
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg></a>
+        </div>
+      </div>
+    </footer>
+
+  </div>
+
+  <script type="module" src="script.js?v=42d556155420"></script>
 </body>
 
 </html>

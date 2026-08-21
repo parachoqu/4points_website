@@ -29,13 +29,22 @@
 
       --graphite: #2B2F32;
       --charcoal: #243B53;
-      --muted: #627D98;
+      /* Was #627D98, which measured 4.21:1 on Paper, 3.90 on Ivory and 3.76 on
+         Sand — under the 4.5:1 small text needs, on every light ground the site
+         has. This token is only ever read on a light ground (on a dark one
+         --canvas-muted resolves to --sage-soft instead), so the hue is kept and
+         only the lightness moves, by the minimum that clears the bar: 5.60 /
+         5.19 / 4.99 respectively. */
+      --muted: #526980;
       --border: #D9E2EC;
       --border-subtle: #E8EEF5;
 
       /* approved accent: warm champagne */
       --champagne: #C8A96A;
       --champagne-deep: #A9894C;
+      /* The same champagne, dark enough to be read as small type on a light
+         ground (4.77:1 at 11.8px), without changing the display accent. */
+      --champagne-text: #876E3D;
       --container: 1280px;
       --gutter: clamp(20px, 5vw, 64px);
       --header-h: 86px;
@@ -67,9 +76,6 @@
       --mark-figure: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23ffffff'%3E%3Cpath d='M100 14 186 100 100 186 14 100Z' stroke-width='1'/%3E%3Cpath d='M100 2V198M2 100H198' stroke-width='.5'/%3E%3Ccircle cx='100' cy='100' r='47' stroke-width='.5'/%3E%3Ccircle cx='100' cy='14' r='4.5'/%3E%3Ccircle cx='186' cy='100' r='4.5'/%3E%3Ccircle cx='100' cy='186' r='4.5'/%3E%3Ccircle cx='14' cy='100' r='4.5'/%3E%3C/g%3E%3C/svg%3E");
       --mark-figure-navy: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Cg fill='none' stroke='%23102A43'%3E%3Cpath d='M100 14 186 100 100 186 14 100Z' stroke-width='1'/%3E%3Cpath d='M100 2V198M2 100H198' stroke-width='.5'/%3E%3Ccircle cx='100' cy='100' r='47' stroke-width='.5'/%3E%3Ccircle cx='100' cy='14' r='4.5'/%3E%3Ccircle cx='186' cy='100' r='4.5'/%3E%3Ccircle cx='100' cy='186' r='4.5'/%3E%3Ccircle cx='14' cy='100' r='4.5'/%3E%3C/g%3E%3C/svg%3E");
 
-      /* film grain: one inline turbulence, reused by every dark surface */
-      --noise: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-
       --ease: cubic-bezier(.16, .8, .24, 1);
       --dur-fast: .25s;
       --dur-med: .55s;
@@ -77,94 +83,11 @@
     }
 
     /* ---------------------------------------------------------
-       ADAPTIVE EDITORIAL INK -- registered so the JS can write in
-       coarse steps while the browser interpolates between them. That split is
-       the whole trick: the sampler quantises (five elements, no per-frame
-       repaint) and the transition below supplies the continuity, so nothing
-       ever reads as a script swapping a colour.
-       --------------------------------------------------------- */
-    @property --ink-mix {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
+       ADAPTIVE CANVAS INK
 
-    @property --ink-temp {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: .5;
-    }
-
-    @property --envelope {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --focus {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --pol-t {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --pol-b {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --accent-dark {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --accent-light {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --ink-pol {
-      syntax: '<number>';
-      inherits: true;
-      initial-value: 0;
-    }
-
-    @property --ink-front {
-      syntax: '<length>';
-      inherits: true;
-      initial-value: -9999px;
-    }
-
-    @property --light-travel {
-      syntax: '<length>';
-      inherits: true;
-      initial-value: 0px;
-    }
-
-    @property --breath {
-      syntax: '<length>';
-      inherits: true;
-      initial-value: 0px;
-    }
-
-    /* ---------------------------------------------------------
-       THE ATMOSPHERE THE WHOLE PAGE INHERITS
-
-       The Standard section samples the canvas per block and paints its type
-       through the result — that treatment is its signature and stays its own.
-       These three are the shared reading: how light the ground is, which way
-       ink has to go on it, and what colour the light happens to be. A hairline
-       in the Before/After board and a label in the FAQ are lit by the same lamp
-       as the type two chapters above them, without either of them re-deriving
-       it. JS writes in coarse steps; the transitions below supply the rest.
+       WebGL publishes one luminance reading, one binary polarity and one glow
+       colour. Text never interpolates through an illegible grey state: only
+       the luminance-fed halo and the atmospheric glow ease between samples.
        --------------------------------------------------------- */
     @property --canvas-lum {
       syntax: '<number>';
@@ -178,10 +101,10 @@
       initial-value: 1;
     }
 
-    @property --grain-o {
-      syntax: '<number>';
+    @property --canvas-glow {
+      syntax: '<color>';
       inherits: true;
-      initial-value: .05;
+      initial-value: #1F6F8B;
     }
 
     /* the Before/After divider, read as a proportion by the board around it */
@@ -198,41 +121,28 @@
     }
 
     :root {
+      --canvas-lum: 0;
+      --canvas-pol: 1;
       --canvas-glow: #1F6F8B;
     }
 
-    /* A custom property is substituted on the element that declares it, so
-       these have to be restated wherever --canvas-pol is written — on the root
-       for the page at large, and on each block that answers to the light at its
-       own position rather than at the centre of the frame. */
-    /* THE ONE SMOOTHING, NOT TWO. The canvas no longer damps the position it
-       samples from — the ground is locked to the raw scroll — so every duration
-       here is the whole of the delay, not a second helping of it. What is left
-       is only what a quantised write needs to read as continuous: polarity is a
-       contrast decision and gets the shortest leash, luminance feeds the halo
-       that protects the type while the ground is changing under it, and the
-       grain keeps its long clock because it must never be caught moving. */
     :root,
     [data-canvas-ink] {
       transition:
         --canvas-lum .28s linear,
-        --canvas-pol .24s var(--ease),
-        --grain-o .7s linear;
+        --canvas-glow .36s linear;
 
-      /* ink, rules and secondary type, resolved against whatever the canvas is
-         currently holding. 1 = the ground is dark and the ink has to be light. */
-      --canvas-ink: color-mix(in oklab, var(--navy-dark) calc((1 - var(--canvas-pol)) * 100%), var(--paper));
+      /* 1 = dark ground, therefore light ink. Polarity is written only as 0/1. */
+      /* Pure endpoints are intentional: black and white overlap at 4.5:1 in
+         the .175–.183 luminance band, leaving room for binary hysteresis. */
+      --canvas-ink: color-mix(in srgb, #000 calc((1 - var(--canvas-pol)) * 100%), #FFF);
       --canvas-strong: color-mix(in oklab, var(--navy) calc((1 - var(--canvas-pol)) * 100%), #FFFFFF);
       --canvas-rule: color-mix(in oklab, var(--line-light) calc((1 - var(--canvas-pol)) * 100%), var(--line-dark));
       --canvas-rule-soft: color-mix(in oklab, var(--line-light-soft) calc((1 - var(--canvas-pol)) * 100%), var(--line-dark-soft));
       --canvas-muted: color-mix(in oklab, var(--muted) calc((1 - var(--canvas-pol)) * 100%), var(--sage-soft));
-      --canvas-accent: color-mix(in oklab, var(--petrol) calc((1 - var(--canvas-pol)) * 100%), var(--champagne));
+      --canvas-accent-base: color-mix(in oklab, var(--petrol) calc((1 - var(--canvas-pol)) * 100%), var(--champagne));
+      --canvas-accent: color-mix(in oklab, var(--canvas-accent-base) 94%, var(--canvas-glow));
 
-      /* The separation the type needs while the ground is changing under it,
-         and nothing past it. The envelope is zero on a comfortably dark ground
-         and zero on a comfortably light one, and rises only across the band
-         where neither ink is winning — which is exactly where a section that
-         paints no ground of its own is at risk of losing its reader. */
       --canvas-halo: color-mix(in oklab, var(--paper) calc((1 - var(--canvas-pol)) * 100%), var(--navy-dark));
       --canvas-envelope: clamp(0, min((var(--canvas-lum) - .03) * 14, (.5 - var(--canvas-lum)) * 5), 1);
       --canvas-ink-halo:
@@ -292,42 +202,6 @@
       pointer-events: none;
     }
 
-    .surface-id {
-      position: fixed;
-      z-index: 20;
-      font-size: 11px;
-      letter-spacing: .28em;
-      font-weight: 600;
-      text-transform: uppercase;
-      top: 32px;
-      left: clamp(20px, 5vw, 64px);
-      font-variant-numeric: tabular-nums;
-      pointer-events: none;
-      transition: color .6s ease, opacity .6s ease;
-      opacity: .22;
-    }
-
-    /* The grain is one continuous quantity now, not two presets. Its density
-       follows the atmosphere, and it thins to a minimum exactly where the blend
-       mode has to change — a blend mode cannot interpolate, so the switch is
-       hidden at the one moment the layer is least visible. */
-    .grain {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 500;
-      opacity: var(--grain-o, .05);
-      mix-blend-mode: multiply;
-      background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
-      background-repeat: repeat;
-    }
-
-    .grain.dark-grain {
-      mix-blend-mode: overlay;
-    }
-
     /* ---------------------------------------------------------
        NO WEBGL
 
@@ -335,14 +209,6 @@
        fails, flat CSS grounds return here only, preserving contrast without the
        atmospheric field.
        --------------------------------------------------------- */
-    .no-canvas .grain {
-      display: none;
-    }
-
-    .no-canvas .surface-id {
-      display: none;
-    }
-
     /* the polarity tokens are resolved where they are declared, so a fallback
        cannot just flip --canvas-pol further down the tree: it has to restate
        the readings themselves */
@@ -353,10 +219,45 @@
     .no-canvas .floorcare {
       background-color: var(--navy-dark);
       --canvas-ink: var(--paper);
+      --canvas-strong: #FFFFFF;
       --canvas-rule: var(--line-dark);
       --canvas-rule-soft: var(--line-dark-soft);
       --canvas-muted: var(--sage-soft);
       --canvas-accent: var(--champagne);
+      --canvas-ink-halo: none;
+    }
+
+    /* The [data-canvas-ink] descendants have to be named explicitly, and this is
+       the same rule as the comment above taken one step further than it went.
+
+       Those blocks re-declare the whole set themselves, off --canvas-pol, whose
+       registered initial-value is 1 — dark. With no canvas running nothing ever
+       writes --canvas-pol, so the elements' own declaration resolves to the dark
+       reading and quietly beats the one restated on the section above them. The
+       result was .ba-caption in Sage Soft on Paper: 1.24:1, which is not low
+       contrast, it is invisible.
+
+       Naming them here gives the concrete values a specificity the element's own
+       generic [data-canvas-ink] rule cannot match. Scoped per section rather than
+       written as a blanket .no-canvas [data-canvas-ink] so that a block added to
+       a dark chapter later still gets the right answer. */
+    .no-canvas .beforeafter,
+    .no-canvas .beforeafter [data-canvas-ink],
+    .no-canvas .faq,
+    .no-canvas .faq [data-canvas-ink],
+    .no-canvas .quote,
+    .no-canvas .quote [data-canvas-ink],
+    .no-canvas .testimonials,
+    .no-canvas .testimonials [data-canvas-ink] {
+      --canvas-ink: var(--navy-dark);
+      --canvas-strong: var(--navy);
+      --canvas-rule: var(--line-light);
+      --canvas-rule-soft: var(--line-light-soft);
+      --canvas-muted: var(--muted);
+      --canvas-accent: var(--petrol);
+      /* the halo exists to protect type while the ground moves under it; with no
+         canvas the ground never moves, so it is dead weight on every glyph */
+      --canvas-ink-halo: none;
     }
 
     .no-canvas .beforeafter,
@@ -364,11 +265,6 @@
     .no-canvas .quote,
     .no-canvas .testimonials {
       background-color: var(--paper);
-      --canvas-ink: var(--navy-dark);
-      --canvas-rule: var(--line-light);
-      --canvas-rule-soft: var(--line-light-soft);
-      --canvas-muted: var(--muted);
-      --canvas-accent: var(--petrol);
     }
 
     .no-canvas .maintenance {
@@ -555,18 +451,9 @@
     }
 
     /* =========================================================
-   02b. DEPTH UTILITIES: grain, registration corners, watermark
+   02b. DEPTH UTILITIES: registration corners, watermark
    ========================================================= */
-    /* Full-width atmospheric planes live in WebGL. The depth class still marks
-       local stacking contexts and lets containers sit above the canvas. */
-    .depth::before,
-    .depth::after {
-      content: none;
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 0;
-    }
+    /* The depth class keeps content above the continuous canvas. */
 
     .depth>.container {
       position: relative;
@@ -1179,15 +1066,6 @@
       transition: transform var(--dur-med) var(--ease), opacity var(--dur-med) var(--ease), visibility 0s linear 0s;
     }
 
-    .mobile-menu::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: var(--noise);
-      opacity: .05;
-      pointer-events: none;
-    }
-
     .mobile-menu::after {
       content: '';
       position: absolute;
@@ -1320,6 +1198,7 @@
       content: '';
       position: absolute;
       inset: 0;
+      opacity: .82;
       background-image: linear-gradient(155deg, rgba(7, 27, 46, .86) 8%, rgba(16, 42, 67, .42) 48%, rgba(7, 27, 46, .72) 100%), var(--hero-img);
       background-size: cover;
       background-position: center;
@@ -1329,18 +1208,6 @@
 
     .hero-slide.is-active .hero-media::before {
       transform: scale(1);
-    }
-
-    /* grain sits on the photograph, not on the page */
-    .hero-slide::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      background-image: var(--noise);
-      opacity: .07;
-      mix-blend-mode: overlay;
     }
 
     /* vignette + base weight: an intermediate plane between photo and copy */
@@ -1508,148 +1375,11 @@
     }
 
     /* =========================================================
-   06. STANDARD (4 PILLARS) — ADAPTIVE EDITORIAL INK
-   =========================================================
-   This section paints no ground of its own: its type sits directly on the
-   Three.js canvas, and that canvas samples the document-space ground field —
-   the heading can be over one chapter while pillar 04 is over another.
-   So the type is not letters filled with a gradient. It is ink on a surface
-   that light keeps crossing:
-
-     CORE INK        the matter that carries the reading, on either side of a
-                     terminator: the line where the ground stops being light
-                     enough for dark ink. The ink never blends across it — a
-                     dissolve would put mid-grey type on a mid-grey ground,
-                     which is precisely how this section used to fail. The
-                     change travels instead, as light travels over a page.
-     ATMOSPHERIC     petrol / champagne / navy / sage drifting through the ink
-     COLOUR          on the one field the whole section shares.
-     INCIDENT LIGHT  a narrow reflection walking down 01 → 02 → 03 → 04.
-     CONTRAST        light of the opposite polarity held tight against the
-     ENVELOPE        letterforms, sized by the contrast each block actually has
-                     — zero the moment the ink is carrying on its own.
-
-   Both upper layers are capped in alpha, so the composite cannot leave the
-   legible band. The envelope is not a correction bolted on afterwards: it is
-   the reason the effect can never win against the words.
+   06. STANDARD (4 PILLARS) — GENERIC CANVAS INK
    ========================================================= */
     .standard {
       background: transparent;
       overflow: hidden;
-
-      /* The two inks, and everything else is these two under some light. They
-         are the palette's own extremes on purpose: between the grounds where
-         dark ink clears 4.5:1 and where light ink does, there is a band no
-         opaque colour can serve, and pulling both ends apart narrows that band
-         from roughly 0.12–0.34 in relative luminance to 0.18–0.23. */
-      --ink-dark: var(--navy-dark);
-      --ink-light: var(--paper);
-
-      /* --pol-t / --pol-b   the ink above and below the terminator
-         --ink-front         where that line falls, in the field's coordinates
-         --ink-temp          0 cool, 1 warm — drifts on its own, slower clock  */
-      --pol-t: 0;
-      --pol-b: 0;
-      --ink-front: -9999px;
-      /* the terminator is a light edge, not a fade: wide enough to read as
-         light, narrow enough that no line of type is caught inside it */
-      --front-soft: 13px;
-
-      --ink-up-core: color-mix(in oklab, var(--ink-dark) calc((1 - var(--pol-t)) * 100%), var(--ink-light));
-      --ink-down-core: color-mix(in oklab, var(--ink-dark) calc((1 - var(--pol-b)) * 100%), var(--ink-light));
-      --ink-up: color-mix(in oklab,
-          color-mix(in oklab, var(--ink-up-core) 88%, var(--petrol-deep)) calc((1 - var(--ink-temp)) * 100%),
-          color-mix(in oklab, var(--ink-up-core) 88%, var(--champagne-deep)));
-      --ink-down: color-mix(in oklab,
-          color-mix(in oklab, var(--ink-down-core) 88%, var(--petrol-deep)) calc((1 - var(--ink-temp)) * 100%),
-          color-mix(in oklab, var(--ink-down-core) 88%, var(--champagne-deep)));
-
-      /* display type keeps the approved navy under light and lands on the same
-         white this site already uses on its own dark surfaces */
-      --strong-up: color-mix(in oklab, var(--navy) calc((1 - var(--pol-t)) * 100%), #FFFFFF);
-      --strong-down: color-mix(in oklab, var(--navy) calc((1 - var(--pol-b)) * 100%), #FFFFFF);
-
-      /* one surface, several windows: the field is the section, every block
-         carries its own offset into it, so the terminator is a single line
-         crossing all of them rather than four gradients that resemble each other */
-      --ink-field: linear-gradient(180deg,
-          var(--ink-up) 0px,
-          var(--ink-up) calc(var(--ink-front) - var(--front-soft)),
-          var(--ink-down) calc(var(--ink-front) + var(--front-soft)),
-          var(--ink-down) 100%);
-
-      --ink-field-strong: linear-gradient(180deg,
-          var(--strong-up) 0px,
-          var(--strong-up) calc(var(--ink-front) - var(--front-soft)),
-          var(--strong-down) calc(var(--ink-front) + var(--front-soft)),
-          var(--strong-down) 100%);
-
-      /* Nothing here snaps. The terminator and the light column are eased
-         rather than driven, so the sampler can write in coarse steps and the
-         surface still moves like light instead of like a value changing.
-
-         The two lengths are positions, and the sampler now rewrites them on
-         almost every frame: anything longer than the gap between writes stops
-         being smoothing and becomes a standing lag, with the line of light
-         trailing the scroll that is producing it. Temperature is the opposite
-         case — it is meant to keep drifting long after the tone has settled. */
-      transition:
-        --ink-temp 2.4s linear,
-        --pol-t .45s var(--ease),
-        --pol-b .45s var(--ease),
-        --ink-front .18s var(--ease),
-        --light-travel .22s var(--ease);
-    }
-
-    /* Read by each block from the light at its own position. These must be
-       declared where --ink-pol and --ink-mix are written: a custom property is
-       substituted on the element that declares it, not where it is finally used. */
-    .standard,
-    .standard-head,
-    .standard .pillar {
-      /* --ink-pol   snapped polarity, for what cannot be painted through the
-                     field (an eyebrow and a numeral draw their rules in
-                     currentColor, which background-clip would blank out)
-         --ink-mix   the same reading, continuous, for hairlines
-         --envelope  0 = the ink is carrying, 1 = the full envelope           */
-      --ink-solid-core: color-mix(in oklab, var(--ink-dark) calc((1 - var(--ink-pol)) * 100%), var(--ink-light));
-      --ink-solid: color-mix(in oklab,
-          color-mix(in oklab, var(--ink-solid-core) 88%, var(--petrol-deep)) calc((1 - var(--ink-temp)) * 100%),
-          color-mix(in oklab, var(--ink-solid-core) 88%, var(--champagne-deep)));
-      --strong-solid: color-mix(in oklab, var(--navy) calc((1 - var(--ink-pol)) * 100%), #FFFFFF);
-
-      /* The numeral is champagne, and champagne is a hue, not a luminance: on a
-         mid ground no member of the family separates from it. So it holds the
-         approved champagne wherever champagne can carry, and is pushed into
-         shadow or into light only by as much as the measured ground demands —
-         --accent-dark and --accent-light are that demand, and are zero on the
-         lit ground the client approved. */
-      --accent-shadow: color-mix(in oklab, var(--champagne-deep) 38%, var(--navy-dark));
-      --accent-lifted: color-mix(in oklab, var(--champagne) 55%, var(--paper));
-      --ink-accent: color-mix(in oklab,
-          color-mix(in oklab, var(--champagne) calc((1 - var(--accent-dark)) * 100%), var(--accent-shadow)) calc((1 - var(--accent-light)) * 100%),
-          var(--accent-lifted));
-      --ink-accent-strong: color-mix(in oklab, var(--ink-accent) 82%, var(--champagne-deep));
-      --eyebrow-ink: color-mix(in oklab, var(--petrol) calc((1 - var(--ink-pol)) * 100%), var(--sage-soft));
-      --rule-ink: color-mix(in oklab, var(--line-light) calc((1 - var(--ink-mix)) * 100%), var(--line-dark));
-
-      /* the envelope: light of the opposite polarity, held tight against the
-         letterforms. Not an offset shadow — the separation the type needs to
-         stay in the foreground, and nothing past it. */
-      --halo: color-mix(in oklab, var(--paper) calc((1 - var(--ink-pol)) * 100%), var(--navy-dark));
-      --ink-halo:
-        drop-shadow(0 0 1px color-mix(in srgb, var(--halo) calc(var(--envelope) * 82%), transparent)) drop-shadow(0 0 4px color-mix(in srgb, var(--halo) calc(var(--envelope) * 52%), transparent)) drop-shadow(0 0 10px color-mix(in srgb, var(--halo) calc(var(--envelope) * 34%), transparent));
-
-      /* Polarity is a legibility decision and the envelope is what protects the
-         type while the ground crosses under it: both have to be there for the
-         crossing, not after it. Mix, accents and focus are appearance and may
-         keep drifting. */
-      transition:
-        --ink-pol .38s var(--ease),
-        --ink-mix .85s var(--ease),
-        --envelope .5s var(--ease),
-        --accent-dark .7s var(--ease),
-        --accent-light .7s var(--ease);
     }
 
     /* the section that names the brand carries the brand diagram */
@@ -1660,13 +1390,14 @@
       height: clamp(220px, 34vw, 460px);
     }
 
-    /* the mark is drawn in whichever ink the surface is holding */
+    /* Keep the light construction mark only while this chapter is dark. */
     .standard .watermark::after {
       content: '';
       position: absolute;
       inset: 0;
       background: var(--mark-light) center / contain no-repeat;
-      opacity: var(--ink-mix);
+      opacity: var(--canvas-pol);
+      transition: opacity var(--dur-med) var(--ease);
     }
 
     .standard .container {
@@ -1678,15 +1409,15 @@
       font-size: clamp(2.6rem, 7vw, 5.4rem);
       line-height: .98;
       letter-spacing: -.02em;
-      color: var(--strong-solid);
-      filter: var(--ink-halo);
+      color: var(--canvas-strong);
+      filter: var(--canvas-ink-halo);
     }
 
     .standard-head .eyebrow {
       margin-bottom: 16px;
       display: flex;
-      color: var(--eyebrow-ink);
-      filter: var(--ink-halo);
+      color: var(--canvas-muted);
+      filter: var(--canvas-ink-halo);
     }
 
     .pillars {
@@ -1701,7 +1432,7 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: var(--rule-ink);
+      background: var(--canvas-rule);
     }
 
     .pillar {
@@ -1710,18 +1441,12 @@
       gap: 32px;
       align-items: start;
       padding: 38px 0;
-      border-bottom: 1px solid var(--rule-ink);
+      border-bottom: 1px solid var(--canvas-rule);
       position: relative;
       transition:
         background var(--dur-med) var(--ease),
         opacity var(--dur-slow) var(--ease),
-        transform var(--dur-slow) var(--ease),
-        --ink-pol .38s var(--ease),
-        --ink-mix .85s var(--ease),
-        --envelope .5s var(--ease),
-        --accent-dark .7s var(--ease),
-        --accent-light .7s var(--ease),
-        --focus .95s var(--ease);
+        transform var(--dur-slow) var(--ease);
     }
 
     /* hovering a point marks it, the way a checklist marks a completed line */
@@ -1749,14 +1474,14 @@
     .pillar-num {
       font-family: var(--font-serif);
       font-size: 1.18rem;
-      color: var(--ink-accent);
+      color: var(--canvas-accent);
       font-weight: 600;
       letter-spacing: .02em;
       padding-top: .3em;
       display: flex;
       align-items: baseline;
       gap: 14px;
-      filter: var(--ink-halo);
+      filter: var(--canvas-ink-halo);
       transition: color var(--dur-med) var(--ease);
     }
 
@@ -1772,7 +1497,7 @@
     }
 
     .pillar:hover .pillar-num {
-      color: var(--ink-accent-strong);
+      color: color-mix(in oklab, var(--canvas-accent) 80%, var(--canvas-strong));
     }
 
     .pillar:hover .pillar-num::after {
@@ -1783,8 +1508,8 @@
     .pillar-title {
       font-family: var(--font-serif);
       font-size: clamp(1.7rem, 3vw, 2.6rem);
-      color: var(--strong-solid);
-      filter: var(--ink-halo);
+      color: var(--canvas-strong);
+      filter: var(--canvas-ink-halo);
       transition: transform var(--dur-med) var(--ease);
     }
 
@@ -1793,103 +1518,11 @@
     }
 
     .pillar-copy {
-      /* the floor: a solid, contrast-correct ink that needs no background-clip
-         support to be read. Every layer below only modulates this. */
-      color: var(--ink-solid);
+      color: var(--canvas-ink);
       font-size: 1rem;
       max-width: 52ch;
       padding-top: .3em;
-      filter: var(--ink-halo);
-
-      /* Both upper layers are capped, and both retract as the envelope rises:
-         where the ground gets difficult the material steps back and the ink
-         goes pure. The effect is allowed to disappear for a moment. The words
-         are not. */
-      --focus-boost: 1;
-      --mat: calc(1 - var(--envelope));
-      --lit: calc(var(--focus) * var(--focus-boost) * var(--mat));
-
-      /* Four colours of the palette, and no transparent gaps between them: the
-         ink is inside a continuous chromatic field rather than under three
-         separate washes. Each tint has two readings — one for ink on a lit
-         ground, one for ink read as light — so the field belongs to the
-         surface it is on, whichever surface that is. */
-      --tint-cool: color-mix(in oklab, var(--petrol) calc((1 - var(--ink-pol)) * 100%), var(--sage-soft));
-      --tint-warm: color-mix(in oklab, var(--champagne-deep) calc((1 - var(--ink-pol)) * 100%), var(--champagne));
-      --tint-deep: color-mix(in oklab, var(--navy-2) calc((1 - var(--ink-pol)) * 100%), var(--sand));
-      --tint-sage: color-mix(in oklab, var(--sage) calc((1 - var(--ink-pol)) * 100%), var(--sage-soft));
-      --atmos-a: calc((.19 * var(--mat) + var(--lit) * .13) * 100%);
-
-      --atmos-layer: linear-gradient(180deg,
-          color-mix(in srgb, var(--tint-cool) calc(var(--atmos-a) * .55), transparent) 0%,
-          color-mix(in srgb, var(--tint-cool) var(--atmos-a), transparent) 14%,
-          color-mix(in srgb, var(--tint-deep) calc(var(--atmos-a) * .7), transparent) 30%,
-          color-mix(in srgb, var(--tint-warm) var(--atmos-a), transparent) 46%,
-          color-mix(in srgb, var(--tint-warm) calc(var(--atmos-a) * .8), transparent) 58%,
-          color-mix(in srgb, var(--tint-sage) var(--atmos-a), transparent) 72%,
-          color-mix(in srgb, var(--tint-cool) calc(var(--atmos-a) * .85), transparent) 88%,
-          color-mix(in srgb, var(--tint-deep) var(--atmos-a), transparent) 100%);
-
-      --sheen-tint: color-mix(in oklab, var(--petrol-light) calc((1 - var(--ink-pol)) * 100%), var(--paper));
-      --sheen-a: calc((.09 * var(--mat) + var(--lit) * .10) * 100%);
-
-      --sheen-layer: linear-gradient(180deg,
-          transparent 33%,
-          color-mix(in srgb, var(--sheen-tint) var(--sheen-a), transparent) 43%,
-          color-mix(in srgb, var(--sheen-tint) calc(var(--sheen-a) * 1.4), transparent) 50%,
-          color-mix(in srgb, var(--sheen-tint) var(--sheen-a), transparent) 57%,
-          transparent 67%);
-    }
-
-    /* the surface keeps breathing when the scroll stops, at a rate closer to a
-       room than to an animation */
-    @keyframes inkBreath {
-
-      0%,
-      100% {
-        --breath: -6px;
-      }
-
-      50% {
-        --breath: 6px;
-      }
-    }
-
-    @supports (background-clip: text) or (-webkit-background-clip: text) {
-
-      /* display type and the four titles: the terminator, nothing else */
-      .standard-head h2,
-      .pillar-title {
-        background: var(--ink-field-strong) 0 var(--field-y, 0px) / 100% var(--field-h, 100%) no-repeat;
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
-      }
-
-      /* the four paragraphs carry the full material */
-      .pillar-copy {
-        background-image: var(--sheen-layer), var(--atmos-layer), var(--ink-field);
-        background-repeat: no-repeat;
-        background-size: 100% var(--field-h, 100%);
-        /* the atmosphere trails the incident light — they are not the same
-           distance from the reader — while the ink stays pinned to the ground */
-        background-position:
-          0 calc(var(--field-y, 0px) + var(--light-travel, 0px) + var(--breath, 0px)),
-          0 calc(var(--field-y, 0px) + var(--light-travel, 0px) * .35),
-          0 var(--field-y, 0px);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        color: transparent;
-        animation: inkBreath 24s var(--ease) infinite;
-      }
-    }
-
-    /* hover raises the incident light on that one line — the same variable the
-       scroll drives, never a second effect stacked on top */
-    .pillar:hover .pillar-copy {
-      --focus-boost: 1.5;
+      filter: var(--canvas-ink-halo);
     }
 
     /* =========================================================
@@ -2396,9 +2029,8 @@
          the photograph. */
 
       /* This content sits on a photograph, not on the canvas, so its ink is a
-         known quantity and is stated rather than read. That is also why the
-         canvas is not allowed to go light while any of it is on screen —
-         see the floorcare-out station's seam window. */
+         known quantity and is stated rather than sampled. The document-space
+         ground remains dark while any of it is on screen. */
       --canvas-ink: rgba(255, 255, 255, .9);
       --canvas-rule: rgba(255, 255, 255, .22);
       --canvas-rule-soft: rgba(255, 255, 255, .11);
@@ -2744,20 +2376,10 @@
       background-position: center 62%;
     }
 
-    /* density, not a filter: a graphite wash and the page's own grain */
+    /* Density, not a filter: a restrained graphite wash. */
     .ba-before {
       background-image: linear-gradient(180deg, rgba(43, 47, 50, .3), rgba(30, 34, 37, .2)), var(--img-before);
       background-color: #2B2F32;
-    }
-
-    .ba-before::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background-image: var(--noise);
-      opacity: .1;
-      mix-blend-mode: multiply;
-      pointer-events: none;
     }
 
     /* light, not a tint: a cool edge on the side that was restored */
@@ -3884,12 +3506,16 @@
       background: var(--champagne-deep);
     }
 
+    /* The step numerals are type, not decoration — at .74rem they are the
+       smallest thing on the page a reader has to actually read to know where
+       they are in the form. The rule above them keeps --champagne-deep: a 2px
+       graphic answers to a different bar than an 11.8px numeral does. */
     .quote-progress span b {
       display: block;
       font-family: var(--font-serif);
       font-size: .74rem;
       font-weight: 600;
-      color: var(--champagne-deep);
+      color: var(--champagne-text);
       margin-bottom: 3px;
       font-variant-numeric: tabular-nums;
     }
@@ -4963,6 +4589,7 @@
       /* deliberate framing per slide: in portrait only ~36% of a 3:2 frame
          survives, so the subject has to be aimed at, never centred by default */
       .hero-slide .hero-media::before {
+        opacity: .9;
         background-position: 56% center;
       }
 
@@ -5225,22 +4852,12 @@
         line-height: 1.15;
       }
 
-      /* On a phone each paragraph is a chapter: it holds the screen while the
-         canvas crosses states it never crosses under a desktop line length. So
-         the ink keeps every layer, at lower amplitude and with a higher floor —
-         the sampler already asks 6:1 here instead of 5.2:1. Legibility is not
-         bought by switching the material off. */
       .pillar-copy {
         max-width: none;
         margin-top: 10px;
         padding-top: 0;
         font-size: .95rem;
         line-height: 1.62;
-        --atmos-a: calc((.14 * var(--mat) + var(--lit) * .09) * 100%);
-        --sheen-a: calc((.06 * var(--mat) + var(--lit) * .07) * 100%);
-        /* the scroll already walks the light down four full screens: a second
-           ambient movement on top of that is noise */
-        animation: none;
       }
 
       /* ---------- 07. SERVICES — hierarchy that states the priority ---------- */
@@ -6374,7 +5991,7 @@
    `.section`, `.hero`, `.floorcare` and `[id]`, which share its specificity —
    and it can never reach the Mobile Edition, whose range is disjoint.
    ========================================================= */
-    @media (min-width:1201px) and (min-height:640px) {
+    @media (min-width:1201px) and (min-height:640px) and (prefers-reduced-motion: no-preference) {
 
       /* Native snapping, and nothing else. No wheel handler, no preventDefault,
          no nextSection(): the browser owns the movement, the momentum and the
@@ -6389,6 +6006,82 @@
         scroll-snap-type: none;
       }
 
+      /* ---------- SCENE PRESENCE ----------
+         Scroll snapping decides where a chapter rests; these curves only refine
+         how its content arrives there. Both effects share the chapter's named
+         view timeline, so there is no second scroll position, JS interpolator
+         or wheel interception that could drift away from the browser.
+
+         Opacity belongs to the scene, while the small cinematic drift belongs
+         only to an inner content wrapper. The structural snap box is never
+         transformed, so its geometry, sticky descendants and measured document
+         positions stay authored. The broad 38–62% plateau matters for chapters
+         taller than the viewport: FAQ and Quote stay fully present while the
+         reader travels inside them. The WebGL ground sits outside the chapter
+         and is never animated here. */
+      @supports (animation-timeline: view()) {
+        .scroll-snap-section {
+          view-timeline-name: --snap-scene;
+          view-timeline-axis: block;
+          animation: snap-scene-presence linear both;
+          animation-duration: auto;
+          animation-timeline: --snap-scene;
+          animation-range: cover 0% cover 100%;
+        }
+
+        :where(.hero.scroll-snap-section .hero-content,
+          .scroll-snap-section:not(.hero):not(.closing-scene)>.container,
+          .closing-scene.scroll-snap-section>.final-cta,
+          .closing-scene.scroll-snap-section>.site-footer) {
+          animation: snap-scene-drift linear both;
+          animation-duration: auto;
+          animation-timeline: --snap-scene;
+          animation-range: cover 0% cover 100%;
+          transform-origin: center center;
+        }
+
+        @keyframes snap-scene-presence {
+
+          0%,
+          100% {
+            opacity: .82;
+          }
+
+          25%,
+          75% {
+            opacity: .94;
+          }
+
+          38%,
+          62% {
+            opacity: 1;
+          }
+        }
+
+        @keyframes snap-scene-drift {
+          0% {
+            transform: translate3d(0, var(--scene-drift), 0) scale(.994);
+          }
+
+          25% {
+            transform: translate3d(0, var(--scene-drift-near), 0) scale(.998);
+          }
+
+          38%,
+          62% {
+            transform: translate3d(0, 0, 0) scale(1);
+          }
+
+          75% {
+            transform: translate3d(0, calc(0px - var(--scene-drift-near)), 0) scale(.998);
+          }
+
+          100% {
+            transform: translate3d(0, calc(0px - var(--scene-drift)), 0) scale(.994);
+          }
+        }
+      }
+
       :root {
         /* Every compression below is derived from viewport height, so 1920x1080
            breathes, 1440x900 sits comfortably and 1366x768 tightens itself
@@ -6399,6 +6092,8 @@
         --scene-pad-bottom: clamp(44px, 6.5dvh, 96px);
         --scene-gap: clamp(20px, 3.4dvh, 48px);
         --scene-row: clamp(8px, 1.4dvh, 12px);
+        --scene-drift: clamp(12px, 1.6dvh, 18px);
+        --scene-drift-near: clamp(4px, .6dvh, 7px);
       }
 
       /* ---------------------------------------------------------

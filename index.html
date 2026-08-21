@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-US">
+<html lang="en-US" class="no-canvas">
 
 <head>
   <meta charset="utf-8">
@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=e47541d84148">
+  <link rel="stylesheet" href="style.css?v=03b9d2e670da">
   <script type="importmap">
   {
     "imports": {
@@ -26,8 +26,6 @@
 <body>
   <div id="loading" class="hidden" aria-hidden="true">Carregando</div>
   <canvas id="canvas-fixed" aria-hidden="true"></canvas>
-  <div class="grain" id="grainOverlay" aria-hidden="true"></div>
-  <span class="surface-id" id="surfaceLabel" aria-hidden="true">01</span>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- =========================================================
@@ -211,7 +209,7 @@
     <!-- =========================================================
      THE 4POINTS STANDARD
      ========================================================= -->
-    <section class="section standard scroll-snap-section">
+    <section class="section standard scroll-snap-section" data-canvas-ink>
       <span class="watermark on-light" aria-hidden="true"></span>
       <div class="container">
         <div class="standard-head" data-reveal>
@@ -962,7 +960,7 @@
 
   </div>
 
-  <script type="module" src="script.js?v=42d556155420"></script>
+  <script type="module" src="script.js?v=2e05e6c35696"></script>
 </body>
 
 </html>

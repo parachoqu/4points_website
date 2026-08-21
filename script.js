@@ -106,78 +106,6 @@
     sections.forEach((_, section) => observer.observe(section));
   }
 
-  /* ---------- desktop scroll snap: fragment navigation ----------
-     The snapping itself is entirely the browser's: nothing here listens to
-     wheel, trackpad or keys, and nothing calls preventDefault. The one thing
-     mandatory snapping plus `scroll-snap-stop: always` does interfere with is
-     a jump to a fragment, which can be halted at the first snap position it
-     passes over. So a fragment jump — a header link, Back to top, the skip
-     link — releases snapping for exactly as long as that scroll lasts. When
-     it is restored the browser re-snaps to the nearest position, which is the
-     top of the chapter the scroll just landed on: the destination still
-     obeys the snap. Inert below the desktop scene breakpoint and whenever the
-     user has asked the operating system to reduce motion. */
-  function initSnapAnchors() {
-    const desktop = window.matchMedia("(min-width:1201px) and (min-height:640px) and (prefers-reduced-motion: no-preference)");
-    const root = document.documentElement;
-    const supportsScrollEnd = "onscrollend" in window;
-    let restoreId = null;
-    let fallbackListening = false;
-
-    const stopFallback = () => {
-      if (!fallbackListening) return;
-      window.removeEventListener("scroll", scheduleFallback);
-      fallbackListening = false;
-    };
-
-    const restore = () => {
-      window.clearTimeout(restoreId);
-      restoreId = null;
-      stopFallback();
-      root.classList.remove("is-snap-released");
-    };
-
-    const scheduleFallback = () => {
-      if (!root.classList.contains("is-snap-released")) return;
-      window.clearTimeout(restoreId);
-      /* A no-scroll jump may emit no scrollend even in supporting browsers, so
-         idle detection remains a safety net everywhere. */
-      restoreId = window.setTimeout(restore, 180);
-    };
-
-    const release = () => {
-      if (!desktop.matches) return;
-      root.classList.add("is-snap-released");
-      window.clearTimeout(restoreId);
-      if (!fallbackListening) {
-        window.addEventListener("scroll", scheduleFallback, { passive: true });
-        fallbackListening = true;
-      }
-      scheduleFallback();
-    };
-
-    document.addEventListener("click", (e) => {
-      const link = e.target.closest?.('a[href^="#"]');
-      if (!link) return;
-      const hash = link.getAttribute("href");
-      if (!hash || hash === "#" || !document.querySelector(hash)) return;
-      release();
-    });
-
-    window.addEventListener("hashchange", release);
-    if (supportsScrollEnd) {
-      window.addEventListener("scrollend", () => {
-        if (root.classList.contains("is-snap-released")) restore();
-      });
-    }
-
-    const onModeChange = (event) => {
-      if (!event.matches) restore();
-    };
-    if (desktop.addEventListener) desktop.addEventListener("change", onModeChange);
-    else desktop.addListener(onModeChange);
-  }
-
   /* ---------- floor care: four planes, one scroll reading ----------
      The photograph, the registration figure, the arrival and the handover all
      come from a single measurement of how far the chapter has travelled through
@@ -923,17 +851,20 @@
       return geometry;
     };
 
+    const mainLineOpacity = initialProfile === "desktop" ? .72 : .5;
+    const accentLineOpacity = initialProfile === "desktop" ? .84 : .68;
+
     const mainLineMaterial = new THREE.LineBasicMaterial({
       color: C.paper,
       transparent: true,
-      opacity: .5,
+      opacity: mainLineOpacity,
       depthWrite: false,
       fog: true
     });
     const accentLineMaterial = new THREE.LineBasicMaterial({
       color: C.petrolLight,
       transparent: true,
-      opacity: .68,
+      opacity: accentLineOpacity,
       depthWrite: false,
       fog: true
     });
@@ -1271,8 +1202,8 @@
       markerMaterial.color.copy(centerLum < .24 ? C.champagne : C.petrolDeep);
 
       const closingFade = index === chapters.length - 1 ? 1 - t : 1;
-      mainLineMaterial.opacity = .5 * closingFade;
-      accentLineMaterial.opacity = .68 * closingFade;
+      mainLineMaterial.opacity = mainLineOpacity * closingFade;
+      accentLineMaterial.opacity = accentLineOpacity * closingFade;
       panelMaterial.opacity = (isMobile ? .1 : .14) * closingFade;
       markerMaterial.opacity = closingFade;
 
@@ -1370,7 +1301,6 @@
   function initApp() {
     initHeader();
     initScrollSpy();
-    initSnapAnchors();
     initNavigation();
     initHeroSlider();
     initScrollReveal();

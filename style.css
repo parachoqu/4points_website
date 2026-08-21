@@ -5971,11 +5971,10 @@
     }
 
     /* =========================================================
-   21. DESKTOP FULL-VIEWPORT / SCROLL SNAP
+   21. DESKTOP SCENE LAYOUT
    =========================================================
-   One chapter, one viewport. Above 1200px the page stops being a continuous
-   column of sections with their own heights and becomes a sequence of scenes:
-   when the scroll settles, a single chapter owns the frame, top to bottom.
+   Above 1200px each chapter keeps its editorial desktop framing while the
+   document remains a continuous, freely scrolling page.
 
    The only layer that still crosses a boundary is the WebGL atmosphere, which
    is intentional — it does not know where sections stop. Nothing here paints a
@@ -5992,96 +5991,6 @@
    and it can never reach the Mobile Edition, whose range is disjoint.
    ========================================================= */
     @media (min-width:1201px) and (min-height:640px) and (prefers-reduced-motion: no-preference) {
-
-      /* Native snapping, and nothing else. No wheel handler, no preventDefault,
-         no nextSection(): the browser owns the movement, the momentum and the
-         keyboard. `stop: always` is what makes a chapter a chapter — the scroll
-         cannot fly past one without it having held the frame. */
-      html {
-        scroll-snap-type: y mandatory;
-      }
-
-      /* released for the duration of a fragment jump only — see initSnapAnchors */
-      html.is-snap-released {
-        scroll-snap-type: none;
-      }
-
-      /* ---------- SCENE PRESENCE ----------
-         Scroll snapping decides where a chapter rests; these curves only refine
-         how its content arrives there. Both effects share the chapter's named
-         view timeline, so there is no second scroll position, JS interpolator
-         or wheel interception that could drift away from the browser.
-
-         Opacity belongs to the scene, while the small cinematic drift belongs
-         only to an inner content wrapper. The structural snap box is never
-         transformed, so its geometry, sticky descendants and measured document
-         positions stay authored. The broad 38–62% plateau matters for chapters
-         taller than the viewport: FAQ and Quote stay fully present while the
-         reader travels inside them. The WebGL ground sits outside the chapter
-         and is never animated here. */
-      @supports (animation-timeline: view()) {
-        .scroll-snap-section {
-          view-timeline-name: --snap-scene;
-          view-timeline-axis: block;
-          animation: snap-scene-presence linear both;
-          animation-duration: auto;
-          animation-timeline: --snap-scene;
-          animation-range: cover 0% cover 100%;
-        }
-
-        :where(.hero.scroll-snap-section .hero-content,
-          .scroll-snap-section:not(.hero):not(.closing-scene)>.container,
-          .closing-scene.scroll-snap-section>.final-cta,
-          .closing-scene.scroll-snap-section>.site-footer) {
-          animation: snap-scene-drift linear both;
-          animation-duration: auto;
-          animation-timeline: --snap-scene;
-          animation-range: cover 0% cover 100%;
-          transform-origin: center center;
-        }
-
-        @keyframes snap-scene-presence {
-
-          0%,
-          100% {
-            opacity: .82;
-          }
-
-          25%,
-          75% {
-            opacity: .94;
-          }
-
-          38%,
-          62% {
-            opacity: 1;
-          }
-        }
-
-        @keyframes snap-scene-drift {
-          0% {
-            transform: translate3d(0, var(--scene-drift), 0) scale(.994);
-          }
-
-          25% {
-            transform: translate3d(0, var(--scene-drift-near), 0) scale(.998);
-          }
-
-          38%,
-          62% {
-            transform: translate3d(0, 0, 0) scale(1);
-          }
-
-          75% {
-            transform: translate3d(0, calc(0px - var(--scene-drift-near)), 0) scale(.998);
-          }
-
-          100% {
-            transform: translate3d(0, calc(0px - var(--scene-drift)), 0) scale(.994);
-          }
-        }
-      }
-
       :root {
         /* Every compression below is derived from viewport height, so 1920x1080
            breathes, 1440x900 sits comfortably and 1366x768 tightens itself
@@ -6092,37 +6001,28 @@
         --scene-pad-bottom: clamp(44px, 6.5dvh, 96px);
         --scene-gap: clamp(20px, 3.4dvh, 48px);
         --scene-row: clamp(8px, 1.4dvh, 12px);
-        --scene-drift: clamp(12px, 1.6dvh, 18px);
-        --scene-drift-near: clamp(4px, .6dvh, 7px);
+      }
+
+      /* Let the opening portal read through the photograph on wide screens. */
+      .hero-slide .hero-media::before {
+        opacity: .72;
       }
 
       /* ---------------------------------------------------------
          THE STRUCTURAL CLASS — shared responsibilities only
 
          Composition stays with .hero, .standard, .services and the rest. This
-         carries four things: where the chapter snaps, how tall a scene is, that
-         it clears the header, and that its content is centred in the frame.
+         carries three things: the scene height, header clearance, and centred
+         content framing. It does not alter native scroll behavior.
          --------------------------------------------------------- */
       .scroll-snap-section {
-        scroll-snap-align: start;
-        scroll-snap-stop: always;
-
-        /* CRITICAL. The base rule gives every [id] a scroll-margin-top of one
-           header, and scroll-margin also expands the *snap area*: with it, an
-           aligned chapter would come to rest ~102px below its own top edge and
-           the previous chapter's last rows would sit under the header. The
-           header clearance is the scene's padding, not the snap offset. */
-        scroll-margin-top: 0;
-
         min-height: 100vh;
         min-height: 100dvh;
 
         /* A scene is a column that centres its content. Because the height is a
            minimum, a chapter that grows — an open FAQ answer, the tallest step
            of the quote form — pushes the scene taller instead of overflowing
-           it, and the reader keeps travelling through the same chapter. Per
-           CSS Scroll Snap, a snap area larger than the snapport makes every
-           position that covers the snapport valid, so nothing traps them. */
+           it, and the reader keeps travelling through the same chapter. */
         display: flex;
         flex-direction: column;
         justify-content: center;

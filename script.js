@@ -549,6 +549,9 @@
   let threeModule = null;
   let threeBooting = false;
   let restoreAttempted = false;
+  let removeThreeContextRecovery = null;
+  const THREE_MODULE_URL = new URL("./assets/vendor/three-r128.module.js", import.meta.url).href;
+  const WEBGL_REASONS = new Set(["module", "renderer", "frame", "context"]);
 
   const WORLD_PALETTE = {
     navyDark: 0x071B2E,
@@ -565,54 +568,154 @@
     champagne: 0xC8A96A
   };
 
+  function setWebGLState(state, mode = "", reason = "") {
+    const root = document.documentElement;
+    root.dataset.webglState = state;
+    if (mode) root.dataset.webglMode = mode;
+    else delete root.dataset.webglMode;
+    if (reason) root.dataset.webglReason = reason;
+    else delete root.dataset.webglReason;
+  }
+
+  function makeWebGLError(reason, message) {
+    const error = new Error(message);
+    error.webglReason = reason;
+    return error;
+  }
+
+  function classifyWebGLError(error, fallback = "renderer") {
+    return WEBGL_REASONS.has(error?.webglReason) ? error.webglReason : fallback;
+  }
+
+  function replaceThreeCanvas(canvas = document.getElementById("canvas-fixed")) {
+    if (!canvas) return null;
+    removeThreeContextRecovery?.();
+    removeThreeContextRecovery = null;
+    const replacement = canvas.cloneNode(false);
+    replacement.removeAttribute("width");
+    replacement.removeAttribute("height");
+    canvas.replaceWith(replacement);
+    installThreeContextRecovery(replacement);
+    return replacement;
+  }
+
+  function restartThreeWorld({ freshCanvas = false } = {}) {
+    const root = document.documentElement;
+    const controller = threeWorld;
+    threeWorld = null;
+    controller?.destroy();
+    if (freshCanvas) replaceThreeCanvas();
+    root.classList.add("no-canvas");
+    setWebGLState("booting");
+    void initThreeWorld();
+  }
+
   async function initThreeWorld() {
-    const canvas = document.getElementById("canvas-fixed");
+    let canvas = document.getElementById("canvas-fixed");
     if (!canvas || threeBooting || threeWorld) return;
     threeBooting = true;
-    let controller = null;
+    setWebGLState("booting");
 
     try {
-      threeModule ||= await import("three");
-      controller = createThreeWorld(threeModule, canvas);
-      threeWorld = controller;
-      controller.start();
-      if (threeWorld === controller) document.documentElement.classList.remove("no-canvas");
+      try {
+        threeModule ||= await import(THREE_MODULE_URL);
+      } catch (error) {
+        const moduleError = makeWebGLError("module", "Local Three.js module could not be loaded");
+        moduleError.cause = error;
+        throw moduleError;
+      }
+      if (String(threeModule.REVISION) !== "128") {
+        throw makeWebGLError("module", `Unexpected Three.js revision ${threeModule.REVISION}`);
+      }
+
+      const modes = ["preferred", "compatibility"];
+      let firstFailure = null;
+      let lastError = null;
+      let lastReason = "renderer";
+
+      for (let attempt = 0; attempt < modes.length; attempt++) {
+        const mode = modes[attempt];
+        if (attempt > 0) canvas = replaceThreeCanvas(canvas);
+        if (!canvas) throw makeWebGLError("renderer", "WebGL canvas is unavailable");
+        setWebGLState("booting", mode);
+        let controller = null;
+
+        try {
+          controller = createThreeWorld(threeModule, canvas, mode);
+          threeWorld = controller;
+          controller.start();
+          if (threeWorld !== controller) throw makeWebGLError("context", "WebGL controller was interrupted during boot");
+          document.documentElement.classList.remove("no-canvas");
+          setWebGLState("ready", mode);
+          if (mode === "compatibility" && firstFailure) {
+            console.warn("[4Points WebGL] Preferred renderer failed; compatibility renderer is active.", firstFailure);
+          }
+          return;
+        } catch (error) {
+          controller?.destroy();
+          if (threeWorld === controller) threeWorld = null;
+          lastError = error;
+          lastReason = classifyWebGLError(error);
+          firstFailure ||= error;
+        }
+      }
+
+      if (lastError) lastError.webglReason = lastReason;
+      throw lastError || makeWebGLError("renderer", "WebGL renderer could not start");
     } catch (error) {
-      controller?.destroy();
-      if (threeWorld === controller) threeWorld = null;
+      const reason = classifyWebGLError(error);
+      threeWorld = null;
       document.documentElement.classList.add("no-canvas");
+      setWebGLState("fallback", "", reason);
       document.getElementById("loading")?.classList.add("hidden");
+      console.error(`[4Points WebGL] ${reason} failure; CSS fallback is active.`, error);
     } finally {
       threeBooting = false;
     }
   }
 
-  function installThreeContextRecovery() {
-    const canvas = document.getElementById("canvas-fixed");
+  function installThreeContextRecovery(canvas = document.getElementById("canvas-fixed")) {
+    removeThreeContextRecovery?.();
+    removeThreeContextRecovery = null;
     if (!canvas) return;
 
-    canvas.addEventListener("webglcontextlost", (event) => {
+    const onContextLost = (event) => {
       event.preventDefault();
-      threeWorld?.destroy();
+      const mode = document.documentElement.dataset.webglMode || "";
+      const controller = threeWorld;
       threeWorld = null;
+      controller?.destroy();
       document.documentElement.classList.add("no-canvas");
-    });
+      setWebGLState("lost", mode, "context");
+    };
 
-    canvas.addEventListener("webglcontextrestored", () => {
-      if (restoreAttempted) return;
+    const onContextRestored = () => {
+      if (restoreAttempted) {
+        setWebGLState("fallback", "", "context");
+        return;
+      }
       restoreAttempted = true;
+      replaceThreeCanvas(canvas);
+      setWebGLState("booting");
       void initThreeWorld();
-    });
+    };
+
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    canvas.addEventListener("webglcontextrestored", onContextRestored);
+    removeThreeContextRecovery = () => {
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      canvas.removeEventListener("webglcontextrestored", onContextRestored);
+    };
   }
 
-  function createThreeWorld(THREE, canvas) {
+  function createThreeWorld(THREE, canvas, rendererMode = "preferred") {
     const root = document.documentElement;
     const mobileQuery = window.matchMedia("(max-width:767px)");
     const tabletQuery = window.matchMedia("(max-width:1200px)");
     const getProfile = () => mobileQuery.matches ? "mobile" : tabletQuery.matches ? "tablet" : "desktop";
     const initialProfile = getProfile();
     const isMobile = initialProfile === "mobile";
-    const getPixelRatioCap = () => getProfile() === "mobile" ? 1.15 : getProfile() === "tablet" ? 1.25 : 1.5;
+    const compatibilityMode = rendererMode === "compatibility";
     const ringSegments = isMobile ? 48 : 96;
     const GROUND_SIZE = 2048;
     const WORLD_STEP = 24;
@@ -648,12 +751,34 @@
       camera: [0, 0]
     };
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      antialias: !isMobile,
-      alpha: false,
-      powerPreference: "high-performance"
-    });
+    let renderer;
+    try {
+      renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: compatibilityMode ? false : !isMobile,
+        alpha: false,
+        powerPreference: compatibilityMode ? "default" : "high-performance",
+        failIfMajorPerformanceCaveat: false
+      });
+    } catch (error) {
+      const rendererError = makeWebGLError("renderer", "WebGL renderer creation failed");
+      rendererError.cause = error;
+      throw rendererError;
+    }
+
+    const gl = renderer.getContext();
+    if (!gl) throw makeWebGLError("renderer", "WebGL context creation returned no context");
+    const maxRenderbufferSize = Number(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE)) || 4096;
+    const getPixelRatioCap = (width = window.innerWidth || 1200, height = window.innerHeight || 800) => {
+      const profileCap = compatibilityMode
+        ? 1
+        : getProfile() === "mobile" ? 1.15 : getProfile() === "tablet" ? 1.25 : 1.5;
+      const safeWidth = Math.max(1, width);
+      const safeHeight = Math.max(1, height);
+      const hardwareCap = Math.min(maxRenderbufferSize / safeWidth, maxRenderbufferSize / safeHeight);
+      const pixelBudgetCap = Math.sqrt(9000000 / (safeWidth * safeHeight));
+      return Math.min(profileCap, hardwareCap, pixelBudgetCap);
+    };
     renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, getPixelRatioCap()));
     renderer.setClearColor(C.navyDark, 1);
 
@@ -883,6 +1008,7 @@
     });
     const panelInstances = isMobile ? panels.filter((_, index) => index % 2 === 0) : panels;
     const panelMesh = new THREE.InstancedMesh(panelGeometry, panelMaterial, panelInstances.length);
+    panelMesh.frustumCulled = false;
     const matrix = new THREE.Matrix4();
     const quaternion = new THREE.Quaternion();
     const scale = new THREE.Vector3();
@@ -902,6 +1028,7 @@
       fog: true
     });
     const markerMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(.16, 8, 6), markerMaterial, markerLimit);
+    markerMesh.frustumCulled = false;
     for (let i = 0; i < markerLimit; i++) {
       matrix.makeTranslation(markers[i][0], markers[i][1], markers[i][2]);
       markerMesh.setMatrixAt(i, matrix);
@@ -1057,7 +1184,7 @@
       camera.aspect = viewWidth / viewHeight;
       camera.fov = mobileQuery.matches ? 48 : 44;
       camera.updateProjectionMatrix();
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, getPixelRatioCap()));
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, getPixelRatioCap(viewWidth, viewHeight)));
       renderer.setSize(viewWidth, viewHeight, false);
       const ratio = renderer.getPixelRatio();
       backdropMaterial.uniforms.uResolution.value.set(viewWidth * ratio, viewHeight * ratio);
@@ -1239,10 +1366,27 @@
     };
     const onProfileChange = () => {
       if (getProfile() === initialProfile || !controllerApi || threeWorld !== controllerApi) return;
-      root.classList.add("no-canvas");
-      threeWorld = null;
-      controllerApi.destroy();
-      void initThreeWorld();
+      restartThreeWorld({ freshCanvas: true });
+    };
+
+    const validateFirstFrame = () => {
+      const context = renderer.getContext();
+      if (!context || context.isContextLost()) {
+        throw makeWebGLError("context", "WebGL context was lost during the first frame");
+      }
+      if (context.drawingBufferWidth < 1 || context.drawingBufferHeight < 1) {
+        throw makeWebGLError("frame", "WebGL drawing buffer is empty");
+      }
+      if (renderer.info.programs?.some((program) => program.diagnostics?.runnable === false)) {
+        throw makeWebGLError("frame", "A WebGL shader program is not runnable");
+      }
+      if (renderer.info.render.calls < 1) {
+        throw makeWebGLError("frame", "The first WebGL frame produced no draw calls");
+      }
+      const glError = context.getError();
+      if (glError !== context.NO_ERROR) {
+        throw makeWebGLError("frame", `The first WebGL frame returned error ${glError}`);
+      }
     };
 
     const start = () => {
@@ -1250,7 +1394,7 @@
       measureChapters();
       update(performance.now());
       renderer.render(scene, camera);
-      if (renderer.getContext().isContextLost()) throw new Error("WebGL context lost during first frame");
+      validateFirstFrame();
       dirty = false;
       window.addEventListener("scroll", onScroll, { passive: true });
       window.addEventListener("resize", resize);

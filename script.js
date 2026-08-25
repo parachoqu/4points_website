@@ -470,6 +470,20 @@
       if (!panel) return;
       button.addEventListener("click", () => {
         const expanded = button.getAttribute("aria-expanded") === "true";
+
+        const faqList = button.closest(".faq-list");
+        const listButtons = faqList
+          ? [...faqList.querySelectorAll("[data-faq-button]")]
+          : buttons;
+
+        listButtons.forEach((otherButton) => {
+          if (otherButton === button || otherButton.getAttribute("aria-expanded") !== "true") return;
+          otherButton.setAttribute("aria-expanded", "false");
+          otherButton.closest(".faq-item")?.classList.remove("is-open");
+          const otherPanel = panelOf(otherButton);
+          if (otherPanel) otherPanel.style.maxHeight = "0px";
+        });
+
         button.setAttribute("aria-expanded", String(!expanded));
         button.closest(".faq-item")?.classList.toggle("is-open", !expanded);
         panel.style.maxHeight = expanded ? "0px" : panel.scrollHeight + "px";

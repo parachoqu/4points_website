@@ -2,6 +2,7 @@
   "use strict";
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const webGLDisabledOnMobile = window.matchMedia("(max-width: 915px)");
 
   /* ---------- shared: swipe navigation ---------- */
   const addSwipeNavigation = (element, onPrevious, onNext) => {
@@ -656,7 +657,32 @@
     return replacement;
   }
 
+  function disableThreeForMobile() {
+    const root = document.documentElement;
+    const controller = threeWorld;
+    threeWorld = null;
+    controller?.destroy();
+    removeThreeContextRecovery?.();
+    removeThreeContextRecovery = null;
+    root.classList.add("no-canvas");
+    setWebGLState("disabled", "mobile");
+    document.getElementById("loading")?.classList.add("hidden");
+  }
+
+  function syncThreeAvailability() {
+    if (webGLDisabledOnMobile.matches) {
+      disableThreeForMobile();
+      return;
+    }
+    installThreeContextRecovery();
+    void initThreeWorld();
+  }
+
   function restartThreeWorld({ freshCanvas = false } = {}) {
+    if (webGLDisabledOnMobile.matches) {
+      disableThreeForMobile();
+      return;
+    }
     const root = document.documentElement;
     const controller = threeWorld;
     threeWorld = null;
@@ -669,6 +695,10 @@
 
   async function initThreeWorld() {
     let canvas = document.getElementById("canvas-fixed");
+    if (webGLDisabledOnMobile.matches) {
+      disableThreeForMobile();
+      return;
+    }
     if (!canvas || threeBooting || threeWorld) return;
     threeBooting = true;
     setWebGLState("booting");
@@ -684,6 +714,10 @@
       if (String(threeModule.REVISION) !== "128") {
         throw makeWebGLError("module", `Unexpected Three.js revision ${threeModule.REVISION}`);
       }
+      if (webGLDisabledOnMobile.matches) {
+        disableThreeForMobile();
+        return;
+      }
 
       const modes = ["preferred", "compatibility"];
       let firstFailure = null;
@@ -691,6 +725,10 @@
       let lastReason = "renderer";
 
       for (let attempt = 0; attempt < modes.length; attempt++) {
+        if (webGLDisabledOnMobile.matches) {
+          disableThreeForMobile();
+          return;
+        }
         const mode = modes[attempt];
         if (attempt > 0) canvas = replaceThreeCanvas(canvas);
         if (!canvas) throw makeWebGLError("renderer", "WebGL canvas is unavailable");
@@ -734,10 +772,14 @@
   function installThreeContextRecovery(canvas = document.getElementById("canvas-fixed")) {
     removeThreeContextRecovery?.();
     removeThreeContextRecovery = null;
-    if (!canvas) return;
+    if (!canvas || webGLDisabledOnMobile.matches) return;
 
     const onContextLost = (event) => {
       event.preventDefault();
+      if (webGLDisabledOnMobile.matches) {
+        disableThreeForMobile();
+        return;
+      }
       const mode = document.documentElement.dataset.webglMode || "";
       const controller = threeWorld;
       threeWorld = null;
@@ -747,6 +789,10 @@
     };
 
     const onContextRestored = () => {
+      if (webGLDisabledOnMobile.matches) {
+        disableThreeForMobile();
+        return;
+      }
       if (restoreAttempted) {
         setWebGLState("fallback", "", "context");
         return;
@@ -1513,8 +1559,8 @@
     initFAQ();
     initQuoteForm();
     initCounters();
-    installThreeContextRecovery();
-    void initThreeWorld();
+    webGLDisabledOnMobile.addEventListener?.("change", syncThreeAvailability);
+    syncThreeAvailability();
     const yearEl = document.querySelector("[data-year]");
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
   }

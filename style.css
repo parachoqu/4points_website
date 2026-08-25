@@ -203,6 +203,12 @@
       pointer-events: none;
     }
 
+    @media (max-width:915px) {
+      #canvas-fixed {
+        display: none;
+      }
+    }
+
     /* ---------------------------------------------------------
        NO WEBGL
 

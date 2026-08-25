@@ -64,15 +64,25 @@
     const header = document.querySelector("[data-header]");
     if (!header) return;
     const progress = header.querySelector("[data-header-progress]");
+    const syncRenderedHeight = () => {
+      document.documentElement.style.setProperty("--header-rendered-h", `${header.getBoundingClientRect().height}px`);
+    };
 
     const update = () => {
       header.classList.toggle("is-scrolled", window.scrollY > 40);
+      syncRenderedHeight();
       if (!progress) return;
       const max = document.documentElement.scrollHeight - window.innerHeight;
       progress.style.setProperty("--progress", max > 0 ? String(Math.min(1, window.scrollY / max)) : "0");
     };
 
     const onScroll = onScrollFrame(update);
+    if ("ResizeObserver" in window) {
+      new ResizeObserver(syncRenderedHeight).observe(header);
+    } else {
+      header.addEventListener("transitionend", syncRenderedHeight);
+    }
+    document.fonts?.ready.then(syncRenderedHeight);
     update();
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
@@ -352,21 +362,54 @@
 
     range.addEventListener("input", () => { setPosition(Number(range.value)); markTouched(); });
 
+    let pointerId = null;
     let dragging = false;
+    let startX = 0;
+    let startY = 0;
     const posFromEvent = (clientX) => {
       const rect = frame.getBoundingClientRect();
       return ((clientX - rect.left) / rect.width) * 100;
     };
+    const finishDrag = () => {
+      if (pointerId !== null && frame.hasPointerCapture?.(pointerId)) {
+        frame.releasePointerCapture(pointerId);
+      }
+      pointerId = null;
+      dragging = false;
+      frame.classList.remove("is-dragging");
+    };
+
     frame.addEventListener("pointerdown", (e) => {
-      frame.classList.add("is-dragging");
-      markTouched();
-      if (e.target.closest("input")) return;
-      dragging = true;
+      if (e.target.closest("input") || (e.pointerType === "mouse" && e.button !== 0)) return;
+      pointerId = e.pointerId;
+      startX = e.clientX;
+      startY = e.clientY;
+    });
+
+    frame.addEventListener("pointermove", (e) => {
+      if (pointerId !== e.pointerId) return;
+      const dx = e.clientX - startX;
+      const dy = e.clientY - startY;
+
+      /* Let a vertical swipe remain document scrolling. Only a deliberate
+         horizontal gesture claims the pointer for the image comparison. */
+      if (!dragging) {
+        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
+        if (Math.abs(dy) > Math.abs(dx)) {
+          pointerId = null;
+          return;
+        }
+        dragging = true;
+        frame.setPointerCapture?.(pointerId);
+        frame.classList.add("is-dragging");
+        markTouched();
+      }
       setPosition(posFromEvent(e.clientX));
     });
-    window.addEventListener("pointermove", (e) => { if (dragging) setPosition(posFromEvent(e.clientX)); });
-    window.addEventListener("pointerup", () => { dragging = false; frame.classList.remove("is-dragging"); });
-    window.addEventListener("pointercancel", () => { dragging = false; frame.classList.remove("is-dragging"); });
+
+    frame.addEventListener("pointerup", finishDrag);
+    frame.addEventListener("pointercancel", finishDrag);
+    frame.addEventListener("lostpointercapture", finishDrag);
 
     setPosition(50);
   }

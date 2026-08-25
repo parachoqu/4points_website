@@ -54,7 +54,7 @@ O logotipo atual precisa ser modernizado para ser altamente escalável em telas,
 
 ## **3\. Arquitetura de Animações e Interações de Alto Padrão**
 
-Os domínios antigos do cliente (4pointscleaning.com e 4pointsjanitorial.com) já contavam com uma estrutura rica em interações. Caso o serviço seja fechado, o pipeline de desenvolvimento irá reutilizar a lógica dessas animações, aprimorando-as através de técnicas modernas de codificação:
+A presença digital anterior do cliente já contava com uma estrutura rica em interações. Caso o serviço seja fechado, o pipeline de desenvolvimento irá reutilizar a lógica dessas animações, aprimorando-as através de técnicas modernas de codificação:
 
 * **Micro-interações de Interface:** Efeitos de Glassmorphism (cartões translúcidos com desfoque de fundo) para organizar os planos de manutenção de forma limpa e futurista.
 

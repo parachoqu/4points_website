@@ -2270,14 +2270,29 @@
     .ba-board {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: clamp(18px, 2.4vw, 36px);
-      row-gap: clamp(24px, 3vw, 40px);
-      padding: clamp(26px, 3.2vw, 48px) clamp(20px, 2.6vw, 40px);
+      column-gap: clamp(20px, 2.25vw, 34px);
+      row-gap: clamp(22px, 2.7vw, 38px);
+      padding: clamp(28px, 3vw, 46px) clamp(22px, 2.4vw, 38px);
       border-top: 1px solid var(--canvas-rule);
       border-bottom: 1px solid var(--canvas-rule);
       --corner: var(--canvas-rule);
       --ba-x: .5;
       --ba-split: .5;
+    }
+
+    /* Unlike the inset marks used by the other panels, this proof's marks
+       terminate the board's own hairlines. Their strokes therefore share the
+       exact edge and 1px weight of the top and bottom rules. */
+    .ba-board.cornered::before {
+      top: -1px;
+      left: 0;
+      border-radius: 0;
+    }
+
+    .ba-board.cornered::after {
+      right: 0;
+      bottom: -1px;
+      border-radius: 0;
     }
 
     .ba-head {
@@ -2308,15 +2323,32 @@
     .ba-plate {
       grid-column: 1 / 9;
       grid-row: 2;
+      align-self: start;
       min-width: 0;
     }
 
     .ba-notes {
       grid-column: 9 / 13;
       grid-row: 2;
-      align-self: end;
-      padding-bottom: 6px;
+      align-self: center;
       min-width: 0;
+      --corner: var(--canvas-rule);
+      /* The equal-and-opposite margins lift the card by 6px without changing
+         the grid track: its optical centre now follows the image, rather than
+         the scale-and-caption envelope around it. */
+      margin-block: -6px 6px;
+      padding: clamp(22px, 1.9vw, 26px) clamp(24px, 2.15vw, 30px);
+      background: color-mix(in srgb, var(--paper) 82%, transparent);
+      border: 1px solid var(--canvas-rule);
+      border-radius: var(--radius-sm);
+      box-shadow: var(--shadow-sm);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .ba-notes .spec-list>dt,
+    .ba-notes .spec-list>dd {
+      padding-block: clamp(12px, 1.05vw, 14px);
     }
 
     /* ---------- the measurement scale ---------- */
@@ -2325,7 +2357,7 @@
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: end;
       gap: 14px;
-      margin-bottom: 26px;
+      margin-bottom: clamp(20px, 1.9vw, 24px);
       font-size: .62rem;
       letter-spacing: .17em;
       text-transform: uppercase;
@@ -2408,7 +2440,7 @@
     }
 
     .ba-caption {
-      margin-top: 18px;
+      margin-top: clamp(14px, 1.35vw, 16px);
       font-family: var(--font-serif);
       font-style: italic;
       font-size: .95rem;
@@ -4262,8 +4294,7 @@
       }
 
       .ba-notes {
-        align-self: start;
-        padding-bottom: 0;
+        margin-block: 0;
       }
 
       .faq-board {
@@ -5262,11 +5293,6 @@
       .ba-notes {
         grid-column: 1;
         grid-row: auto;
-      }
-
-      .ba-notes {
-        align-self: start;
-        padding-bottom: 0;
       }
 
       .ba-scale {

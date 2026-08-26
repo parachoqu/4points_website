@@ -2475,6 +2475,9 @@
     .ba-handle-track {
       position: absolute;
       inset: 0;
+      /* The range above is the single gesture surface. This layer only draws
+         the divider and must never intercept its touch target. */
+      pointer-events: none;
     }
 
     .ba-handle {
@@ -2614,9 +2617,8 @@
       cursor: ew-resize;
       margin: 0;
       z-index: 5;
-      /* The frame owns pointer gestures; this remains in the tab order so the
-         comparison can still be adjusted with a keyboard. */
-      pointer-events: none;
+      /* Native range behavior provides consistent mouse, touch and keyboard
+         control while the frame's pan-y touch action preserves page scroll. */
     }
 
     /* =========================================================

@@ -361,58 +361,32 @@
     /* the invitation to drag retires as soon as the user takes it */
     const markTouched = () => frame.classList.add("is-touched");
 
-    range.addEventListener("input", () => { setPosition(Number(range.value)); markTouched(); });
+    range.addEventListener("input", () => {
+      setPosition(Number(range.value));
+      markTouched();
+    });
 
-    let pointerId = null;
-    let dragging = false;
-    let startX = 0;
-    let startY = 0;
-    const posFromEvent = (clientX) => {
-      const rect = frame.getBoundingClientRect();
-      return ((clientX - rect.left) / rect.width) * 100;
-    };
-    const finishDrag = () => {
-      if (pointerId !== null && frame.hasPointerCapture?.(pointerId)) {
-        frame.releasePointerCapture(pointerId);
-      }
-      pointerId = null;
-      dragging = false;
+    /* The native range owns drag, touch and keyboard behavior. JavaScript only
+       mirrors its lifecycle into the frame's visual states. */
+    let activePointerId = null;
+    range.addEventListener("pointerdown", (e) => {
+      if (!e.isPrimary || (e.pointerType === "mouse" && e.button !== 0)) return;
+      activePointerId = e.pointerId;
+      frame.classList.add("is-dragging");
+      markTouched();
+    });
+
+    const finishDrag = (e) => {
+      if (activePointerId === null || e.pointerId !== activePointerId) return;
+      activePointerId = null;
       frame.classList.remove("is-dragging");
     };
 
-    frame.addEventListener("pointerdown", (e) => {
-      if (e.target.closest("input") || (e.pointerType === "mouse" && e.button !== 0)) return;
-      pointerId = e.pointerId;
-      startX = e.clientX;
-      startY = e.clientY;
-    });
+    window.addEventListener("pointerup", finishDrag);
+    window.addEventListener("pointercancel", finishDrag);
+    range.addEventListener("lostpointercapture", finishDrag);
 
-    frame.addEventListener("pointermove", (e) => {
-      if (pointerId !== e.pointerId) return;
-      const dx = e.clientX - startX;
-      const dy = e.clientY - startY;
-
-      /* Let a vertical swipe remain document scrolling. Only a deliberate
-         horizontal gesture claims the pointer for the image comparison. */
-      if (!dragging) {
-        if (Math.abs(dx) < 6 && Math.abs(dy) < 6) return;
-        if (Math.abs(dy) > Math.abs(dx)) {
-          pointerId = null;
-          return;
-        }
-        dragging = true;
-        frame.setPointerCapture?.(pointerId);
-        frame.classList.add("is-dragging");
-        markTouched();
-      }
-      setPosition(posFromEvent(e.clientX));
-    });
-
-    frame.addEventListener("pointerup", finishDrag);
-    frame.addEventListener("pointercancel", finishDrag);
-    frame.addEventListener("lostpointercapture", finishDrag);
-
-    setPosition(50);
+    setPosition(Number(range.value));
   }
 
   /* ---------- testimonials ---------- */

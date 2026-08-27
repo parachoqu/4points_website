@@ -3,6 +3,18 @@
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
   const webGLDisabledOnMobile = window.matchMedia("(max-width: 915px)");
+  const mobileNav = window.matchMedia("(max-width: 767px)");
+
+  /* ---------- shared: minimal focus trap for the iOS-style overlays ---------- */
+  const FOCUSABLE = 'a[href],button:not([disabled]),input,textarea,select,[tabindex]:not([tabindex="-1"])';
+  const trapFocus = (container, e) => {
+    if (e.key !== "Tab") return;
+    const items = [...container.querySelectorAll(FOCUSABLE)].filter((el) => el.offsetParent !== null);
+    if (!items.length) return;
+    const first = items[0], last = items[items.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  };
 
   /* ---------- shared: swipe navigation ---------- */
   const addSwipeNavigation = (element, onPrevious, onNext) => {
@@ -179,6 +191,250 @@
     });
     menu.querySelectorAll("a").forEach((link) => link.addEventListener("click", close));
     window.addEventListener("keydown", (e) => { if (e.key === "Escape") close(); });
+    /* the phone-width nav (tab bar + options sheet) replaces this overlay
+       below 768px; if the window crosses that line while it's open, close it
+       so it can't be left stranded, invisible but still holding scroll lock */
+    mobileNav.addEventListener?.("change", (e) => { if (e.matches) close(); });
+  }
+
+  /* ---------- bottom tab bar (mobile only, hidden by CSS at >=768px) ---------- */
+  function initTabBar() {
+    const bar = document.querySelector("[data-tabbar]");
+    if (!bar) return;
+    const links = [...bar.querySelectorAll("[data-tabbar-link]")];
+    const indicator = bar.querySelector(".m-tabbar-indicator");
+    if (!links.length) return;
+
+    const setCurrent = (link) => {
+      if (!link) return;
+      links.forEach((l) => {
+        const active = l === link;
+        l.classList.toggle("is-current", active);
+        if (active) l.setAttribute("aria-current", "page");
+        else l.removeAttribute("aria-current");
+      });
+      if (indicator) {
+        indicator.style.width = link.offsetWidth + "px";
+        indicator.style.transform = `translateX(${link.offsetLeft}px)`;
+      }
+    };
+
+    links.forEach((link) => {
+      link.addEventListener("click", () => {
+        const target = link.dataset.tabbarTarget;
+        const behavior = reducedMotion.matches ? "auto" : "smooth";
+        if (target === "top") window.scrollTo({ top: 0, behavior });
+        else document.querySelector(target)?.scrollIntoView({ behavior, block: "start" });
+      });
+    });
+
+    /* a second, independent scrollspy: initScrollSpy() only ever watches
+       .nav-desktop links, so this cannot fight it for the same elements */
+    const targets = links
+      .map((link) => {
+        const sel = link.dataset.tabbarTarget;
+        const el = sel === "top" ? document.querySelector(".hero") : document.querySelector(sel);
+        return el ? { link, el } : null;
+      })
+      .filter(Boolean);
+
+    if ("IntersectionObserver" in window && targets.length) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const match = targets.find((t) => t.el === entry.target);
+          if (match) setCurrent(match.link);
+        });
+      }, { rootMargin: "-40% 0px -55% 0px" });
+      targets.forEach((t) => observer.observe(t.el));
+    }
+
+    setCurrent(links[0]);
+    window.addEventListener("resize", onScrollFrame(() => setCurrent(bar.querySelector(".is-current") || links[0])));
+  }
+
+  /* ---------- secondary-options bottom sheet (mobile only) ---------- */
+  function initOptionsSheet() {
+    const toggle = document.querySelector("[data-options-sheet-toggle]");
+    const sheet = document.querySelector("[data-options-sheet]");
+    const backdrop = document.querySelector("[data-options-sheet-backdrop]");
+    if (!toggle || !sheet || !backdrop) return;
+    let lastFocused = null;
+
+    const close = () => {
+      toggle.setAttribute("aria-expanded", "false");
+      sheet.classList.remove("is-open");
+      sheet.setAttribute("aria-hidden", "true");
+      sheet.setAttribute("inert", "");
+      backdrop.classList.remove("is-open");
+      document.body.classList.remove("m-overlay-open");
+      document.body.style.overflow = "";
+      lastFocused?.focus();
+    };
+    const open = () => {
+      lastFocused = document.activeElement;
+      toggle.setAttribute("aria-expanded", "true");
+      requestAnimationFrame(() => {
+        sheet.classList.add("is-open");
+        backdrop.classList.add("is-open");
+      });
+      sheet.setAttribute("aria-hidden", "false");
+      sheet.removeAttribute("inert");
+      document.body.classList.add("m-overlay-open");
+      document.body.style.overflow = "hidden";
+      sheet.querySelector("a, button")?.focus();
+    };
+
+    toggle.addEventListener("click", () => (sheet.classList.contains("is-open") ? close() : open()));
+    backdrop.addEventListener("click", close);
+    sheet.querySelectorAll("[data-options-sheet-link]").forEach((link) => link.addEventListener("click", close));
+    window.addEventListener("keydown", (e) => {
+      if (!sheet.classList.contains("is-open")) return;
+      if (e.key === "Escape") close();
+      trapFocus(sheet, e);
+    });
+
+    /* swipe-down to dismiss: addSwipeNavigation() is built for horizontal
+       prev/next gestures and explicitly ignores vertical drags, so this is
+       a small dedicated vertical handler rather than a forced reuse */
+    let startY = null;
+    sheet.addEventListener("pointerdown", (e) => {
+      if (e.target.closest("a, button")) return;
+      startY = e.clientY;
+    });
+    sheet.addEventListener("pointermove", (e) => {
+      if (startY === null) return;
+      const dy = e.clientY - startY;
+      if (dy > 0) sheet.style.transform = `translateY(${dy}px)`;
+    });
+    const endDrag = (e) => {
+      if (startY === null) return;
+      const dy = e.clientY - startY;
+      sheet.style.transform = "";
+      startY = null;
+      if (dy > 80) close();
+    };
+    sheet.addEventListener("pointerup", endDrag);
+    sheet.addEventListener("pointercancel", () => { startY = null; sheet.style.transform = ""; });
+  }
+
+  /* ---------- full-screen service cover layers (mobile only) ----------
+     Replaces the inline accordion (initServiceInteractions) below 768px
+     without editing that function: a capturing click listener on the card
+     runs before the toggle/card-cta's own bubbling listeners, so it can
+     intercept and stop them cleanly whenever the mobile breakpoint is live. */
+  function initServiceCovers() {
+    const covers = [...document.querySelectorAll("[data-service-cover]")];
+    const cards = [...document.querySelectorAll("[data-service-card]")];
+    if (!covers.length || !cards.length) return;
+
+    const keyForCard = (card) => {
+      if (card.classList.contains("is-commercial")) return "commercial";
+      if (card.classList.contains("is-floor")) return "floor";
+      if (card.classList.contains("is-residential")) return "residential";
+      if (card.classList.contains("is-post-construction")) return "post-construction";
+      return null;
+    };
+    const byKey = new Map(covers.map((cover) => [cover.dataset.serviceCover, cover]));
+    let lastFocused = null, openCoverEl = null;
+    /* a cover reads as a pushed screen, so the platform Back gesture has to
+       reverse it instead of leaving the site. ownsEntry tracks whether the
+       open cover is holding a history entry of its own; switching straight
+       from one service to another replaces it rather than stacking, so Back
+       is never more than one step deep however many covers were browsed. */
+    let ownsEntry = false, focusOnHistoryClose = true;
+
+    const dismiss = (returnFocus) => {
+      if (!openCoverEl) return;
+      openCoverEl.classList.remove("is-open");
+      openCoverEl.setAttribute("aria-hidden", "true");
+      openCoverEl.setAttribute("inert", "");
+      document.body.classList.remove("m-overlay-open");
+      document.body.style.overflow = "";
+      openCoverEl = null;
+      if (returnFocus) lastFocused?.focus();
+    };
+
+    const closeCover = (returnFocus = true) => {
+      if (!openCoverEl) return;
+      if (ownsEntry) {
+        /* let popstate do the closing so the entry is consumed, otherwise the
+           Back gesture would afterwards land on a screen that is already gone */
+        focusOnHistoryClose = returnFocus;
+        window.history.back();
+        return;
+      }
+      dismiss(returnFocus);
+    };
+
+    const openCover = (key, trigger, fromHistory = false) => {
+      const cover = byKey.get(key);
+      if (!cover) return;
+      const wasOpen = !!openCoverEl;
+      dismiss(false);
+      lastFocused = trigger || (wasOpen ? lastFocused : document.activeElement);
+      cover.classList.add("is-open");
+      cover.setAttribute("aria-hidden", "false");
+      cover.removeAttribute("inert");
+      document.body.classList.add("m-overlay-open");
+      document.body.style.overflow = "hidden";
+      cover.scrollTop = 0;
+      openCoverEl = cover;
+      cover.querySelector("[data-service-cover-close]")?.focus();
+
+      if (fromHistory) { ownsEntry = true; return; }
+      if (ownsEntry) window.history.replaceState({ cover: key }, "");
+      else { window.history.pushState({ cover: key }, ""); ownsEntry = true; }
+    };
+
+    cards.forEach((card) => {
+      const key = keyForCard(card);
+      if (!key || !byKey.has(key)) return;
+      card.addEventListener("click", (e) => {
+        if (!mobileNav.matches) return;
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        openCover(key, card);
+      }, true);
+    });
+
+    covers.forEach((cover) => {
+      cover.querySelectorAll("[data-service-cover-close]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          /* the quote CTA is a real anchor: it is about to push a #quote entry
+             of its own, so the cover's entry is replaced rather than popped —
+             going back from the form must not reopen the cover behind it */
+          if (btn.tagName === "A") {
+            if (ownsEntry) { window.history.replaceState({}, ""); ownsEntry = false; }
+            dismiss(false);
+            return;
+          }
+          closeCover(true);
+        });
+      });
+    });
+
+    window.addEventListener("popstate", (e) => {
+      const key = e.state && e.state.cover;
+      if (openCoverEl && !key) {
+        ownsEntry = false;
+        dismiss(focusOnHistoryClose);
+        focusOnHistoryClose = true;
+        return;
+      }
+      if (key && !openCoverEl && mobileNav.matches) openCover(key, null, true);
+    });
+
+    window.addEventListener("keydown", (e) => {
+      if (!openCoverEl) return;
+      if (e.key === "Escape") closeCover();
+      trapFocus(openCoverEl, e);
+    });
+
+    /* a cover is phone-only furniture: if the viewport grows past the mobile
+       breakpoint while one is open it would be hidden by CSS but still holding
+       the scroll lock, exactly the stranded state initNavigation() guards for */
+    mobileNav.addEventListener?.("change", (ev) => { if (!ev.matches) closeCover(false); });
   }
 
   /* ---------- hero slider ---------- */
@@ -324,15 +580,23 @@
       });
     };
 
-    tabs.forEach((tab) => {
+    /* the mobile segmented control slides a single champagne indicator behind
+       the active tab; publishing the index lets CSS animate it without the
+       plan data or the list rendering above knowing anything about it */
+    const tabList = tabs[0].parentElement;
+    const setIndicator = (index) => tabList?.style.setProperty("--freq-i", String(index));
+
+    tabs.forEach((tab, index) => {
       tab.addEventListener("click", () => {
         tabs.forEach((t) => { t.classList.remove("is-active"); t.setAttribute("aria-selected", "false"); });
         tab.classList.add("is-active");
         tab.setAttribute("aria-selected", "true");
+        setIndicator(index);
         render(tab.dataset.freq);
       });
     });
 
+    setIndicator(0);
     render("daily");
   }
 
@@ -1523,6 +1787,9 @@
     initHeader();
     initScrollSpy();
     initNavigation();
+    initTabBar();
+    initOptionsSheet();
+    initServiceCovers();
     initHeroSlider();
     initScrollReveal();
     initFloorParallax();

@@ -51,6 +51,14 @@
         <a class="btn btn-primary" href="#quote">Request a Quote</a>
         <button class="hamburger" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu"
           aria-label="Open menu"><span></span></button>
+        <button class="m-options-toggle" type="button" data-options-sheet-toggle aria-expanded="false"
+          aria-controls="m-options-sheet" aria-label="More options">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="5" cy="12" r="1.6" />
+            <circle cx="12" cy="12" r="1.6" />
+            <circle cx="19" cy="12" r="1.6" />
+          </svg>
+        </button>
       </div>
     </div>
     <div class="mobile-menu" id="mobile-menu" data-mobile-menu>
@@ -198,6 +206,28 @@
         </div>
       </article>
     </section>
+
+    <!-- Mobile-only quick-trust strip: the same 4 credentials shown inside
+         the hero panel on desktop, promoted to their own row below the photo
+         on mobile so the image and CTA stay uncluttered. -->
+    <ul class="m-trust" aria-label="Why 4Points">
+      <li><svg class="icon" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v5l3 2" />
+        </svg>15+ Years Experience</li>
+      <li><svg class="icon" viewBox="0 0 24 24">
+          <path d="M12 3 4.5 6v5.4c0 4.7 2.5 7.8 7.5 9.6 5-1.8 7.5-4.9 7.5-9.6V6L12 3Z" />
+          <path d="m8.5 12 2.2 2.2 4.8-5" />
+        </svg>Fully Insured</li>
+      <li><svg class="icon" viewBox="0 0 24 24">
+          <path d="M3 6.5 8 4l8 2.5L21 4v13.5L16 20l-8-2.5L3 20V6.5Z" />
+          <path d="M8 4v13.5M16 6.5V20" />
+        </svg>100% Mobile Service</li>
+      <li><svg class="icon" viewBox="0 0 24 24">
+          <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
+          <circle cx="12" cy="9.5" r="2.2" />
+        </svg>Massachusetts</li>
+    </ul>
 
     <!-- =========================================================
      THE 4POINTS STANDARD
@@ -807,13 +837,14 @@
           </div>
           <div class="faq-item">
             <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-8">
-              [Insira sua pergunta aqui]
+              How quickly can you start service?
               <svg class="icon" viewBox="0 0 24 24">
                 <path d="M12 5v14M5 12h14" />
               </svg>
             </button>
             <div class="faq-a" id="faq-8">
-              <p>[Insira sua resposta aqui]</p>
+              <p>Most recurring commercial plans can start within a week of your quote being confirmed. Residential
+                and one-time visits are often scheduled even sooner, depending on availability.</p>
             </div>
           </div>
         </div>
@@ -990,6 +1021,208 @@
     </footer>
 
   </div>
+
+  <!-- =========================================================
+     iOS NAVIGATION SYSTEM (mobile only, ≤767px)
+     Persistent bottom tab bar, secondary-options bottom sheet, and
+     one full-screen editorial cover per service. Hidden by default
+     (base rules live near .site-header / .mobile-menu / .hero-rail
+     in style.css) and only unhidden/styled inside the existing
+     "20. MOBILE EDITION" block, sub-section "20a".
+     ========================================================= -->
+
+  <nav class="m-tabbar" data-tabbar aria-label="Primary">
+    <button type="button" class="m-tabbar-link is-current" data-tabbar-link data-tabbar-target="top"
+      aria-current="page">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M4 11.5 12 4l8 7.5M6 10v9h5v-5h2v5h5v-9" />
+      </svg><span>Home</span>
+    </button>
+    <button type="button" class="m-tabbar-link" data-tabbar-link data-tabbar-target="#services">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <rect x="4" y="4" width="7" height="7" rx="1.2" /><rect x="13" y="4" width="7" height="7" rx="1.2" />
+        <rect x="4" y="13" width="7" height="7" rx="1.2" /><rect x="13" y="13" width="7" height="7" rx="1.2" />
+      </svg><span>Services</span>
+    </button>
+    <button type="button" class="m-tabbar-link" data-tabbar-link data-tabbar-target="#impact">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M12 20.5s-7.6-4.6-7.6-10.2A4.6 4.6 0 0 1 12 7.1a4.6 4.6 0 0 1 7.6 3.2c0 5.6-7.6 10.2-7.6 10.2Z" />
+      </svg><span>Impact</span>
+    </button>
+    <button type="button" class="m-tabbar-link" data-tabbar-link data-tabbar-target="#quote">
+      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M6 3h9l4 4v14H6Z" /><path d="M15 3v4h4M9 12h7M9 16h7" />
+      </svg><span>Quote</span>
+    </button>
+    <span class="m-tabbar-indicator" aria-hidden="true"></span>
+  </nav>
+
+  <div class="m-sheet-backdrop" data-options-sheet-backdrop></div>
+  <div class="m-sheet" id="m-options-sheet" data-options-sheet role="dialog" aria-modal="true"
+    aria-label="More options" aria-hidden="true" inert>
+    <span class="m-sheet-handle" aria-hidden="true"></span>
+    <nav aria-label="Secondary">
+      <a href="#floorcare" data-options-sheet-link>Floor Care<svg class="icon" viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path d="M9 6l6 6-6 6" />
+        </svg></a>
+      <a href="#areas" data-options-sheet-link>Areas We Serve<svg class="icon" viewBox="0 0 24 24"
+          aria-hidden="true">
+          <path d="M9 6l6 6-6 6" />
+        </svg></a>
+      <a href="#faq" data-options-sheet-link>FAQ<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M9 6l6 6-6 6" />
+        </svg></a>
+    </nav>
+    <div class="m-sheet-contact">
+      <a class="menu-call" href="tel:+17742043112"><small>Call 4Points</small>+1 774-204-3112</a>
+      <a class="menu-mail" href="mailto:4pointscontact@gmail.com">4pointscontact@gmail.com</a>
+    </div>
+  </div>
+
+  <section class="m-cover" data-service-cover="commercial" role="dialog" aria-modal="true"
+    aria-label="Commercial &amp; Janitorial" aria-hidden="true" inert>
+    <div class="m-cover-media" style="--cover-img:url('assets/images/commercial-cleaning.jpg')">
+      <div class="m-cover-bar">
+        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <span>Commercial &amp; Janitorial</span>
+      </div>
+    </div>
+    <div class="m-cover-body">
+      <span class="card-tag">Priority Focus</span>
+      <h2>Commercial &amp; Janitorial</h2>
+      <p>Recurring cleaning plans for offices, schools and commercial buildings: daily, weekly, bi-weekly or
+        monthly.</p>
+      <ul class="m-cover-list">
+        <li>Restrooms &amp; Common Areas</li>
+        <li>Break Rooms</li>
+        <li>Trash Removal</li>
+        <li>Touchpoint Cleaning</li>
+        <li>Custom Maintenance Plans</li>
+      </ul>
+      <dl class="spec-list">
+        <dt>Frequency</dt>
+        <dd>Daily · Weekly · Bi-weekly · Monthly</dd>
+        <dt>Coverage</dt>
+        <dd>Greater Boston &amp; Massachusetts</dd>
+        <dt>Contract</dt>
+        <dd>Flexible, no long-term lock-in</dd>
+      </dl>
+    </div>
+    <div class="m-cover-cta">
+      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Commercial Quote</a>
+    </div>
+  </section>
+
+  <section class="m-cover" data-service-cover="floor" role="dialog" aria-modal="true" aria-label="Floor Care"
+    aria-hidden="true" inert>
+    <div class="m-cover-media" style="--cover-img:url('assets/images/floor-care.jpg')">
+      <div class="m-cover-bar">
+        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <span>Floor Care</span>
+      </div>
+    </div>
+    <div class="m-cover-body">
+      <span class="card-tag">Specialized</span>
+      <h2>Floor Care</h2>
+      <p>Premium polishing and waxing for high-traffic commercial floors, including Sunday and after-hours
+        execution.</p>
+      <ul class="m-cover-list">
+        <li>Polishing</li>
+        <li>Waxing</li>
+        <li>High-Traffic Floors</li>
+        <li>Sunday Service</li>
+      </ul>
+      <dl class="spec-list">
+        <dt>Schedule</dt>
+        <dd>Sundays &amp; after hours</dd>
+        <dt>Contract</dt>
+        <dd>Recurring or one-time</dd>
+        <dt>Coverage</dt>
+        <dd>Greater Boston &amp; Massachusetts</dd>
+      </dl>
+    </div>
+    <div class="m-cover-cta">
+      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Floor Care Quote</a>
+    </div>
+  </section>
+
+  <section class="m-cover" data-service-cover="residential" role="dialog" aria-modal="true" aria-label="Residential"
+    aria-hidden="true" inert>
+    <div class="m-cover-media" style="--cover-img:url('assets/images/residential-cleaning.jpg')">
+      <div class="m-cover-bar">
+        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <span>Residential</span>
+      </div>
+    </div>
+    <div class="m-cover-body">
+      <span class="card-tag">Secondary</span>
+      <h2>Residential</h2>
+      <p>Standard and deep cleaning, plus move-in and move-out service for homes across Greater Boston.</p>
+      <ul class="m-cover-list">
+        <li>Standard Cleaning</li>
+        <li>Deep Cleaning</li>
+        <li>Move-In</li>
+        <li>Move-Out</li>
+      </ul>
+      <dl class="spec-list">
+        <dt>Coverage</dt>
+        <dd>Greater Boston &amp; Massachusetts</dd>
+        <dt>Contract</dt>
+        <dd>Per-visit, no subscription required</dd>
+      </dl>
+    </div>
+    <div class="m-cover-cta">
+      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Home Cleaning</a>
+    </div>
+  </section>
+
+  <section class="m-cover" data-service-cover="post-construction" role="dialog" aria-modal="true"
+    aria-label="Post-Construction" aria-hidden="true" inert>
+    <div class="m-cover-media" style="--cover-img:url('assets/images/after-floor.jpg')">
+      <div class="m-cover-bar">
+        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M15 6l-6 6 6 6" />
+          </svg>
+        </button>
+        <span>Post-Construction</span>
+      </div>
+    </div>
+    <div class="m-cover-body">
+      <span class="card-tag">Specialized</span>
+      <h2>Post-Construction</h2>
+      <p>Thorough cleanup after remodeling or building, removing heavy dust and residue.</p>
+      <ul class="m-cover-list">
+        <li>Fine Dust Removal</li>
+        <li>Debris &amp; Residue Cleanup</li>
+        <li>Surface Detailing</li>
+        <li>Window &amp; Frame Cleaning</li>
+      </ul>
+      <dl class="spec-list">
+        <dt>Scheduling</dt>
+        <dd>One-time, timed to your project close-out</dd>
+        <dt>Coverage</dt>
+        <dd>Greater Boston &amp; Massachusetts</dd>
+      </dl>
+    </div>
+    <div class="m-cover-cta">
+      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Post-Construction</a>
+    </div>
+  </section>
 
   <script type="module" src="script.js?v=b015c1a82365"></script>
 </body>

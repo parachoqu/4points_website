@@ -1165,6 +1165,31 @@
       z-index: 1;
     }
 
+    /* ---------- iOS navigation system: hidden-by-default bases ----------
+       None of these exist in the desktop composition. They are unhidden
+       and fully styled only inside "20. MOBILE EDITION" § 20a, so at every
+       width above 767px this display:none is the only rule that applies —
+       same precedent as .hero-rail (line ~1380) and .hamburger (line 1007). */
+    .m-options-toggle {
+      display: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255, 255, 255, .35);
+      background: transparent;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .m-tabbar,
+    .m-sheet-backdrop,
+    .m-sheet,
+    .m-cover,
+    .m-trust {
+      display: none;
+    }
+
     /* =========================================================
    05. HERO
    ========================================================= */
@@ -4431,7 +4456,7 @@
     @media (max-width:767px) {
 
       :root {
-        --header-h: 62px;
+        --header-h: calc(62px + env(safe-area-inset-top));
         --gutter: clamp(20px, 5.4vw, 26px);
 
         /* three breaths, alternated: the page has cadence, not one padding */
@@ -4441,6 +4466,9 @@
 
         --bleed: calc(var(--gutter) * -1);
         --bleed-w: calc(100% + var(--gutter) * 2);
+
+        /* iOS navigation system: persistent bottom tab bar */
+        --tabbar-h: calc(56px + env(safe-area-inset-bottom));
       }
 
       /* The document remains the only scroller. Cards offer soft landing
@@ -5975,6 +6003,644 @@
 
       .footer-top {
         padding: 13px 18px;
+      }
+
+      /* =========================================================
+         20a. iOS NAVIGATION SYSTEM
+         Net-new components with no desktop counterpart: top-bar options
+         entry, persistent bottom tab bar, secondary-options sheet,
+         full-screen service covers, and the hero page-control / trust-strip
+         changes that go with them. Namespace: every new class is prefixed
+         `m-` (verified unused elsewhere in this file) so nothing here can
+         collide with an existing desktop or mobile-edition selector.
+         z-index range (new, reserved): .m-tabbar 300 · .m-sheet-backdrop 390
+         · .m-sheet 400 · .m-cover 500 — all comfortably below the skip-link
+         and #loading (999 / 1000).
+         ========================================================= */
+
+      /* ---------- top bar: safe-area aware, options replaces hamburger ---------- */
+      .site-header {
+        padding-top: calc(11px + env(safe-area-inset-top));
+        padding-bottom: 11px;
+      }
+
+      .site-header.is-scrolled {
+        padding-top: calc(8px + env(safe-area-inset-top));
+        padding-bottom: 8px;
+      }
+
+      .hamburger,
+      .mobile-menu {
+        display: none;
+      }
+
+      .m-options-toggle {
+        display: inline-flex;
+      }
+
+      .m-options-toggle:active {
+        border-color: var(--champagne);
+        color: var(--champagne);
+      }
+
+      /* room for the tab bar at the foot of every page */
+      body {
+        padding-bottom: var(--tabbar-h);
+      }
+
+      /* ---------- bottom tab bar ---------- */
+      .m-tabbar {
+        display: flex;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 300;
+        height: var(--tabbar-h);
+        padding-bottom: env(safe-area-inset-bottom);
+        background: rgba(7, 27, 46, .86);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        border-top: 1px solid var(--line-dark);
+        transition: transform var(--dur-med) var(--ease);
+      }
+
+      body.m-overlay-open .m-tabbar {
+        transform: translateY(100%);
+      }
+
+      .m-tabbar-link {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 3px;
+        border: 0;
+        background: none;
+        color: rgba(255, 255, 255, .55);
+        font-family: var(--font-ui);
+        font-size: .62rem;
+        font-weight: 600;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+        padding: 8px 0 6px;
+        position: relative;
+        transition: color var(--dur-fast) var(--ease);
+      }
+
+      .m-tabbar-link .icon {
+        width: 21px;
+        height: 21px;
+        stroke-width: 1.6;
+        fill: none;
+        stroke: currentColor;
+      }
+
+      .m-tabbar-link.is-current {
+        color: var(--champagne);
+      }
+
+      /* the signature: a thin index rule — the same editorial device as the
+         hero's "01/03" and the pillars' "01–04" — now doing navigation duty */
+      .m-tabbar-indicator {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 2px;
+        width: 44px;
+        background: var(--champagne);
+        border-radius: 0 0 2px 2px;
+        transition: transform var(--dur-fast) var(--ease), width var(--dur-fast) var(--ease);
+      }
+
+      /* ---------- secondary-options bottom sheet ---------- */
+      /* Hidden by visibility + pointer-events, never by the hidden attribute:
+         this author rule sets display, and author styles beat the UA's
+         [hidden]{display:none}, so the attribute alone would leave a
+         full-viewport pane at z-index 390 swallowing every tap on the page.
+         Same closed-state pattern as .mobile-menu and .m-cover. */
+      .m-sheet-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 390;
+        background: rgba(7, 27, 46, .5);
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+        transition: opacity var(--dur-med) var(--ease), visibility 0s linear var(--dur-med);
+      }
+
+      .m-sheet-backdrop.is-open {
+        opacity: 1;
+        visibility: visible;
+        pointer-events: auto;
+        transition: opacity var(--dur-med) var(--ease), visibility 0s linear 0s;
+      }
+
+      .m-sheet {
+        display: block;
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 400;
+        background: var(--navy-dark);
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding: 12px 22px calc(28px + env(safe-area-inset-bottom));
+        transform: translateY(100%);
+        transition: transform var(--dur-med) var(--ease);
+        box-shadow: var(--shadow-lg);
+      }
+
+      .m-sheet.is-open {
+        transform: translateY(0);
+      }
+
+      .m-sheet-handle {
+        display: block;
+        width: 36px;
+        height: 4px;
+        border-radius: 4px;
+        background: var(--line-dark);
+        margin: 0 auto 18px;
+      }
+
+      .m-sheet nav {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .m-sheet nav a {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        min-height: 52px;
+        color: #fff;
+        font-family: var(--font-ui);
+        font-weight: 600;
+        font-size: .98rem;
+        border-bottom: 1px solid var(--line-dark-soft);
+      }
+
+      .m-sheet nav a .icon {
+        width: 15px;
+        height: 15px;
+        color: var(--champagne);
+      }
+
+      .m-sheet-contact {
+        margin-top: 18px;
+        padding-top: 18px;
+        border-top: 1px solid var(--line-dark-soft);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .m-sheet-contact a {
+        color: rgba(255, 255, 255, .85);
+        font-size: .92rem;
+      }
+
+      .m-sheet-contact .menu-call {
+        display: block;
+      }
+
+      .m-sheet-contact .menu-call small {
+        display: block;
+        color: var(--sage-soft);
+        font-size: .68rem;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+        margin-bottom: 2px;
+      }
+
+      /* ---------- full-screen service covers ---------- */
+      .m-cover {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 500;
+        background: var(--paper);
+        overflow-y: auto;
+        opacity: 0;
+        visibility: hidden;
+        transform: scale(.97);
+        transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease), visibility 0s linear var(--dur-med);
+      }
+
+      .m-cover.is-open {
+        opacity: 1;
+        visibility: visible;
+        transform: scale(1);
+        transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease), visibility 0s linear 0s;
+      }
+
+      .m-cover-media {
+        position: relative;
+        height: 46vh;
+        min-height: 300px;
+        background-image: var(--cover-img);
+        background-size: cover;
+        background-position: center;
+      }
+
+      .m-cover-media::after {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(to top, rgba(7, 27, 46, .55), rgba(7, 27, 46, 0) 45%),
+          linear-gradient(to bottom, rgba(7, 27, 46, .55), rgba(7, 27, 46, 0) 30%);
+      }
+
+      .m-cover-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: calc(14px + env(safe-area-inset-top)) var(--gutter) 14px;
+      }
+
+      .m-cover-back {
+        width: 40px;
+        height: 40px;
+        flex: none;
+        border-radius: 50%;
+        border: 1px solid rgba(255, 255, 255, .4);
+        background: rgba(7, 27, 46, .35);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .m-cover-bar span {
+        color: #fff;
+        font-family: var(--font-ui);
+        font-weight: 700;
+        font-size: .9rem;
+      }
+
+      .m-cover-body {
+        padding: 28px var(--gutter) 32px;
+        --canvas-ink: var(--navy-dark);
+        --canvas-muted: var(--muted);
+        --canvas-rule: var(--line-light);
+        --canvas-rule-soft: var(--line-light-soft);
+        --canvas-accent: var(--petrol);
+      }
+
+      .m-cover-body .card-tag {
+        color: var(--petrol);
+      }
+
+      .m-cover-body h2 {
+        font-family: var(--font-serif);
+        font-size: clamp(1.9rem, 8vw, 2.4rem);
+        color: var(--navy-dark);
+        margin: 10px 0 14px;
+        line-height: 1.1;
+      }
+
+      .m-cover-body>p {
+        font-size: 1rem;
+        line-height: 1.6;
+        color: var(--muted);
+        margin-bottom: 22px;
+      }
+
+      .m-cover-list {
+        display: grid;
+        gap: 10px;
+        margin-bottom: 26px;
+        padding-bottom: 26px;
+        border-bottom: 1px solid var(--line-light);
+      }
+
+      .m-cover-list li {
+        font-size: .92rem;
+        font-weight: 600;
+        color: var(--navy-dark);
+        padding-left: 20px;
+        position: relative;
+      }
+
+      .m-cover-list li::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 9px;
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--champagne);
+      }
+
+      .m-cover-cta {
+        position: sticky;
+        bottom: 0;
+        padding: 16px var(--gutter) calc(16px + env(safe-area-inset-bottom));
+        background: rgba(255, 253, 248, .86);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border-top: 1px solid var(--line-light);
+      }
+
+      .m-cover-cta .btn {
+        width: 100%;
+      }
+
+      /* ---------- hero: dot page-control, trust strip promoted below ---------- */
+      .hero .hero-panel {
+        display: none;
+      }
+
+      .m-trust {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2px 16px;
+        padding: 22px var(--gutter) 0;
+        background: var(--paper);
+      }
+
+      .m-trust li {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-size: .74rem;
+        font-weight: 600;
+        color: var(--muted);
+        padding: 9px 0;
+      }
+
+      .m-trust li .icon {
+        width: 15px;
+        height: 15px;
+        color: var(--petrol);
+        stroke-width: 1.8;
+        flex: none;
+      }
+
+      /* the rail's 20px predates the tab bar; left there the dots sit behind it,
+         unreachable and visually colliding with the nav */
+      .hero-rail {
+        bottom: calc(var(--tabbar-h) + 14px);
+      }
+
+      .hero-rail-index {
+        display: none;
+      }
+
+      .hero-rail-ticks {
+        justify-content: center;
+        gap: 7px;
+        flex: none;
+        margin: 0 auto;
+      }
+
+      .hero-rail-ticks button {
+        flex: none;
+        padding: 15px 4px;
+        margin: -15px 0;
+      }
+
+      .hero-rail-ticks i {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        transition: width var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease);
+      }
+
+      .hero-rail-ticks button[aria-current="true"] i {
+        width: 16px;
+        border-radius: 3px;
+      }
+
+      /* ---------- services: the whole card now opens a cover (§ initServiceCovers),
+         so the old inline accordion must stay inert even if initServiceInteractions()'s
+         own keydown handling still toggles .is-active on a focused card ---------- */
+      .service-card:hover .card-more,
+      .service-card.is-active .card-more {
+        max-height: 0;
+        opacity: 0;
+      }
+
+      .card-cta,
+      .service-card.is-active .card-cta {
+        display: none;
+      }
+
+      /* =========================================================
+         20c. SECTION RESTYLING (phase 2)
+         Presentation-only pass over sections that already exist. No JS state
+         machine changes beyond the segmented control publishing --freq-i.
+         Placed last inside the ≤767px block so it wins by source order over
+         the per-section rules above at equal specificity.
+         ========================================================= */
+
+      /* ---------- 07. SERVICES — a catalogue, read top to bottom ----------
+         Commercial keeps the dominant format; the other three settle into an
+         even, browsable rank below it. The "+" stops promising an accordion
+         and becomes a disclosure chevron, because tapping now opens a page. */
+      .services-grid {
+        gap: 14px;
+      }
+
+      .service-card.is-floor,
+      .service-card.is-residential,
+      .service-card.is-post-construction {
+        min-height: 186px;
+      }
+
+      .service-card.is-floor .card-body,
+      .service-card.is-residential .card-body,
+      .service-card.is-post-construction .card-body {
+        padding: 18px 62px 18px 20px;
+      }
+
+      .service-card.is-floor .card-body h3,
+      .service-card.is-residential .card-body h3,
+      .service-card.is-post-construction .card-body h3 {
+        font-size: 1.32rem;
+      }
+
+      .card-toggle {
+        display: flex;
+        top: auto;
+        bottom: 16px;
+        right: 16px;
+        width: 44px;
+        height: 44px;
+        background: rgba(255, 255, 255, .1);
+        border-color: rgba(255, 255, 255, .32);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        pointer-events: none;
+      }
+
+      .card-toggle .icon {
+        display: none;
+      }
+
+      /* a chevron, drawn from two borders: this opens a screen, it doesn't expand */
+      .card-toggle::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-top: 1.8px solid currentColor;
+        border-right: 1.8px solid currentColor;
+        transform: translateX(-2px) rotate(45deg);
+      }
+
+      /* keyboard Enter on a focused card still reaches the old toggle state;
+         it must not read as an open accordion control behind the cover */
+      .service-card.is-active .card-toggle {
+        transform: none;
+        background: rgba(255, 255, 255, .1);
+        border-color: rgba(255, 255, 255, .32);
+        color: #fff;
+      }
+
+      /* ---------- 08. MAINTENANCE — a true segmented control ----------
+         One champagne indicator slides behind the active label (index published
+         as --freq-i by initMaintenanceSelector), replacing four independently
+         filled pills. Champagne is the site's single "selected" colour. */
+      .freq-tabs {
+        position: relative;
+        isolation: isolate;
+        background: rgba(255, 255, 255, .62);
+      }
+
+      .freq-tabs::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        top: 3px;
+        bottom: 3px;
+        left: 3px;
+        width: calc((100% - 6px) / 4);
+        border-radius: 100px;
+        background: var(--champagne);
+        box-shadow: 0 2px 8px rgba(169, 137, 76, .34);
+        transform: translateX(calc(var(--freq-i, 0) * 100%));
+        transition: transform var(--dur-fast) var(--ease);
+      }
+
+      .freq-tab {
+        background: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+        font-weight: 700;
+      }
+
+      .freq-tab.is-active {
+        background: none;
+        border-color: transparent;
+        box-shadow: none;
+        color: var(--navy-dark);
+      }
+
+      /* the panel keeps one accent, and it is the same champagne the control
+         above uses. --champagne-text, not --champagne: this is small type on
+         Paper, where the brand tone measures 3.24:1 and the text token 4.77:1 */
+      .freq-panel-head small b {
+        color: var(--champagne-text);
+      }
+
+      /* ---------- 09. FLOOR CARE — consecutive pages of one chapter ----------
+         Same soft landing the services list already uses: the document stays
+         the only scroller, the blocks simply prefer to arrive squarely. */
+      @media (prefers-reduced-motion: no-preference) {
+
+        .floorcare-content,
+        .fc-dossier {
+          scroll-snap-align: start;
+          scroll-snap-stop: normal;
+        }
+      }
+
+      /* ---------- 12. IMPACT — the ratio centred as a poster ---------- */
+      .impact-inner>div:first-child {
+        text-align: center;
+      }
+
+      /* the element carries its own text-align, so the parent's centring
+         never reaches the numeral without this */
+      .impact-ratio {
+        text-align: center;
+        margin-left: 0;
+      }
+
+      .impact-ratio small {
+        display: inline-block;
+        border-top: 0;
+        padding-top: 0;
+        margin-top: 14px;
+      }
+
+      .impact-viz {
+        justify-content: center;
+      }
+
+      /* ---------- 16. QUOTE — one question per screen, action always in reach ----------
+         Two columns of half-width options made every answer a small target and
+         broke the reading line. Full-width rows scan in one column, and the
+         primary action rides the foot of the form on the same navy glass the
+         rest of the app's chrome is made of. */
+      .q-options {
+        grid-template-columns: 1fr;
+        gap: 9px;
+      }
+
+      .q-options>.q-option:last-child:nth-child(odd) {
+        grid-column: auto;
+      }
+
+      .q-option {
+        padding: 17px 52px 17px 18px;
+        font-size: .95rem;
+        min-height: 58px;
+      }
+
+      .q-option::after {
+        right: 16px;
+        width: 20px;
+        height: 20px;
+        margin-top: -10px;
+        background-size: 11px 11px;
+      }
+
+      .q-step h3 {
+        font-size: 1.45rem;
+      }
+
+      /* The action bar closes the form as its own footer plate rather than a
+         sticky bar: .quote-form and .section.quote both clip their children
+         (the form to catch the 16px qfade slide, the section for its depth
+         art), and either one is enough to make position:sticky pin to a box
+         that never scrolls. Opening both to reach the viewport would cost more
+         than it buys — with one question per screen the action already sits a
+         short scroll away, and on the long contact step it closes the field
+         list where the thumb ends up anyway. */
+      .q-nav {
+        margin: 26px -22px -22px;
+        padding: 16px 22px calc(16px + env(safe-area-inset-bottom));
+        background: rgba(255, 253, 248, .92);
+        border-top: 1px solid var(--line-light);
+        border-radius: 0 0 var(--radius-md) var(--radius-md);
+      }
+
+      .q-nav::before {
+        display: none;
       }
     }
 

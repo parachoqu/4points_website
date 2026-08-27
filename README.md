@@ -597,6 +597,92 @@ Decisões de composição:
   fotos realmente está.
 - **Alvos de toque:** todo elemento interativo tem no mínimo 44×44px.
 
+### 20a. Sistema de navegação iOS (dentro do mesmo bloco `≤767px`)
+
+Uma sub-seção **`20a. iOS NAVIGATION SYSTEM`**, ao final do bloco `20` (antes do `}` que o fecha, e
+portanto antes de `20b`), acrescenta uma camada de navegação de app nativo só para telefone:
+
+- **Top bar** compacta (vidro navy + `env(safe-area-inset-top)`) com o botão de opções
+  (`.m-options-toggle`, `data-options-sheet-toggle`) substituindo o hambúrguer *apenas* em
+  `≤767px` — o hambúrguer/`.mobile-menu` original continua 100% funcional em `768–992px`.
+- **Tab bar** inferior persistente (`.m-tabbar`, `data-tabbar`), 4 destinos (Home/Services/
+  Impact/Quote), com uma régua-índice champagne (`.m-tabbar-indicator`) sincronizada por toque e
+  por um segundo `IntersectionObserver` (`initTabBar()` em `script.js`) independente do
+  `initScrollSpy()` existente.
+- **Bottom sheet de opções** (`.m-sheet`, `data-options-sheet`) para Floor Care, Áreas, FAQ e
+  contato — controlado por `initOptionsSheet()`.
+- **Camadas de serviço em tela cheia** (`.m-cover`, `data-service-cover`), uma por card de
+  serviço, abertas por `initServiceCovers()` via um listener de clique em **fase de captura** no
+  `.service-card` (intercepta o accordion antigo só quando `matchMedia('(max-width:767px)')` é
+  verdadeiro, sem alterar `initServiceInteractions()`).
+
+**Histórico das camadas de serviço.** Uma camada se comporta como tela empilhada, então o gesto de
+voltar do sistema tem que revertê-la em vez de sair do site. `initServiceCovers()` mantém um
+sinalizador `ownsEntry`:
+
+| Ação | Efeito no histórico |
+| :--- | :--- |
+| Abrir a partir do catálogo | `pushState({cover})` — **uma** entrada |
+| Trocar direto de um serviço para outro | `replaceState({cover})` — a pilha **não** cresce |
+| Fechar pelo chevron / `Escape` | `history.back()`; o `popstate` é que fecha, consumindo a entrada |
+| Voltar pelo gesto do sistema | `popstate` sem `state.cover` → fecha |
+| Tocar no CTA de orçamento (`<a href="#quote">`) | `replaceState({})` e fecha **sem** `back()` — a âncora vai empilhar `#quote` logo em seguida, e voltar de lá não pode reabrir a camada |
+
+> O **bottom sheet de opções não** integra histórico, de propósito: é um painel transitório, e uma
+> entrada por abertura faria o botão voltar reabri-lo em vez de sair da página.
+
+> ⚠️ **Nunca esconda uma superfície `m-*` pelo atributo `hidden`.** O `.m-sheet-backdrop` foi
+> escrito com `hidden` no HTML **e** `display:block` no CSS de `20a`. Estilos de autor vencem a
+> regra do user-agent `[hidden]{display:none}`, então o atributo não fazia nada: sobrava um painel
+> `position:fixed; inset:0; z-index:390; opacity:0` invisível cobrindo a tela inteira e **engolindo
+> todo toque da página no mobile** — todos os botões pareciam mortos. O estado fechado agora usa
+> `visibility:hidden` + `pointer-events:none`, alternado por `.is-open`, igual a `.mobile-menu` e
+> `.m-cover`. Ao criar qualquer superfície nova, siga esse padrão.
+>
+> **Como testar isso:** `element.click()` e `dispatchEvent` disparam direto no nó e **ignoram
+> hit-testing** — nenhum teste desse tipo detecta uma sobreposição invisível. Use cliques reais ou
+> `document.elementFromPoint(cx, cy)` e confirme que o elemento retornado é o alvo. Foi assim que o
+> bug passou despercebido por toda uma bateria de testes "verdes".
+
+`initServiceCovers()` também fecha a camada aberta se a viewport crescer além de `767px`
+(`mobileNav` change) — sem isso ela ficaria escondida pelo CSS mas ainda segurando o scroll lock,
+exatamente a rede de segurança que `initNavigation()` já tem.
+
+**Namespace:** todo componente novo usa classes `m-*`, exclusivas — nunca reutilizadas pelo CSS de
+desktop nem pelo restante da Mobile Edition. Cada uma tem uma regra-base `display:none` fora de
+qualquer media query (mesmo padrão de `.hero-rail`), então acima de `767px` elas são inertes por
+construção. Faixa de `z-index` reservada: `.m-tabbar` 300 · `.m-sheet-backdrop` 390 · `.m-sheet`
+400 · `.m-cover` 500 (abaixo de skip-link/`#loading`, 999/1000).
+
+### 20c. Restyling por seção (fase 2)
+
+Sub-seção final do bloco `≤767px`, só apresentação — vence por ordem de fonte sobre as regras por
+seção acima, na mesma especificidade:
+
+- **Serviços** viram catálogo: Commercial mantém o formato dominante (470px), os outros três caem
+  para 186px em bloco browsável. O `.card-toggle` deixa de ser "+" de accordion e vira **chevron de
+  disclosure** (`pointer-events:none`, desenhado com duas bordas) — tocar o card abre uma página,
+  então o controle não pode mais prometer expansão inline. `.card-cta` some no mobile: o CTA agora
+  vive na barra fixa da própria camada.
+- **Planos recorrentes** ganham um segmented control de verdade: `.freq-tabs::before` é um indicador
+  champagne único que desliza via `--freq-i`, publicado por `initMaintenanceSelector()`
+  (`z-index:-1` + `isolation:isolate` no trilho o mantém atrás dos rótulos). A lógica de dados
+  (`plans`, `render()`) não mudou.
+- **Floor Care** recebe `scroll-snap-align` em `.floorcare-content` e `.fc-dossier` (só sob
+  `prefers-reduced-motion: no-preference`), como páginas consecutivas do mesmo capítulo.
+- **Impact** centraliza o 5:1 como pôster. Atenção: `.impact-ratio` carrega o próprio
+  `text-align`, então centralizar só o pai não basta — o token precisa ser reescrito no elemento.
+- **Orçamento** passa a uma pergunta por tela: `.q-options` em coluna única, linhas de 58px, e
+  `.q-nav` fechando o formulário como placa de rodapé com hairline e safe-area.
+
+> ⚠️ **`.q-nav` não é `position: sticky`, e isso é deliberado.** Tanto `.quote-form` quanto
+> `.section.quote` usam `overflow: hidden` (o formulário para conter o slide de 16px do `qfade`, a
+> seção para sua arte de profundidade). Qualquer um dos dois basta para tornar o formulário o bloco
+> de contenção do sticky, prendendo a barra a uma caixa que nunca rola — o sticky simplesmente não
+> engata. Abrir os dois para alcançar a viewport custaria mais do que entrega, já que com uma
+> pergunta por tela a ação já fica a um scroll curto. Se um dia isso for revisitado, é preciso
+> liberar **os dois** `overflow` e revalidar a arte da seção.
+
 ---
 
 ## 📐 Layout, Grid & Responsividade

@@ -621,7 +621,6 @@
 
     /* numerals never reflow while they animate */
     .hero-count,
-    .t-count,
     .pillar-num,
     .impact-ratio,
     .q-step-label,
@@ -3160,15 +3159,14 @@
     }
 
     .t-track {
-      position: relative;
-      min-height: 220px;
+      display: grid;
       --dx: 0px;
     }
 
-    /* the quote enters from the side you asked it to come from */
+    /* every slide shares the same grid cell, so the track auto-sizes to the
+       tallest testimonial instead of jumping height when the active one changes */
     .t-slide {
-      position: absolute;
-      inset: 0;
+      grid-area: 1 / 1;
       opacity: 0;
       transform: translate3d(var(--dx), 10px, 0);
       transition: opacity .5s var(--ease), transform .5s var(--ease);
@@ -3179,7 +3177,6 @@
       opacity: 1;
       transform: translate3d(0, 0, 0);
       pointer-events: auto;
-      position: relative;
     }
 
     .t-slide p {
@@ -3227,83 +3224,6 @@
     .t-meta span {
       color: var(--navy-2);
       font-size: .88rem;
-    }
-
-    .t-controls {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 24px;
-      margin-top: 40px;
-    }
-
-    .t-arrow {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      border: 1.5px solid rgba(16, 42, 67, .2);
-      background: transparent;
-      color: var(--navy);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
-    }
-
-    .t-arrow .icon {
-      transition: transform var(--dur-med) var(--ease);
-    }
-
-    .t-arrow:hover {
-      background: var(--ivory);
-      border-color: var(--navy);
-      transform: translateY(-2px);
-    }
-
-    .t-arrow[data-t-prev]:hover .icon {
-      transform: translateX(-3px);
-    }
-
-    .t-arrow[data-t-next]:hover .icon {
-      transform: translateX(3px);
-    }
-
-    .t-count {
-      font-size: .82rem;
-      color: var(--navy-2);
-      letter-spacing: .08em;
-      font-weight: 700;
-      min-width: 76px;
-      text-align: center;
-      position: relative;
-      padding-bottom: 12px;
-    }
-
-    .t-count strong {
-      color: var(--navy);
-    }
-
-    /* the counter carries its own progress rail */
-    .t-count::before,
-    .t-count::after {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      height: 2px;
-      border-radius: 2px;
-    }
-
-    .t-count::before {
-      background: var(--line-light);
-    }
-
-    .t-count::after {
-      background: var(--champagne);
-      transform: scaleX(var(--p, .25));
-      transform-origin: left center;
-      transition: transform var(--dur-med) var(--ease);
     }
 
     /* =========================================================
@@ -4364,10 +4284,6 @@
 
       .footer-grid {
         grid-template-columns: 1fr 1fr;
-      }
-
-      .t-controls {
-        gap: 14px;
       }
 
       /* the step numeral carries the wayfinding once the labels stop fitting */
@@ -5613,19 +5529,9 @@
         font-size: .7rem;
       }
 
-      /* ---------- 14. TESTIMONIALS — a page, not a card ---------- */
+      /* ---------- 14. TESTIMONIALS ---------- */
       .t-carousel {
         text-align: left;
-        padding: 6px 0 0;
-        border: 0;
-        border-radius: 0;
-        background: none;
-        box-shadow: none;
-      }
-
-      .t-carousel::before,
-      .t-carousel::after {
-        display: none;
       }
 
       .t-stars {
@@ -5637,11 +5543,6 @@
       .t-stars .icon {
         width: 15px;
         height: 15px;
-      }
-
-      /* a fixed 220px well left holes under the short quotes */
-      .t-track {
-        min-height: 0;
       }
 
       .t-slide p {
@@ -5662,23 +5563,6 @@
       .t-avatar {
         width: 40px;
         height: 40px;
-      }
-
-      .t-controls {
-        justify-content: flex-start;
-        gap: 16px;
-        margin-top: 28px;
-      }
-
-      .t-arrow {
-        width: 44px;
-        height: 44px;
-      }
-
-      .t-count {
-        min-width: 62px;
-        text-align: left;
-        font-size: .74rem;
       }
 
       /* ---------- 15. FAQ — the pace changes: scan, don't read ----------
@@ -7001,16 +6885,8 @@
       /* ---------- TESTIMONIALS ----------
          Centred in the frame, and not one pixel wider: the negative space
          around the card is the composition. */
-      .t-track {
-        min-height: clamp(180px, 24dvh, 220px);
-      }
-
       .t-stars {
         margin-bottom: clamp(16px, 2.6dvh, 28px);
-      }
-
-      .t-controls {
-        margin-top: clamp(22px, 3.4dvh, 40px);
       }
 
       /* ---------- FAQ ----------

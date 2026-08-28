@@ -660,11 +660,7 @@
     const slides = [...carousel.querySelectorAll("[data-testimonial-slide]")];
     const track = carousel.querySelector("[data-testimonial-track]");
     const status = carousel.querySelector("[data-testimonial-status]");
-    const currentLabel = carousel.querySelector("[data-t-current]");
-    const rail = currentLabel?.parentElement;
-    const prevBtn = carousel.querySelector("[data-t-prev]");
-    const nextBtn = carousel.querySelector("[data-t-next]");
-    let currentIndex = 0;
+    let currentIndex = 0, autoplayId = null;
 
     const show = (index, direction = 0) => {
       /* the quote enters from the side the reader asked for: the offset has
@@ -679,22 +675,27 @@
         slide.classList.toggle("is-active", active);
         slide.setAttribute("aria-hidden", String(!active));
       });
-      if (currentLabel) currentLabel.textContent = String(currentIndex + 1).padStart(2, "0");
-      if (rail) rail.style.setProperty("--p", String((currentIndex + 1) / slides.length));
       if (status) status.textContent = `Testimonial ${currentIndex + 1} of ${slides.length}`;
     };
 
-    const next = () => show(currentIndex + 1, 1);
-    const prev = () => show(currentIndex - 1, -1);
+    const startAutoplay = () => {
+      window.clearInterval(autoplayId);
+      autoplayId = null;
+      if (reducedMotion.matches || document.hidden) return;
+      autoplayId = window.setInterval(() => show(currentIndex + 1, 1), 6000);
+    };
+    const pauseAutoplay = () => window.clearInterval(autoplayId);
+    const refreshAutoplay = () => startAutoplay();
 
-    nextBtn?.addEventListener("click", next);
-    prevBtn?.addEventListener("click", prev);
-    carousel.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowRight") next();
-      if (e.key === "ArrowLeft") prev();
-    });
-    addSwipeNavigation(carousel, prev, next);
+    carousel.addEventListener("pointerenter", pauseAutoplay);
+    carousel.addEventListener("pointerleave", startAutoplay);
+    carousel.addEventListener("focusin", pauseAutoplay);
+    carousel.addEventListener("focusout", startAutoplay);
+    document.addEventListener("visibilitychange", refreshAutoplay);
+    reducedMotion.addEventListener?.("change", refreshAutoplay);
+
     show(0);
+    startAutoplay();
   }
 
   /* ---------- FAQ accordion ---------- */

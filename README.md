@@ -102,342 +102,85 @@ O esquema de cores foi selecionado para transmitir elegância corporativa, higie
 
 ---
 
-## 🌫️ Continuous Editorial Canvas
+## 🌫️ Quiet Material Field
 
-O fundo Three.js (`initThreeBackground`, `script.js`) não é uma camada decorativa atrás do
-HTML: ele é **a fonte de verdade do chão global da página**. Em funcionamento normal com WebGL,
-as seções não pintam superfícies full-width próprias; elas apenas fornecem conteúdo, mídia,
-componentes e medidas de capítulo para o canvas.
+O background WebGL de desktop (`createThreeWorld`, em `script.js`) é um único campo material
+raymarched. A cena Three.js contém somente uma câmera ortográfica, um quad fullscreen e um
+`ShaderMaterial`: não há câmera em perspectiva, luzes de cena ou objetos 3D. Canvas, grão e
+vinheta ficam abaixo do conteúdo; textos, controles e componentes continuam no DOM real.
 
-### Document-Space Ground Field
+O canvas existe apenas acima de `915px`. Tablet, mobile e navegadores sem WebGL usam os fundos CSS
+existentes, sem perder conteúdo ou funcionalidade.
 
-O chão é definido por uma estrutura única em `script.js`, medida contra o DOM real:
+### Trilha material em document-space
 
-```js
-{ key: "quote", sel: ".quote", top: PALETTE.paper, bottom: PALETTE.paper, enter: 0, exit: 0 }
-```
+Cada capítulo real declara paleta e estado material. As posições vêm de `offsetTop` e
+`offsetHeight`, portanto acompanham a altura efetiva do DOM em vez de uma sequência de alturas
+fixas. A medição é refeita em `load`, `resize`, `orientationchange`, `document.fonts.ready`, por
+`ResizeObserver` e quando FAQ, Quote ou outro conteúdo expandido altera o documento.
 
-A sequência de ground é:
-
-`hero → standard → services → maintenance → floorcare → beforeafter → residential → impact → areas → testimonials → faq → quote → final-cta → footer`.
-
-Cada capítulo declara seletor, cores principais, variação top/bottom ou stops internos,
-transition-in e transition-out. As posições vêm de `offsetTop` / `offsetHeight`, não de alturas
-fixas. `measureGroundField()` recalcula a timeline em `load`, `resize`, `orientationchange`,
-`fonts.ready`, `ResizeObserver` e quando `scrollHeight` muda.
-
-No shader, cada fragmento resolve:
+No fragment shader, a posição vertical da viewport é convertida em posição do documento:
 
 ```glsl
-docY = uScrollY + viewportY;
-ground = sampleGroundField(docY);
+docY = scrollY + viewportY;
+palette = samplePaletteTrack(docY);
 ```
 
-Isso permite que uma única viewport mostre, no mesmo frame WebGL, o topo ainda em Paper e a base
-já em Navy, sem nenhum wrapper HTML pintando um segundo chão por cima.
+Assim, uma mesma viewport pode atravessar dois perfis sem costura, inclusive entre `916–1200px`.
+As cores são amostradas por fragmento nessa trilha vertical. Os demais parâmetros — relevo,
+polimento, juntas, câmera e atmosfera — são interpolados em JavaScript entre os centros reais dos
+capítulos medidos, com a mesma geometria do documento.
 
-### Ground vs Atmosphere
-
-**Ground** é a superfície base: Navy, Navy Dark, Paper, Ivory, Sand, Sage Soft, Petrol. Ele é
-espacialmente correto no documento e alimenta o shader, `sampleGround()`, polaridade, tinta
-adaptativa e custom properties públicas.
-
-**Atmosphere** é o que existe entre a câmera e essa superfície: a luz que a raspa, o ar que a
-distancia e as marcas que estão paradas dentro dela. Não há `THREE.Fog` e não há luzes na cena —
-nenhum material aqui responde a iluminação, são todos Basic — mas há profundidade de verdade, e
-ela é um termo do próprio shader. Ver *O ar* abaixo.
-
-Quote e Final CTA têm tratamento explícito no field: a Quote permanece Paper por toda a leitura
-do headline, progresso, formulário e sucesso; a Final CTA assume a sequência Petrol Deep →
-Petrol → Navy Dark; o Footer chega com Navy Dark já estabilizado.
-
-### Perfis atmosféricos por seção
-
-A identidade de um capítulo vivia espalhada em três listas que não se falavam: `groundChapters`
-diz onde o chão está, `stations` diz onde a lâmpada está, e o bloco de geometria diz onde a
-estrutura está. Nenhuma delas dizia **que tipo de ar existe entre a câmera e as três** — que é o
-que faz uma sala ser uma sala.
-
-`SECTION_PROFILES` é essa quarta tabela, indexada pelo mesmo seletor `.scroll-snap-section` que
-as outras usam. Cada estação resolve o seu perfil no boot (`st.profile`); as duas estações da
-Floor Care e as duas da FAQ dividem o perfil da seção, porque é uma sala só vista de dois pontos.
-
-| campo | o que decide |
-| :--- | :--- |
-| `fog` | a cor em que a profundidade resolve — sempre um token vizinho, nunca uma cor nova |
-| `density` | quanto ar existe |
-| `height` | onde no quadro o ar começa a ganhar corpo (0 = piso, 1 = teto) |
-| `falloff` | quanto acima disso ele leva para chegar à densidade cheia |
-| `base` | a laje achatada entre câmera e superfície, antes de qualquer horizonte |
-| `depth` | quanto a estrutura faz paralaxe neste capítulo |
-| `lightCap` | **a calibração de contraste**: o teto de `uGlowStrength` sob este capítulo |
-
-Todos os campos são interpolados entre os dois perfis em que a página está, pelo `blendAt` que já
-existia, no canal `surface`. Nenhum valor pula: um capítulo **se torna** o próximo.
-
-Duas regras que não são óbvias e custaram para achar:
-
-- **Em capítulo escuro a névoa é mais CLARA que o chão.** Perspectiva aérea leva as coisas em
-  direção à luz ambiente, não em direção à sombra. O rodapé começou com névoa Navy Dark sobre
-  chão Navy Dark: cinco linhas de shader e zero pixel. Uma sala só recua se houver para onde.
-- **`base` é pequeno de propósito.** Um véu uniforme sobre o quadro inteiro não é profundidade, é
-  alguém trocando a cor do chão — e cairia direto em cima de uma paleta aprovada. Quem lê como
-  espaço é o gradiente; o `base` é só a garantia de que ele não começa do nada.
-
-### O ar — profundidade dentro do shader
-
-```glsl
-float horizon  = clamp((fragUV.y - uFogHeight) / max(0.001, uFogFalloff), 0.0, 1.0);
-float airDepth = uFogBase + horizon * horizon;
-float air      = 1.0 - exp(-uFogDensity * airDepth * 1.8);
-col = mix(col, uFogColor, air);
-```
-
-Duas fontes de profundidade, e é o **mesmo ar**. A vertical é perspectiva aérea sobre uma
-superfície que recua: altura no quadro é distância, então a bruma engrossa em direção ao
-horizonte, e cresce com o quadrado porque o volume cresce. A achatada é a laje que o dolly abre
-entre a câmera e a superfície — `uFogBase` carrega o trilho. Beer-Lambert nas duas, que é a lei
-que `FogExp2` usa, aplicada à profundidade do quadro em vez de a `z`.
-
-**Aplicado depois da luz**, e a ordem é o efeito inteiro: o ar está entre a superfície e o olho,
-não sob a lâmpada. É por isso que um realce lá em cima no quadro aparece velado — e um realce
-velado é a única coisa que um degradê plano não consegue fingir.
-
-> ⚠️ **Por que não `THREE.Fog`.** O backdrop é um `ShaderMaterial` cru e material cru **ignora**
-> `scene.fog` — não há chunks de fog nele. A névoa que esta página declarava alcançava só os
-> objetos de linha e nunca alcançava o chão atrás deles: as duas metades da mesma sala discordavam
-> sobre quanto ar havia nela. Repor `scene.fog` seria repor exatamente esse desacordo.
-
-Os objetos recebem a **mesma lei**, calculada na CPU em `updateSpans()` com os uniforms como
-fonte única — `1 - exp(-density * (d / RAIL_STEP) * FOG_OBJ_K)` — tingindo a cor em direção à
-névoa e reduzindo a opacidade juntas. Uma marca que emerge do fundo emerge **do ar**, ganhando cor
-e peso ao mesmo tempo, em vez de subir de opacidade já saturada.
-
-> ⚠️ `1.8` é a profundidade óptica a horizonte cheio e densidade 1, e vive nos **dois lados do
-> espelho**: o literal no shader e `AIR_K` em `airAt()`. Mudar um sem o outro é a página medindo
-> uma luz em que não está.
-
-### A luz rasante e o acabamento da superfície
-
-O realce é uma **gaussiana elíptica** em coordenadas locais de um eixo rasante (≈ −18°, que se
-inclina acoplado ao `uGroundSkew` para que luz e chão concordem sobre o horizonte numa travessia).
-É o núcleo do modelo de Ward com os termos geométricos removidos — sem normais, o que sobrevive é
-a exponencial de duas projeções ortogonais com escalas independentes:
-
-```glsl
-sheen = exp(-( across²/uSheenAcross² + along²/uSheenAlong² ))
-```
-
-`uSheenAcross` e `uSheenAlong` são o αx e o αy de Ward, e **a razão entre eles é o acabamento da
-superfície** — isso não é metáfora: polir um piso é literalmente aumentar a anisotropia da sua
-BRDF. Uma superfície fosca espalha luz de forma quase isotrópica; uma brunida espalha alongada no
-eixo do ferramental.
-
-`uFinish` (0 → 1) percorre essa razão ao longo do trilho:
-
-| Trecho | `uFinish` | Realce |
+| Seção real | Paleta | Estado material |
 | :--- | :--- | :--- |
-| hero → maintenance (rail 0–3.4) | 0 | quase isotrópico, largo — próximo de propósito da mancha radial aprovada |
-| floorcare in→out (rail 3.4–6) | 0 → 1 | a elipse se estreita e alonga durante o capítulo sobre polimento |
-| beforeafter (rail 6) em diante | 1 | corrida especular limpa, **mantida** — um piso restaurado continua restaurado |
+| Hero / Standard | Navy Dark → Navy / Navy 2 | Fosco, névoa profunda e quatro forças quase imperceptíveis |
+| Services | Navy → Navy Dark | Relevo com mais ritmo e terraços suaves |
+| Maintenance | Paper → Ivory | Planos claros, recorrentes e de baixo contraste |
+| Floor Care | Navy Dark → Petrol Deep | Polimento crescente e juntas discretas |
+| Before / After | Paper → Sand | Passagem entre acabamento fosco e restaurado |
+| Residential | Ivory → Sage Soft | Sombra macia e relevo reduzido |
+| Impact | Sand | Cinco presenças suaves em torno de uma ausência central; pico exclusivo do `5:1` |
+| Areas | Navy → Navy Dark | Dissolução completa do `5:1`, sem símbolo residual |
+| Testimonials | Paper → Ivory | Campo calmo, ordenado e pouco especular |
+| FAQ | Paper → Sand | Terraços largos que se assentam |
+| Quote | Paper | Laje quase imóvel para o formulário |
+| Closing / Footer | Petrol → Navy → Navy Dark | Plano amplo e ordenado de fechamento |
 
-É a mesma escala Worn ↔ Restored que a régua `.ba-scale` mostra no DOM. O canal médio dos três
-relógios, `atmSurface`, carrega **duas coisas que andam juntas**: o acabamento da superfície e a
-densidade do ar. Um piso e o ar acima dele são o mesmo fato material e chegam no mesmo relógio.
+### Material, movimento e repouso
 
-> ⚠️ `uFinish` deriva do trilho, **nunca de um relógio**. Nada na atmosfera pode rodar no tempo,
-> ou o `wake`/`framesAtRest` nunca mais estaciona e um canvas fixo em tela cheia passa a custar um
-> frame para sempre.
+O raymarch combina relevo amplo e terraceado, névoa, oclusão, sombras curtas, reflexos
+anisotrópicos, grão e vinheta. O ponteiro produz apenas uma paralaxe mínima. Velocidade de scroll
+alimenta tempo e rotação; depois da rolagem, os seguidores amortecem até os limites de chegada e o
+loop estaciona, evitando draws contínuos numa página parada.
 
-#### O teto da luz é por capítulo
+Com `prefers-reduced-motion: reduce`, paralaxe, deriva e amortecimento são desligados. O shader
+recebe diretamente o estado estável correspondente ao scroll, sem animação residual.
 
-Conforme a elipse colapsa numa faixa, a mesma `glowStrength` autorada se espalha por uma fração
-da área e o pico sobe junto — que é como um capítulo que lê a própria tinta desta tela acaba com o
-chão empurrado através do limiar de polaridade com o texto ainda na tela.
+### Qualidade adaptativa e ciclo de vida
 
-Esse teto era um número só (`SHEEN_CEILING = 0.58`) para catorze capítulos com necessidades
-opostas. Agora é `profile.lightCap`, interpolado com o resto: baixo onde o tipo lê o canvas
-(`.standard`, `.beforeafter`, `.faq`, `.testimonials`, `.quote`), alto onde a folha de estilo fixa
-a tinta e a luz pode fazer o que a estação pedir.
+A resolução interna respeita limites de DPR, hardware e orçamento de pixels. Sob pressão de frame,
+o render scale desce em níveis; quando há margem estável, volta com cautela. Essa adaptação altera
+somente a resolução do canvas, nunca layout, medidas do documento ou a resolução da interface.
 
-**É aqui que contraste se calibra** — por seção, na luz — em vez de mexer numa cor de chão que uma
-dúzia de outras coisas está pisando.
+O boot valida o primeiro frame antes de publicar o canvas. A renderização pausa com a aba oculta,
+responde a `webglcontextlost` e reconstrói os recursos em `webglcontextrestored`.
 
-#### Escuro↔claro é transformação, não crossfade
+### Paleta, contraste e ponte canvas → CSS
 
-O par de perfis resolve no trilho de **superfície**; a luz, no de **luz**. O `CHANNEL_LEAD` separa
-os dois por alguns por cento de intervalo, e essa defasagem é o efeito:
+A polaridade vem da paleta e do perfil material da seção. Limites de iluminação impedem que
+reflexos ou névoa atravessem o envelope de contraste reservado ao conteúdo; a decisão de tinta não
+depende do antigo sampler de glow.
 
-| travessia | o que acontece primeiro | como se lê |
-| :--- | :--- | :--- |
-| escuro → claro | a luz entra (`light` lidera 0.09) e o ar rareia atrás dela | iluminação chegando e queimando a bruma |
-| claro → escuro | o ar ganha corpo (`surface` lidera 0.09) e a lâmpada responde | a sala muda antes da lâmpada |
-| mesma polaridade | quase nada | três temperaturas de um material, não três fundos |
+Continuam públicos os contratos `.no-canvas`, `data-webgl-state`, `data-canvas-ink` e
+`--canvas-*`. Elementos adaptativos recebem a tinta correspondente ao capítulo medido; no fallback,
+o CSS reafirma cores concretas e legíveis.
 
-Duas imagens sendo misturadas não conseguem fazer isso. Uma densidade e uma intensidade mudando em
-ordens diferentes conseguem — e a ordem é o que o olho lê.
+### Fallback e dependência local
 
-### Adicionar luz a Paper não faz nada — os flancos
-
-Sete dos catorze capítulos ficam sobre chão claro, onde os canais já estão no teto e um realce
-aditivo satura em branco. Também não é assim que uma luz rasante se lê num piso pálido: ali a
-faixa não é mais clara que o branco, o **entorno é mais fundo**.
-
-Então em chão claro a mesma elipse *escava* em vez de somar: um segundo lobo, 2.6× mais largo no
-mesmo eixo, subtraído onde excede o núcleo — portanto exatamente zero na linha de centro. Ele
-multiplica o próprio chão, não uma cor fixa, para aprofundar a superfície sem tingi-la. O peso
-`carve` é 0 em navy e 1 em paper, medido no chão **antes** da luz.
-
-### Grão e dither
-
-O grão direcional (lento ao longo do eixo, rápido através dele) usa o **Hash without Sine** de
-Dave Hoskins, não o `fract(sin(dot(...)) * 43758.5)` canônico: `sin` com argumento grande é
-definido pela implementação e dá grão diferente por driver. Ele só aparece **dentro** do realce —
-uma superfície só mostra suas marcas onde a luz a raspa — e some em mobile e reduced-motion.
-
-O chão vai de `#071B2E` a `#102A43` ao longo de uma viewport: nove passos de 8 bits em vermelho e
-vinte e um em azul. Isso é banding de manual, e quem vinha mascarando era o overlay `.grain` do
-CSS. Agora há **dither TPDF** no shader (dois samples de Interleaved Gradient Noise somados),
-ancorado em `gl_FragCoord` para não cintilar com o scroll — e por isso o `--grain-o` do CSS pôde
-cair de .035–.075 para .024–.054.
-
-### A estrutura — três marcas, três profundidades
-
-Cortar quinze arames para um só acertou o **peso** e errou a **contagem**: o dolly percorre 224
-unidades (de `z 20` a `z -204`) e encontrava uma coisa só, no fim de tudo. O espaço tinha destino
-e não tinha extensão.
-
-| | `z` | atravessada em | o que é |
-| :--- | ---: | :--- | :--- |
-| **CORNERS-A** | −60 | Standard → Floor Care | as cantoneiras de registro, mais largas que altas |
-| **DIAMOND-B** | −124 | Floor Care out → Impact | o losango sozinho, maior que a viewport |
-| **FOURPOINT-C** | −184 | Areas → Quote | a marca de registro completa |
-
-Nenhuma anima: a escala é o dolly e o dolly é o scroll. Nenhuma carrega cor própria — cada uma
-toma a cor da luz que está atravessando a página e é então **tomada pelo ar** que está entre ela e
-a câmera, que é toda a diferença entre um objeto na sala e um objeto desenhado na parede. A câmera
-as encontra em sequência, e encontrar coisas em sequência é o que faz uma profundidade ler como um
-espaço contínuo em vez de um fundo que muda.
-
-`spanFade()` é a **janela de visibilidade** — decide se o objeto está em jogo — e o ar decide
-quanto dele sobrevive à distância. Dois trabalhos; antes eram um.
-
-### ⚠️ Espaço de cor: não "consertar"
-
-O importmap fixa `three@0.128.0`, que **não exporta** `SRGBColorSpace`, `outputColorSpace` nem
-`ColorManagement` (zero ocorrências no build). Sem gerenciamento de cor, `new THREE.Color(0x102A43)`
-guarda os canais sRGB crus e o shader os escreve crus — e é isso que faz `PALETTE.navy` na tela
-ser byte a byte o `--navy: #102A43` do CSS. `relLuminance()` lineariza onde linearizar importa (ao
-medir contraste) e em nenhum outro lugar. Não subir a versão do three sem re-derivar todos os
-chãos.
-
-### Ponte canvas → CSS
-
-O JS publica leituras da luz como custom properties registradas: `--canvas-lum`, `--canvas-pol`,
-`--canvas-glow`, `--canvas-air`, `--grain-o`. Delas o CSS deriva `--canvas-ink`,
-`--canvas-strong`, `--canvas-rule`, `--canvas-muted`, `--canvas-accent`, `--canvas-halo` e
-`--canvas-envelope`.
-
-`--canvas-air` é quanto ar o canvas está segurando entre o leitor e o chão no centro do quadro,
-vindo de `airAt(0.5)`. O DOM não enxerga um termo de shader, e uma hairline é a primeira coisa que
-ar espesso dissolve — então `--canvas-rule` e `--canvas-rule-soft` são puxadas um pouco de volta
-em direção à tinta, proporcionalmente ao ar à frente delas.
-
-> Com `initial-value: 0` — que aqui é estrutural — ninguém escreve essa property sem canvas, o
-> reforço resolve em exatamente zero e os blocos `.no-canvas` continuam byte a byte o que eram.
-
-> ⚠️ Uma custom property é substituída **no elemento que a declara**. Por isso o bloco de
-> derivações aparece em `:root, [data-canvas-ink]` — e por isso o fallback `.no-canvas` reafirma
-> os valores concretos em vez de só virar `--canvas-pol`.
-
-Elementos com `data-canvas-ink` são amostrados **na própria posição**, não no centro da viewport:
-durante uma travessia o cabeçalho do Before/After está perto da borda inferior, onde a luz já
-está um capítulo à frente do meio. Hoje são `.ba-head`, `.ba-scale`, `.ba-caption` e `.ba-notes`.
-`.faq-intro` **não** é um deles de propósito: é `position: sticky`, e o offset de layout de um
-elemento sticky não é onde ele está na tela.
-
-### ⚠️ Regra crítica: o sampler espelha o shader
-
-`sampleGround()` usa o mesmo Document-Space Ground Field do shader e soma os termos atmosféricos
-que interferem na luminância. É dele que vive a tinta adaptativa da `.standard` e a legibilidade
-dos elementos com `data-canvas-ink`. **Todo termo novo que altere luminância no shader precisa ser
-espelhado lá** — senão a página mede uma luz em que não está.
-
-O realce e os flancos vivem em **espaço de frame** (`gl_FragCoord.xy / uResolution`, y para cima,
-que é a convenção em que `glowPos` é autorado), não no uv do plano do backdrop. Isso não é
-detalhe: o plano tem 220 unidades de largura e a viewport ocupava cerca de um décimo dele, então
-no uv toda posição autorada caía muito fora do frame visível e só a cauda da queda aparecia. Em
-espaço de frame o espelho na CPU é `screenX / viewW` e `1 - screenY / viewH` — shader e sampler
-não têm mais como discordar sobre onde um pixel está, e o `halfHCache`/`halfWCache` que
-reconstruía o mapeamento antigo deixou de existir.
-
-**O ar é o exemplo vivo dessa regra.** Ele desloca luminância de forma **sistemática** — num
-capítulo escuro levanta o topo do quadro em direção à bruma, num de papel abaixa, e nos dois casos
-por uma quantidade fixa, não em torno de zero. Um cabeçalho parado em ar espesso está sobre um chão
-diferente do mesmo cabeçalho no piso do quadro, e a tinta precisa ser avisada. Por isso `airAt()`
-existe em função separada: shader, `sampleGround()` e `--canvas-air` leem a mesma conta.
-
-**Dois termos não são espelhados, de propósito:** o grão e o dither. Ambos são de média zero por
-construção — `(g - 0.5)` e `(d1 + d2 - 1)` — e limitados, o grão a 0.03 em unidades de cor e o
-dither a um passo de 8 bits. A contribuição esperada de cada um para a luminância é nula e nenhum
-tem amplitude para virar polaridade sozinho. Qualquer termo novo que **não** seja de média zero
-precisa ser espelhado.
-
-Como verificar o espelho na prática: `--canvas-lum` publicado no `:root` é exatamente o retorno de
-`sampleGround()` no centro da viewport. Compare com a luminância relativa do pixel central de um
-screenshot, num ponto sem DOM por cima. Divergência acima de ~0.02 significa espelho quebrado.
-
-### ⚠️ Repouso: todo estado atmosférico precisa chegar
-
-`dampTo` e `springStep` são **assintóticos**: fecham uma fração da distância por segundo e nunca
-chegam de fato. Num loop que estaciona, esse resto é a diferença entre uma página parada e um
-frame para sempre por uma mudança que ninguém vê. Já custou caro uma vez — a cauda de `inkTemp`
-mantinha a página acordada por mais dez segundos depois de tudo assentar.
-
-Então cada seguidor atmosférico tem um epsilon de chegada explícito, na unidade em que ele se
-move, e abaixo dele o valor é **snapado**:
-
-| valor | epsilon | unidade |
-| :--- | ---: | :--- |
-| `atmLight` / `atmSurface` / `atmDepth` | `EPS_SCROLL` 0.5 | pixel de documento |
-| `camRail` | `EPS_RAIL` 0.0015 | unidade de trilho |
-| `uGroundSkew` | `EPS_SKEW` 0.25 | pixel de documento |
-| `scrollVel` | `EPS_VEL` 6 | px/s |
-| `uFogDensity` | `EPS_FOG` 0.0015 | fração de mistura |
-| `uFogHeight` / `uFogFalloff` / `uFogBase` | `EPS_FOG_GEO` 0.002 | frame space |
-| `uFogColor` | `EPS_FOG_COL` 0.002 | por canal |
-
-Um epsilon só para todos seria errado: pixel de documento, passo de trilho e densidade de névoa
-são três escalas diferentes.
-
-> ⚠️ Nos três canais o snap precisa zerar **`v` junto com `x`**. `springStep` carrega velocidade —
-> snapar só a posição faz o passo seguinte empurrar de volta para fora do alvo, e o resíduo nunca
-> morre.
-
-A soma de repouso em `updateFromScroll` soma os resíduos **já snapados**, então ela alcança um zero
-de verdade em vez de um número cada vez menor que nunca cruza `REST_EPSILON`. O ar entra pesado
-(`fogRest * 60`) porque suas unidades são frações de mistura, não pixels.
-
-Como medir: envolver `gl.drawArrays` / `gl.drawElements` num contador e conferir **0 draws** em
-três janelas de 3s consecutivas com a página parada.
-
-### Fallback sem WebGL
-
-Se o contexto não vier, `initThreeBackground` marca `document.documentElement` com `.no-canvas` e
-o CSS devolve chão sólido coerente às seções. O fallback não tenta reproduzir animações, seams ou
-glows complexos; ele preserva contraste e leitura quando a superfície WebGL não existe.
-
-> Para exercitar esse caminho, bloqueie o contexto **antes** do módulo carregar, e cubra as três
-> variantes: `webgl2`, `webgl` e `experimental-webgl`. Um filtro que só testa `indexOf('webgl')
-> === 0` deixa passar `experimental-webgl`, o three obtém contexto e o fallback nunca dispara.
-
----
-
-### `background.html` está obsoleto
-
-`background.html` é o laboratório de uma passagem anterior desta atmosfera: dez estações, um único
-glow radial, sem Document-Space Ground Field, sem spans e sem tinta adaptativa. Ele **não espelha**
-o `script.js` e não é servido em produção. Trate-o como registro histórico, não como referência.
+O renderer importa somente `assets/vendor/three-r128.module.js`. Não há CDN, asset externo ou nova
+dependência. Se WebGL não inicializar ou o primeiro frame falhar, `.no-canvas` permanece ativa e
+`data-webgl-state` registra o estado de fallback enquanto os fundos CSS preservam a paleta e a
+leitura da página.
 
 ---
 
@@ -451,8 +194,8 @@ Um único `<dl>` de rows label/valor com hairlines aparece três vezes e **nunca
 | `PL—02 Case` | `.ba-notes` | notas de leitura na margem da prancha |
 | assurance index | `.faq-assurance` | segunda massa que equilibra o accordion |
 
-Só a tinta muda, e ela vem de `--canvas-*`. Essa repetição é o argumento inteiro: três decorações
-diferentes leem como três seções que receberam trabalho; um componente em três chãos lê como uma
+Só a tinta muda, e ela vem de `--canvas-*`. Essa repetição é o argumento inteiro: três blocos
+técnicos diferentes leem como três seções que receberam trabalho; um componente em três chãos lê como uma
 publicação com estilo de casa para informação técnica.
 
 No mobile (≤767px) ele empilha — label acima do valor — porque duas colunas em 346px deixam o
@@ -464,8 +207,8 @@ valor com ~250px e transformam "Greater Boston & Massachusetts" em três linhas 
 
 No Desktop amplo a página deixa de ser uma coluna contínua de seções com alturas próprias e passa a
 ser uma sequência de cenas: **um capítulo, uma viewport**. Quando o scroll estabiliza, uma única
-seção domina o frame de ponta a ponta. A única camada que ainda atravessa a fronteira é a atmosfera
-WebGL — isso é intencional, porque ela não sabe onde as seções terminam.
+seção domina o frame de ponta a ponta. A única camada que ainda atravessa a fronteira é o campo
+material WebGL — a interpolação contínua entre perfis é intencional.
 
 Tudo vive em **um único bloco** no fim de `style.css` (`/* 21. DESKTOP FULL-VIEWPORT / SCROLL SNAP */`),
 depois do bloco Mobile.
@@ -506,8 +249,8 @@ conteúdo é escondido, cortado ou removido para caber: a compressão vem de qua
 
 1920×1080 respira, 1440×900 fica confortável, 1366×768 se aperta sozinho — sem media query extra e
 sem tocar em `font-size`. Onde padding e gap não bastaram, quem cedeu foi a mídia, sempre mantendo
-proporção: a foto da Residential ganhou altura em `dvh`, o radar da Areas escala com `52dvh`, e o
-frame do Before/After troca a proporção por altura de viewport (`3/2` → `16/9` ≤980px → `2/1`
+proporção: a foto da Residential ganhou altura em `dvh`, o bloco de Areas se compacta, e o frame
+do Before/After troca a proporção por altura de viewport (`3/2` → `16/9` ≤980px → `2/1`
 ≤820px), mantendo a mesma largura de prancha e apenas ampliando o crop de um `background: cover`.
 Tipografia só foi ajustada em *leading*, e em `max-height:880px` há uma densificação pontual da
 microcópia dos cards de serviço.
@@ -531,22 +274,20 @@ que estados expandidos de FAQ e Quote continuem estáveis durante a leitura.
 
 O `transform` nunca é aplicado na própria `.scroll-snap-section`: Hero anima `.hero-content`, os
 capítulos regulares animam seu `.container` direto e a Closing Scene anima apenas `.final-cta` e
-`.site-footer`. Assim a geometria do snap e as medições do documento não mudam. Essa camada não cria
+`.site-footer`. Assim o layout do snap e as medições do documento não mudam. Essa camada não cria
 listeners de scroll e não toca no canvas WebGL. Navegadores sem View Timelines mantêm o snap nativo;
 com `prefers-reduced-motion: reduce`, todo o bloco Desktop Scroll Snap continua inativo.
 
-### Relação com o Document-Space Ground Field
+### Relação com a trilha material em document-space
 
-Nada foi hardcoded no Three.js. `measureGroundField()` e `measureRail()` continuam lendo
-`offsetTop` / `offsetHeight` reais, e a remedição existente já cobre as novas alturas: `resize`,
-`load`, `fonts.ready`, `ResizeObserver` e a checagem por frame de `scrollHeight` em
-`updateFromScroll` — que é exatamente o que captura o FAQ abrindo. O canvas continua acompanhando o
-`scrollY` real; não existe animação de background específica para o snap.
+Nada é posicionado por uma sequência fixa no Three.js. A trilha lê `offsetTop` / `offsetHeight`
+reais e a remedição cobre `resize`, `load`, `fonts.ready`, `ResizeObserver` e mudanças de
+`scrollHeight`, incluindo FAQ aberto e etapas da Quote. O canvas acompanha o `scrollY` real; não há
+uma animação de background específica para o snap.
 
-O mesmo seletor serve de chave em três lugares: `groundChapters` (chão), `stations` (luz) e
-`SECTION_PROFILES` (ar, profundidade e teto de contraste). Renomear ou remover uma
-`.scroll-snap-section` desalinha os três de uma vez — o chão some da timeline, a estação perde
-âncora e o perfil cai no `DEFAULT_PROFILE`, que mantém o ar da página mas para de mudá-lo.
+Os seletores de capítulo são a chave comum entre DOM, paleta e perfil material. Ao renomear ou
+remover uma `.scroll-snap-section`, atualize a entrada correspondente na trilha para manter cor,
+contraste e estado material alinhados.
 
 ### ⚠️ Duas armadilhas ao editar
 
@@ -770,10 +511,8 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
   uma especialidade. Um dos três picos visuais do site.
 - **Composição (desktop):** manifesto à esquerda — eyebrow, `Polishing. Waxing. Restoring.`, uma
   frase de manifesto, badge de domingo e CTA — e, na margem direita, o **dossiê `FC—01`**
-  (`.spec-list`) impresso sobre a fotografia. Atrás dele, `.fc-figure`: a marca 4POINTS desenhada
-  como construção (`--mark-figure`, eixos que passam do losango, nós abertos, círculo inscrito) em
-  escala arquitetônica, **registrada à informação** — seu eixo vertical cai na borda esquerda do
-  dossiê e o horizontal no centro dele.
+  (`.spec-list`) impresso sobre a fotografia. Acima de `915px`, a composição mantém somente
+  conteúdo e fotografia; os ornamentos de construção ficam restritos às regras tablet/mobile.
 - **A costura, feita com alpha:** o `background-color` sólido saiu. A fotografia (`::before`) e o
   scrim (`::after`) compartilham `--fc-mask` e **perdem alpha** nas duas pontas, revelando o
   canvas. Não existe faixa de cor em lugar nenhum porque a camada de cima perde alpha em vez de
@@ -785,17 +524,14 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 > alturas — tinta branca sobre fotografia dissolvendo sobre canvas clareando. Não mexa em um sem
 > o outro.
 
-- **Planos:** `initFloorParallax` faz uma única leitura de scroll e escreve `--parallax` (foto),
-  `--fc-figure` (a figura, em sinal oposto: é isso que os faz ler como distâncias diferentes),
-  `--fc-enter` e `--fc-exit`. Os dois últimos são escritos **também sob `prefers-reduced-motion`**:
-  não são movimento, são a costura.
-- **É o capítulo com mais ar da página** (`density: 0.72`, névoa em Haze sobre chão Navy Dark) e
-  também onde `uFinish` percorre de 0 a 1. Luz baixa subindo do piso do quadro, bruma petróleo
-  enchendo o alto e a elipse se estreitando: os três dizem a mesma coisa, que é o que este
-  capítulo vende.
+- **Planos:** `initFloorParallax` mantém o deslocamento da fotografia e escreve também as variáveis
+  de entrada/saída usadas pela costura. Sob `prefers-reduced-motion`, a foto não deriva e a máscara
+  é resolvida diretamente no estado estável.
+- **Campo material:** Navy Dark passa a Petrol Deep enquanto o polimento cresce e juntas discretas
+  aparecem. O efeito nasce no raymarch e não adiciona decoração ao DOM.
 - **Mobile:** o pôster vertical continua intacto; a fotografia recebe o pôster mais o próprio
-  dissolve (`92svh + 210px`) e o dossiê continua abaixo, sobre o canvas, como a próxima página do
-  mesmo capítulo.
+  dissolve (`92svh + 210px`) e o dossiê continua abaixo, sobre o fallback CSS, como a próxima
+  página do mesmo capítulo.
 
 ![Especialistas em Cuidados com Pisos](/home/https/.gemini/antigravity-ide/brain/ce12fde1-0eb2-4d3d-947c-877d16257892/section_5_floor_care_banner_1786379340053.png)
 
@@ -804,11 +540,10 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 ### 6. Before / After — Editorial Case Study (`.section.beforeafter`)
 
 - **Função narrativa:** a Floor Care afirma a especialidade; aqui ela é provada.
-- **A prancha:** `.ba-board` é um grid de 12 colunas com hairline em cima e embaixo e cantoneiras
-  de registro (`.cornered`). Cabeçalho e prancha ocupam as colunas 1–8; as **notas de leitura**
-  (`PL—02`, `.spec-list`) ficam na margem, colunas 9–12, alinhadas à base. A seção não pinta chão:
-  o Paper é o canvas, e o anel que nasceu atrás da fotografia da Floor Care está aqui, grande o
-  bastante para sangrar pelas duas bordas.
+- **A prancha:** `.ba-board` é um grid de 12 colunas. Cabeçalho e comparador ocupam as colunas 1–8;
+  as **notas de leitura** (`PL—02`, `.spec-list`) ficam na margem, colunas 9–12, alinhadas à base.
+  A seção não pinta um fundo full-width: o campo material atravessa Paper → Sand e conduz a
+  passagem visual entre fosco e restaurado.
 - **A escala:** `.ba-scale` é uma régua com marcas; a leitura (`50`) cavalga o divisor via
   `--ba-x` e deixa cair uma hairline até a prancha. Número e divisor são um objeto só.
 - **A seção responde à proporção:** `setPosition` escreve `--ba-x` e `--ba-split` em `.ba-board`.
@@ -822,7 +557,7 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 
 > ⚠️ **Não regredir:** `.ba-range` (`position:absolute; inset:0; opacity:0; z-index:5`) **é** a
 > superfície de arraste. O `pointerdown` do frame retorna cedo quando o alvo é o input e o range
-> nativo cuida de drag, touch e teclado. Preservar geometria, `aria-label` e `touch-action`.
+> nativo cuida de drag, touch e teclado. Preservar dimensões, `aria-label` e `touch-action`.
 
 ![Comparador Antes / Depois de Pisos](/home/https/.gemini/antigravity-ide/brain/ce12fde1-0eb2-4d3d-947c-877d16257892/section_6_before_after_slider_1786379476368.png)
 
@@ -839,6 +574,8 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 ### 8. Impacto Social (`.section.impact`)
 
 - **Design:** Contador animado de proporção `5:1` (A cada 5 limpezas contratadas, 1 limpeza gratuita é oferecida para pacientes em situação de vulnerabilidade). Parceria humanitária com a organização **PPEAL**.
+- **Campo material:** cinco presenças suaves cercam uma ausência central somente neste capítulo; o
+  motivo começa a se dissolver antes de Areas.
 
 ![Impacto Social e Parcerias](/home/https/.gemini/antigravity-ide/brain/ce12fde1-0eb2-4d3d-947c-877d16257892/section_8_social_impact_1786379828526.png)
 
@@ -846,7 +583,9 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 
 ### 9. Áreas Atendidas (`.section.areas`)
 
-- **Design:** Apresentação do conceito de Serviço 100% Móvel. Gráfico animado no estilo radar SVG que ilustra o alcance de atendimento na região de Greater Boston e estado de Massachusetts.
+- **Design:** Apresentação do conceito de Serviço 100% Móvel e da cobertura em Greater Boston e
+  Massachusetts. No desktop, o campo Navy → Navy Dark encerra completamente o motivo `5:1`; a
+  ilustração ornamental existente permanece restrita a `≤915px`.
 
 ![Áreas de Atendimento e Raio Móvel](/home/https/.gemini/antigravity-ide/brain/ce12fde1-0eb2-4d3d-947c-877d16257892/section_9_areas_serve_1786380011203.png)
 
@@ -869,13 +608,12 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
   accordion sem virar sete cards. À direita, a lista, com a estrutura de rows e o ARIA intactos.
 - **Estados:** a pergunta aberta troca para Fraunces e ganha a régua champagne, o deslocamento e
   um wash que se apaga bem antes da borda da coluna (um wash, não um painel). O controle `+`
-  responde à mesma régua champagne em vez de virar um botão preenchido de aplicativo. A resposta
-  pendura numa hairline própria com um nó no início.
-- **Profundidade:** vem toda do canvas — um losango de quatro pontos maior que a viewport,
-  entrando e saindo do frame conforme a câmera viaja. Não há nada decorativo no DOM aqui.
-- **Encerramento:** FAQ e Quote permanecem sobre chão claro no Document-Space Ground Field. A
-  entrada dark só começa depois da leitura da Quote, na Final CTA, onde o próprio field assume
-  Petrol Deep → Petrol → Navy Dark.
+  responde à mesma régua champagne em vez de virar um botão preenchido de aplicativo.
+- **Profundidade:** vem do Quiet Material Field, com terraços largos que se assentam sob o conteúdo
+  e sem ornamentos adicionais no desktop.
+- **Encerramento:** FAQ e Quote permanecem sobre campo claro na trilha document-space. A entrada
+  escura só começa depois da leitura da Quote, na Final CTA, onde o perfil assume Petrol → Navy →
+  Navy Dark.
 - **Mobile:** coluna única, intro não-sticky, e o índice de confiança **condensado a 3 linhas**
   acima das perguntas — seis empurrariam a primeira pergunta para fora da tela, que é a única
   coisa que esta seção não pode fazer.
@@ -906,6 +644,8 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 - **HTML5 Semântico:** `<header>`, `<main>`, `<section>`, `<article>`, `<footer>` com acessibilidade ARIA completa.
 - **Vanilla CSS:** Sem dependências externas de frameworks CSS (Tailwind ou Bootstrap), proporcionando desempenho máximo e controle total sobre o design system.
 - **Vanilla JavaScript (ES6+):** Código limpo em IIFE, modularizado e focado em eventos passivos e `IntersectionObserver`.
+- **Three.js r128 local:** câmera ortográfica, quad fullscreen e raymarch do Quiet Material Field em
+  `assets/vendor/three-r128.module.js`, sem CDN.
 - **Google Fonts:** Fraunces e Manrope.
 
 ---

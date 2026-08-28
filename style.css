@@ -185,13 +185,14 @@
       overflow-x: hidden;
     }
 
-    #main {
+    #main,
+    .closing-scene {
       position: relative;
-      z-index: 1;
+      z-index: 3;
     }
 
     /* =========================================================
-       02a. THREE.JS CONTINUOUS CANVAS & ATMOSPHERE
+       02a. QUIET MATERIAL FIELD LAYERS
        ========================================================= */
     #canvas-fixed {
       position: fixed;
@@ -201,10 +202,56 @@
       z-index: 0;
       display: block;
       pointer-events: none;
+      visibility: hidden;
+      opacity: 0;
+      transition: opacity .8s var(--ease);
+    }
+
+    html[data-webgl-state="ready"]:not(.no-canvas) #canvas-fixed {
+      visibility: visible;
+      opacity: 1;
+    }
+
+    #canvas-grain,
+    #canvas-vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      visibility: hidden;
+      opacity: 0;
+    }
+
+    #canvas-grain {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    #canvas-vignette {
+      z-index: 2;
+      background: radial-gradient(120% 90% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, .22) 100%);
+      mix-blend-mode: multiply;
+    }
+
+    @media (min-width:916px) {
+      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-grain,
+      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-vignette {
+        visibility: visible;
+      }
+
+      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-grain {
+        opacity: .11;
+      }
+
+      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-vignette {
+        opacity: .8;
+      }
     }
 
     @media (max-width:915px) {
-      #canvas-fixed {
+      #canvas-fixed,
+      #canvas-grain,
+      #canvas-vignette {
         display: none;
       }
     }
@@ -460,7 +507,7 @@
     /* =========================================================
    02b. DEPTH UTILITIES: registration corners, watermark
    ========================================================= */
-    /* The depth class keeps content above the continuous canvas. */
+    /* The depth class keeps content above the material field. */
 
     .depth>.container {
       position: relative;
@@ -2271,10 +2318,9 @@
    measurement scale that reports where the divider is standing, and reading
    notes in the margin that say what is being looked at.
 
-   The section paints no ground of its own. Paper here is the canvas, which has
-   been travelling since the Floor Care photograph began to dissolve — so the
-   ring that was a small far circle behind that photograph is the same ring,
-   now large enough to run off both edges, sitting behind this board.
+   The section paints no ground of its own. Paper comes from the document-space
+   material track as the Floor Care photograph dissolves, keeping the board on
+   one continuous surface instead of introducing a painted seam.
 
    The two photographs are the same lobby from the same camera position. That is
    the whole argument, so nothing is done to them that would weaken it: the worn
@@ -2294,9 +2340,9 @@
     .ba-board {
       display: grid;
       grid-template-columns: repeat(12, minmax(0, 1fr));
-      column-gap: clamp(20px, 2.25vw, 34px);
-      row-gap: clamp(22px, 2.7vw, 38px);
-      padding: clamp(28px, 3vw, 46px) clamp(22px, 2.4vw, 38px);
+      column-gap: clamp(22px, 2.1vw, 32px);
+      row-gap: clamp(24px, 2.4vw, 36px);
+      padding: clamp(30px, 3vw, 44px) clamp(24px, 2.6vw, 40px);
       border-top: 1px solid var(--canvas-rule);
       border-bottom: 1px solid var(--canvas-rule);
       --corner: var(--canvas-rule);
@@ -2357,11 +2403,11 @@
       align-self: center;
       min-width: 0;
       --corner: var(--canvas-rule);
-      /* The equal-and-opposite margins lift the card by 6px without changing
+      /* The equal-and-opposite margins lift the card by 8px without changing
          the grid track: its optical centre now follows the image, rather than
          the scale-and-caption envelope around it. */
-      margin-block: -6px 6px;
-      padding: clamp(22px, 1.9vw, 26px) clamp(24px, 2.15vw, 30px);
+      margin-block: -8px 8px;
+      padding: clamp(20px, 1.75vw, 24px) clamp(22px, 2vw, 28px);
       background: color-mix(in srgb, var(--paper) 82%, transparent);
       border: 1px solid var(--canvas-rule);
       border-radius: var(--radius-sm);
@@ -2381,7 +2427,7 @@
       grid-template-columns: auto minmax(0, 1fr) auto;
       align-items: end;
       gap: 14px;
-      margin-bottom: clamp(20px, 1.9vw, 24px);
+      margin-bottom: clamp(16px, 1.55vw, 20px);
       font-size: .62rem;
       letter-spacing: .17em;
       text-transform: uppercase;
@@ -2464,7 +2510,7 @@
     }
 
     .ba-caption {
-      margin-top: clamp(14px, 1.35vw, 16px);
+      margin-top: clamp(12px, 1.1vw, 14px);
       font-family: var(--font-serif);
       font-style: italic;
       font-size: .95rem;
@@ -3236,10 +3282,9 @@
    it and holds the composition, so the density comes from proportion and
    typography rather than from seven boxes.
 
-   The depth comes from the canvas: a four-point figure larger than the
-   viewport, entering and leaving the frame as the camera travels, with the
-   accordion perfectly stable in front of it. There is nothing decorative in
-   the DOM here at all.
+   On desktop, depth comes from the broad terraces of the Quiet Material Field;
+   the accordion remains stable in front of it. Legacy construction nodes stay
+   available only in the <=915px edition.
    ========================================================= */
     .faq {
       background: transparent;
@@ -5239,8 +5284,12 @@
         grid-row: auto;
       }
 
+      .ba-head {
+        margin-bottom: 0;
+      }
+
       .ba-scale {
-        margin-bottom: 18px;
+        margin-bottom: 16px;
         font-size: .58rem;
       }
 
@@ -5253,7 +5302,7 @@
       }
 
       .ba-caption {
-        margin-top: 16px;
+        margin-top: 14px;
         font-size: .9rem;
       }
 
@@ -6809,16 +6858,16 @@
          the height of the room — same width, a wider crop of the same
          photograph, which is already a cover background. */
       .ba-board {
-        padding-block: clamp(18px, 2.7dvh, 48px);
-        row-gap: clamp(16px, 2.6dvh, 40px);
+        padding-block: clamp(20px, 2.7dvh, 44px);
+        row-gap: clamp(18px, 2.4dvh, 36px);
       }
 
       .ba-scale {
-        margin-bottom: clamp(14px, 2.2dvh, 26px);
+        margin-bottom: clamp(16px, 1.8dvh, 20px);
       }
 
       .ba-caption {
-        margin-top: clamp(10px, 1.7dvh, 18px);
+        margin-top: clamp(12px, 1.4dvh, 14px);
       }
 
       @media (max-height:980px) {
@@ -7036,5 +7085,74 @@
         .card-tag {
           padding: 5px 11px;
         }
+      }
+    }
+
+    /* =========================================================
+       QUIET MATERIAL FIELD — DESKTOP ORNAMENT CLEANUP
+
+       The field now carries the desktop atmosphere. Keep the legacy visual
+       vocabulary available to the tablet/mobile edition, but do not layer it
+       over the raymarched material on viewports where WebGL is active.
+       ========================================================= */
+    @media (min-width:916px) {
+
+      .watermark,
+      .fc-figure,
+      .impact-viz,
+      .areas-graphic,
+      .section-joint {
+        display: none;
+      }
+
+      .cornered::before,
+      .cornered::after,
+      .eyebrow::before,
+      .eyebrow::after,
+      .hero-panel .hero-index::before,
+      .pillars::after,
+      .pillar::before,
+      .pillar-num::after,
+      .service-card::after,
+      .spec-plate::after,
+      .spec-list::before,
+      .residential::before,
+      .residential-media::before,
+      .residential-media::after,
+      .mobile-menu::after,
+      .footer-col h4::after,
+      .footer-joint::before,
+      .footer-joint::after,
+      .footer-joint > span,
+      .faq-a p::before {
+        display: none;
+      }
+
+      .ba-board {
+        border-top: 0;
+        border-bottom: 0;
+      }
+
+      /* The FAQ keeps its accordion dividers and interaction states; only the
+         construction rule and node attached to the answer are removed. */
+      .faq-a p {
+        margin-left: 0;
+        padding-left: 0;
+        border-left: 0;
+      }
+
+      /* With the radar gone, Areas becomes a deliberate reading column rather
+         than retaining an empty half of the former two-column composition. */
+      .areas-inner {
+        grid-template-columns: minmax(0, 760px);
+        justify-content: start;
+      }
+
+      .areas-inner > div:first-child {
+        max-width: 760px;
+      }
+
+      .areas p {
+        max-width: 60ch;
       }
     }

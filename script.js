@@ -42,6 +42,28 @@
     return () => { if (!ticking) { ticking = true; requestAnimationFrame(run); } };
   };
 
+  /* ---------- shared: trailing debounce ----------
+     For work that must not run per frame and must not run per event either —
+     re-measuring line boxes after a drag-resize, for one. */
+  const debounce = (handler, wait) => {
+    let timer = 0;
+    return (...args) => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => handler(...args), wait);
+    };
+  };
+
+  /* ---------- shared: the Before/After divider, published ----------
+     The native range remains the single source of truth for the comparison.
+     This is only a read channel: the optional WebGL plate subscribes to where
+     the divider is, and never writes back to it. */
+  let baPosition = 0.5;
+  const baSubscribers = new Set();
+  const onBeforeAfterMove = (handler) => {
+    baSubscribers.add(handler);
+    return () => baSubscribers.delete(handler);
+  };
+
   /* ---------- shared: colour maths for the adaptive ink field ----------
      WCAG relative luminance needs linearised sRGB. Reading the raw channels
      overstates a dark navy by an order of magnitude, which puts the crossover
@@ -546,14 +568,15 @@
     const title = document.querySelector("[data-freq-title]");
     const list = document.querySelector("[data-freq-list]");
     const count = document.querySelector("[data-freq-count]");
+    const fit = document.querySelector("[data-freq-fit]");
     if (!tabs.length || !list) return;
 
     const iconCheck = '<svg class="icon" viewBox="0 0 24 24"><path d="m5 12 4 4 10-10"/></svg>';
     const plans = {
-      daily: { title: "Daily Plan", items: ["Restroom sanitization", "Trash removal", "Touchpoint disinfection", "Common area upkeep"] },
-      weekly: { title: "Weekly Plan", items: ["Full restroom cleaning", "Break room detail", "Floor vacuuming & mopping", "Trash removal", "Touchpoint disinfection"] },
-      biweekly: { title: "Bi-Weekly Plan", items: ["Deep restroom cleaning", "Common area detail", "Break room deep clean", "Floor care check", "Trash removal"] },
-      monthly: { title: "Monthly Plan", items: ["Full facility deep clean", "Floor polishing check-in", "Interior glass & touchpoints", "Break room & restroom deep clean"] }
+      daily: { title: "Daily Plan", fit: "Best fit for schools and commercial buildings with continuous foot traffic — the highest-oversight plan.", items: ["Restroom sanitization", "Trash removal", "Touchpoint disinfection", "Common area upkeep"] },
+      weekly: { title: "Weekly Plan", fit: "Best fit for offices and commercial buildings with steady, moderate traffic.", items: ["Full restroom cleaning", "Break room detail", "Floor vacuuming & mopping", "Trash removal", "Touchpoint disinfection"] },
+      biweekly: { title: "Bi-Weekly Plan", fit: "Best fit for smaller offices or lower-traffic spaces that still want a consistent detail pass.", items: ["Deep restroom cleaning", "Common area detail", "Break room deep clean", "Floor care check", "Trash removal"] },
+      monthly: { title: "Monthly Plan", fit: "Best fit as a periodic deep-clean layer alongside Floor Care or another primary service.", items: ["Full facility deep clean", "Floor polishing check-in", "Interior glass & touchpoints", "Break room & restroom deep clean"] }
     };
 
     const render = (key) => {
@@ -561,6 +584,13 @@
       if (!plan) return;
       if (title) title.textContent = plan.title;
       if (count) count.textContent = String(plan.items.length).padStart(2, "0");
+      if (fit) {
+        fit.classList.remove("is-in");
+        window.setTimeout(() => {
+          fit.textContent = plan.fit;
+          fit.classList.add("is-in");
+        }, 20);
+      }
       list.innerHTML = "";
       plan.items.forEach((item, i) => {
         const li = document.createElement("li");
@@ -610,6 +640,8 @@
       board.style.setProperty("--ba-x", (clamped / 100).toFixed(4));
       board.style.setProperty("--ba-split", (1 - clamped / 100).toFixed(4));
       if (readout) readout.textContent = String(Math.round(clamped));
+      baPosition = clamped / 100;
+      baSubscribers.forEach((handler) => handler(baPosition));
     };
 
     /* the invitation to drag retires as soon as the user takes it */
@@ -656,7 +688,9 @@
       /* the quote enters from the side the reader asked for: the offset has
          to be committed before the class flips, or there is nothing to ease from */
       if (track && direction !== 0) {
-        track.style.setProperty("--dx", direction > 0 ? "30px" : "-30px");
+        /* a short lateral fade: far enough to say which way the quote came
+           from, close enough that the card never appears to slide */
+        track.style.setProperty("--dx", direction > 0 ? "22px" : "-22px");
         void track.offsetWidth;
       }
       currentIndex = (index + slides.length) % slides.length;
@@ -831,6 +865,551 @@
     observer.observe(el);
   }
 
+  /* ---------- display type: one masked line at a time ----------
+
+     Fraunces enters line by line, each line rising out of its own mask. The
+     lines are not authored: they are read back from the real rendering, so the
+     break points are whatever the browser chose at this width, with these
+     metrics, in this language. Change the width or load the webfont and they
+     are measured again.
+
+     Only plain display type is ever touched. A heading that already carries
+     its own elements — Floor Care's three specialties, each with its own
+     delay — is recognised and left exactly as it is. */
+  const LINE_MASK_TARGETS = [
+    ".hero-text h1",
+    ".standard-head h2",
+    ".services .section-head h2",
+    ".ba-head h2",
+    ".maintenance-head h2",
+    ".residential-inner h2",
+    ".impact-inner h2",
+    ".areas-inner h2",
+    ".faq-intro h2",
+    ".quote-inner h2",
+    ".final-cta h2"
+  ].join(",");
+
+  function initLineMask() {
+    /* the Mobile Edition composes its own headlines and is not touched */
+    const wide = window.matchMedia("(min-width: 768px)");
+    const targets = [...document.querySelectorAll(LINE_MASK_TARGETS)];
+    if (!targets.length) return;
+
+    /* the authored markup, kept off the DOM so no attribute carries HTML */
+    const sources = new WeakMap();
+    const measuredAt = new WeakMap();
+
+    const restore = (el) => {
+      const source = sources.get(el);
+      if (source === undefined) return;
+      el.innerHTML = source;
+      el.classList.remove("is-line-masked");
+      measuredAt.delete(el);
+    };
+
+    const split = (el) => {
+      if (!sources.has(el)) sources.set(el, el.innerHTML);
+      el.innerHTML = sources.get(el);
+      el.classList.remove("is-line-masked");
+
+      const nodes = [...el.childNodes];
+      if (!nodes.every((node) => node.nodeType === 3 || node.nodeName === "BR")) return;
+
+      const probes = [];
+      const staged = document.createDocumentFragment();
+      nodes.forEach((node) => {
+        if (node.nodeName === "BR") { staged.appendChild(document.createElement("br")); return; }
+        node.textContent.split(/(\s+)/).forEach((chunk) => {
+          if (!chunk) return;
+          if (!chunk.trim()) { staged.appendChild(document.createTextNode(" ")); return; }
+          const probe = document.createElement("span");
+          probe.textContent = chunk;
+          probes.push(probe);
+          staged.appendChild(probe);
+        });
+      });
+      if (!probes.length) return;
+      el.replaceChildren(staged);
+
+      /* one forced layout, then reads only: no write happens between the
+         first offsetTop and the last, so this costs a single reflow */
+      const lines = [];
+      let lastTop = null;
+      probes.forEach((probe) => {
+        const top = probe.offsetTop;
+        if (lastTop === null || Math.abs(top - lastTop) > 2) { lines.push([]); lastTop = top; }
+        lines[lines.length - 1].push(probe.textContent);
+      });
+
+      const out = document.createDocumentFragment();
+
+      /* The headline's intrinsic width, kept.
+
+         Lines are block boxes, so a split heading contributes only its longest
+         line to max-content sizing, where the unsplit one contributed the whole
+         sentence. Every desktop scene centres a `fit-content` container, so
+         that alone re-sized the column — and the lines had been measured
+         against the width the column no longer had. The ghost carries the
+         original single-line contribution at zero height, so the composition
+         measures exactly as it did before the split and the lines stay true. */
+      const ghost = document.createElement("span");
+      ghost.className = "lm-ghost";
+      ghost.setAttribute("aria-hidden", "true");
+      ghost.textContent = probes.map((probe) => probe.textContent).join(" ");
+      out.appendChild(ghost);
+
+      lines.forEach((words, index) => {
+        const line = document.createElement("span");
+        line.className = "lm-line";
+        const inner = document.createElement("span");
+        inner.className = "lm-in";
+        inner.style.setProperty("--lm-i", String(index));
+        inner.textContent = words.join(" ");
+        line.appendChild(inner);
+        out.appendChild(line);
+      });
+      el.replaceChildren(out);
+      el.classList.add("is-line-masked");
+      measuredAt.set(el, el.clientWidth);
+    };
+
+    /* A re-split of an already revealed heading is invisible: the new nodes
+       resolve straight to the revealed state on their first style pass, so
+       there is nothing to transition from and nothing flashes. */
+    const sync = (force) => {
+      targets.forEach((el) => {
+        if (!wide.matches) { restore(el); return; }
+        if (!force && el.classList.contains("is-line-masked") && measuredAt.get(el) === el.clientWidth) return;
+        split(el);
+      });
+    };
+
+    sync(true);
+    document.fonts?.ready.then(() => sync(true));
+    window.addEventListener("resize", debounce(() => sync(false), 180));
+    window.addEventListener("orientationchange", debounce(() => sync(true), 180));
+    wide.addEventListener?.("change", () => sync(true));
+  }
+
+  /* ---------- hero: low-amplitude parallax ----------
+     The photograph travels a fraction of the scroll so the frame gains a plane
+     without the copy ever appearing to float over a moving picture. It shares
+     one transform with the slow push, which is why the push lives in its own
+     registered property: the 8s clock belongs to the zoom, not to this. */
+  function initHeroParallax() {
+    const hero = document.querySelector(".hero");
+    if (!hero) return;
+    const wide = window.matchMedia("(min-width: 916px)");
+    let scrollHandler = null;
+
+    const update = () => {
+      const viewHeight = window.innerHeight || 800;
+      const rect = hero.getBoundingClientRect();
+      if (rect.bottom < 0 || rect.top > viewHeight) return;
+      const pass = (rect.top + rect.height / 2 - viewHeight / 2) / viewHeight;
+      hero.style.setProperty("--hero-par", (pass * -26).toFixed(1) + "px");
+    };
+
+    const mount = () => {
+      if (scrollHandler) return;
+      scrollHandler = onScrollFrame(update);
+      window.addEventListener("scroll", scrollHandler, { passive: true });
+      window.addEventListener("resize", scrollHandler);
+      update();
+    };
+
+    const unmount = () => {
+      if (!scrollHandler) return;
+      window.removeEventListener("scroll", scrollHandler);
+      window.removeEventListener("resize", scrollHandler);
+      scrollHandler = null;
+      hero.style.removeProperty("--hero-par");
+    };
+
+    const sync = () => { if (wide.matches && !reducedMotion.matches) mount(); else unmount(); };
+    wide.addEventListener?.("change", sync);
+    reducedMotion.addEventListener?.("change", sync);
+    sync();
+  }
+
+  /* ---------- before / after: the local WebGL plate ----------
+
+     The only WebGL on the site, and the only place it earns its keep: this is
+     the chapter where the argument is materiality, so the boundary between the
+     two photographs is allowed to behave like a wet edge under a blade rather
+     than like a straight cut.
+
+     What it is NOT allowed to do:
+       · own the interaction — the native range still does, and this only reads
+         where the range is standing;
+       · take a pointer, a hit test or a tab stop — the host is inert;
+       · replace the CSS comparison — both .ba-img layers stay in the DOM as
+         the complete fallback and keep their captions;
+       · run when it cannot be seen, when the tab is hidden, when the pointer
+         is coarse, or when reduced motion is asked for;
+       · distort the picture — the effect is confined to a narrow band around
+         the boundary and settles within a few hundred milliseconds. */
+
+  const BA_VERTEX = `
+attribute vec2 aPos;
+varying vec2 vUv;
+void main() {
+  vUv = vec2(aPos.x * .5 + .5, .5 - aPos.y * .5);
+  gl_Position = vec4(aPos, 0., 1.);
+}`;
+
+  const BA_FRAGMENT = `
+precision mediump float;
+
+varying vec2 vUv;
+
+uniform sampler2D uBefore;
+uniform sampler2D uAfter;
+uniform vec2 uBeforeScale;
+uniform vec2 uBeforeOffset;
+uniform vec2 uAfterScale;
+uniform vec2 uAfterOffset;
+uniform float uSplit;
+uniform float uEnergy;
+uniform float uTime;
+
+float hash(vec2 p) {
+  return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453123);
+}
+
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  vec2 u = f * f * (3.0 - 2.0 * f);
+  return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), u.x),
+             mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), u.x), u.y);
+}
+
+/* Two octaves, both low frequency. This has to read as a long lobe running
+   down a squeegee, never as texture. */
+float field(vec2 p) {
+  return vnoise(p) * 0.66 + vnoise(p * 2.17 + 5.7) * 0.34;
+}
+
+/* The two CSS treatments, restated: a restrained graphite wash on the worn
+   side, a cool edge of light on the restored one. The plate and the fallback
+   have to be the same picture, or switching between them would be a cut. */
+vec3 worn(vec2 uv) {
+  vec3 c = texture2D(uBefore, uv * uBeforeScale + uBeforeOffset).rgb;
+  return mix(c, vec3(0.169, 0.184, 0.196), mix(0.30, 0.20, uv.y));
+}
+
+vec3 restored(vec2 uv) {
+  vec3 c = texture2D(uAfter, uv * uAfterScale + uAfterOffset).rgb;
+  return mix(c, vec3(0.886, 0.941, 0.961), (1.0 - smoothstep(0.0, 0.38, uv.y)) * 0.16);
+}
+
+void main() {
+  vec2 uv = vUv;
+
+  /* the boundary is displaced by smooth low-frequency noise, so it bends the
+     way water pushed by a blade bends — never a perfectly straight division */
+  float n = field(vec2(uv.y * 2.6, uTime * 0.06)) - 0.5;
+  float edge = uSplit + n * (0.0075 + uEnergy * 0.010);
+
+  /* narrow by construction: outside this band the comparison stays an exact,
+     objective reading of the two photographs */
+  float band = 0.020 + uEnergy * 0.016;
+  float mask = smoothstep(edge - band, edge + band, uv.x);
+
+  float prox = 1.0 - smoothstep(0.0, band * 2.4, abs(uv.x - edge));
+  prox *= prox;
+
+  vec3 col;
+
+  if (prox > 0.002) {
+    float drive = prox * (0.30 + uEnergy * 2.0);
+
+    /* damped displacement and an aberration you have to look for, both fenced
+       inside the band and both proportional to how far from rest we are */
+    vec2 disp = vec2(n, field(vec2(uv.y * 3.9 + 3.1, uTime * 0.05)) - 0.5)
+              * drive * vec2(0.0090, 0.0034);
+    float aberration = drive * 0.0015;
+    vec2 p = uv + disp;
+
+    vec3 a = mix(worn(p + vec2(aberration, 0.0)), restored(p + vec2(aberration, 0.0)), mask);
+    vec3 b = mix(worn(p), restored(p), mask);
+    vec3 c = mix(worn(p - vec2(aberration, 0.0)), restored(p - vec2(aberration, 0.0)), mask);
+    col = vec3(a.r, b.g, c.b);
+
+    /* a wet-surface reading, cold and very low: the blade has just passed */
+    col += vec3(0.165, 0.557, 0.667) * drive * 0.085;
+  } else if (mask > 0.5) {
+    col = restored(uv);
+  } else {
+    col = worn(uv);
+  }
+
+  gl_FragColor = vec4(col, 1.0);
+}`;
+
+  function initBeforeAfterGL() {
+    const frame = document.querySelector("[data-before-after]");
+    const host = frame && frame.querySelector("[data-ba-gl]");
+    if (!frame || !host) return;
+
+    const wide = window.matchMedia("(min-width: 916px)");
+    const finePointer = window.matchMedia("(pointer: fine)");
+
+    /* the photograph paths are already declared on the frame for the CSS
+       fallback; reading them back keeps one source for both */
+    const readUrl = (value) => {
+      const match = /url\(\s*(['"]?)(.*?)\1\s*\)/.exec(value || "");
+      return match ? match[2] : null;
+    };
+
+    let canvas = null, gl = null, program = null, quad = null;
+    let images = null, textures = null, uniform = null;
+    let sizeObserver = null, viewObserver = null, unsubscribe = null;
+    let frameId = 0, pixelW = 0, pixelH = 0;
+    let ready = false, onScreen = false;
+    let target = baPosition, current = baPosition, energy = 0, clock = 0, lastTime = 0;
+
+    const compile = (type, source) => {
+      const shader = gl.createShader(type);
+      gl.shaderSource(shader, source);
+      gl.compileShader(shader);
+      if (gl.getShaderParameter(shader, gl.COMPILE_STATUS)) return shader;
+      gl.deleteShader(shader);
+      return null;
+    };
+
+    /* background-size:cover with the same focal point the CSS uses
+       (background-position: center 62%), so the crop never shifts between the
+       plate and its fallback */
+    const cover = (image, w, h, fx, fy) => {
+      const scale = Math.max(w / image.naturalWidth, h / image.naturalHeight);
+      const dw = image.naturalWidth * scale;
+      const dh = image.naturalHeight * scale;
+      return [[w / dw, h / dh], [((dw - w) * fx) / dw, ((dh - h) * fy) / dh]];
+    };
+
+    const applyCover = () => {
+      if (!images || !pixelW || !pixelH) return;
+      const [bs, bo] = cover(images[0], pixelW, pixelH, 0.5, 0.62);
+      const [as, ao] = cover(images[1], pixelW, pixelH, 0.5, 0.62);
+      gl.uniform2fv(uniform.beforeScale, bs);
+      gl.uniform2fv(uniform.beforeOffset, bo);
+      gl.uniform2fv(uniform.afterScale, as);
+      gl.uniform2fv(uniform.afterOffset, ao);
+    };
+
+    const draw = () => {
+      if (!ready) return;
+      gl.uniform1f(uniform.split, current);
+      gl.uniform1f(uniform.energy, energy);
+      gl.uniform1f(uniform.time, clock);
+      gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    };
+
+    const render = (time) => {
+      frameId = 0;
+      if (!ready) return;
+      const dt = lastTime ? Math.min(0.05, (time - lastTime) / 1000) : 0.016;
+      lastTime = time;
+
+      /* short inertia: the surface follows the blade and settles behind it */
+      const delta = target - current;
+      current += delta * Math.min(1, dt * 11);
+      energy = Math.max(energy * Math.pow(0.06, dt), Math.min(1, Math.abs(delta) * 22));
+      clock += dt;
+
+      const settled = Math.abs(target - current) < 0.0004 && energy < 0.004;
+      if (settled) { current = target; energy = 0; lastTime = 0; }
+      draw();
+      /* at rest the loop stops outright: the boundary keeps its organic shape,
+         but nothing on the plate moves any more */
+      if (!settled) frameId = requestAnimationFrame(render);
+    };
+
+    const start = () => {
+      if (frameId || !ready || !onScreen || document.hidden) return;
+      lastTime = 0;
+      frameId = requestAnimationFrame(render);
+    };
+
+    const stop = () => {
+      if (frameId) cancelAnimationFrame(frameId);
+      frameId = 0;
+      lastTime = 0;
+    };
+
+    const resize = () => {
+      if (!gl || !canvas) return;
+      const rect = frame.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const ratio = Math.min(2, window.devicePixelRatio || 1);
+      const w = Math.max(1, Math.round(rect.width * ratio));
+      const h = Math.max(1, Math.round(rect.height * ratio));
+      if (w === pixelW && h === pixelH) return;
+      pixelW = w;
+      pixelH = h;
+      canvas.width = w;
+      canvas.height = h;
+      gl.viewport(0, 0, w, h);
+      applyCover();
+      draw();
+    };
+
+    const loadImage = (src) => new Promise((resolve, reject) => {
+      const image = new Image();
+      image.decoding = "async";
+      image.onload = () => resolve(image);
+      image.onerror = reject;
+      image.src = src;
+    });
+
+    const upload = (image, unit) => {
+      const texture = gl.createTexture();
+      gl.activeTexture(gl.TEXTURE0 + unit);
+      gl.bindTexture(gl.TEXTURE_2D, texture);
+      /* non-power-of-two photographs: clamp and filter linearly, no mipmaps */
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+      gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGB, gl.RGB, gl.UNSIGNED_BYTE, image);
+      return texture;
+    };
+
+    const teardown = () => {
+      stop();
+      unsubscribe?.();
+      unsubscribe = null;
+      sizeObserver?.disconnect();
+      sizeObserver = null;
+      frame.classList.remove("is-gl");
+      ready = false;
+      if (gl) {
+        textures?.forEach((texture) => gl.deleteTexture(texture));
+        if (quad) gl.deleteBuffer(quad);
+        if (program) gl.deleteProgram(program);
+      }
+      textures = null;
+      quad = null;
+      program = null;
+      gl = null;
+      images = null;
+      pixelW = 0;
+      pixelH = 0;
+      canvas?.remove();
+      canvas = null;
+    };
+
+    const onContextLost = (event) => {
+      /* the plate simply stops existing; the CSS comparison is still the page */
+      event.preventDefault();
+      teardown();
+    };
+
+    const mount = () => {
+      if (canvas) return;
+      const style = getComputedStyle(frame);
+      const beforeUrl = readUrl(style.getPropertyValue("--img-before"));
+      const afterUrl = readUrl(style.getPropertyValue("--img-after"));
+      if (!beforeUrl || !afterUrl) return;
+
+      canvas = document.createElement("canvas");
+      canvas.setAttribute("aria-hidden", "true");
+      /* preserveDrawingBuffer, deliberately: this is an on-demand renderer.
+         It stops drawing the moment the surface has settled, so the last frame
+         has to survive every recomposite until the divider moves again. */
+      const context = canvas.getContext("webgl", {
+        alpha: false, antialias: false, depth: false, stencil: false, preserveDrawingBuffer: true
+      });
+      if (!context) { canvas = null; return; }
+      gl = context;
+      canvas.addEventListener("webglcontextlost", onContextLost);
+
+      const vertex = compile(gl.VERTEX_SHADER, BA_VERTEX);
+      const fragment = compile(gl.FRAGMENT_SHADER, BA_FRAGMENT);
+      if (!vertex || !fragment) { teardown(); return; }
+      program = gl.createProgram();
+      gl.attachShader(program, vertex);
+      gl.attachShader(program, fragment);
+      gl.linkProgram(program);
+      gl.deleteShader(vertex);
+      gl.deleteShader(fragment);
+      if (!gl.getProgramParameter(program, gl.LINK_STATUS)) { teardown(); return; }
+      gl.useProgram(program);
+
+      quad = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, quad);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
+      const position = gl.getAttribLocation(program, "aPos");
+      gl.enableVertexAttribArray(position);
+      gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+
+      uniform = {
+        before: gl.getUniformLocation(program, "uBefore"),
+        after: gl.getUniformLocation(program, "uAfter"),
+        beforeScale: gl.getUniformLocation(program, "uBeforeScale"),
+        beforeOffset: gl.getUniformLocation(program, "uBeforeOffset"),
+        afterScale: gl.getUniformLocation(program, "uAfterScale"),
+        afterOffset: gl.getUniformLocation(program, "uAfterOffset"),
+        split: gl.getUniformLocation(program, "uSplit"),
+        energy: gl.getUniformLocation(program, "uEnergy"),
+        time: gl.getUniformLocation(program, "uTime")
+      };
+
+      host.appendChild(canvas);
+
+      Promise.all([loadImage(beforeUrl), loadImage(afterUrl)]).then((loaded) => {
+        /* the breakpoint may have moved while the photographs decoded */
+        if (!gl || !canvas) return;
+        images = loaded;
+        textures = [upload(loaded[0], 0), upload(loaded[1], 1)];
+        gl.uniform1i(uniform.before, 0);
+        gl.uniform1i(uniform.after, 1);
+        ready = true;
+        target = current = baPosition;
+        energy = 0;
+        resize();
+        draw();
+        frame.classList.add("is-gl");
+
+        unsubscribe = onBeforeAfterMove((value) => { target = value; start(); });
+        if ("ResizeObserver" in window) {
+          sizeObserver = new ResizeObserver(() => { resize(); });
+          sizeObserver.observe(frame);
+        }
+      }).catch(teardown);
+    };
+
+    const sync = () => {
+      if (wide.matches && finePointer.matches && !reducedMotion.matches) mount();
+      else teardown();
+    };
+
+    /* out of the viewport, or behind a hidden tab, the plate does not render */
+    if ("IntersectionObserver" in window) {
+      viewObserver = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          onScreen = entry.isIntersecting;
+          if (onScreen) start(); else stop();
+        });
+      }, { rootMargin: "120px 0px" });
+      viewObserver.observe(frame);
+    } else {
+      onScreen = true;
+    }
+
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stop(); else start();
+    });
+    window.addEventListener("resize", debounce(resize, 140));
+    wide.addEventListener?.("change", sync);
+    finePointer.addEventListener?.("change", sync);
+    reducedMotion.addEventListener?.("change", sync);
+    sync();
+  }
+
   /* ---------- Architectural relief field ----------
 
      One fixed surface behind the whole scroll. Not a scene per section: a
@@ -907,8 +1486,10 @@
 
     let mounted = false;
     let scrollFrame = 0;
+    let measureFrame = 0;
     let fogFrame = 0;
     let polTimer = 0;
+    let chapterObserver = null;
     let activeIndex = -1;
     let appliedPol = -1;
     let fogScrollY = 0;
@@ -1002,6 +1583,19 @@
       scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; onScroll(); });
     };
 
+    /* Cards, FAQ answers and form states can change a chapter's intrinsic
+       height without a window resize. Keep the document-space map aligned with
+       those real boundaries so the fixed field never changes tone against a
+       stale section start. */
+    const requestMeasure = () => {
+      if (measureFrame) return;
+      measureFrame = requestAnimationFrame(() => {
+        measureFrame = 0;
+        measure();
+        requestScroll();
+      });
+    };
+
     /* Cursor position smoothed by continuous interpolation, never followed
        directly. Three speeds read as three distances. On a coarse pointer the
        fog drifts on its own instead of standing still. */
@@ -1057,6 +1651,12 @@
       if (mounted) return;
       mounted = true;
       measure();
+      if ("ResizeObserver" in window) {
+        chapterObserver = new ResizeObserver(requestMeasure);
+        chapters.forEach((chapter) => {
+          if (chapter.element) chapterObserver.observe(chapter.element);
+        });
+      }
       window.addEventListener("scroll", requestScroll, { passive: true });
       window.addEventListener("resize", onResize);
       window.addEventListener("orientationchange", onResize);
@@ -1081,8 +1681,12 @@
       window.removeEventListener("load", onResize);
       window.removeEventListener("pointermove", onPointerMove);
       document.removeEventListener("visibilitychange", onVisibility);
+      chapterObserver?.disconnect();
+      chapterObserver = null;
       if (scrollFrame) cancelAnimationFrame(scrollFrame);
       scrollFrame = 0;
+      if (measureFrame) cancelAnimationFrame(measureFrame);
+      measureFrame = 0;
       stopFog();
       window.clearTimeout(polTimer);
       polTimer = 0;
@@ -1115,10 +1719,15 @@
     initServiceInteractions();
     initMaintenanceSelector();
     initBeforeAfter();
+    /* strictly after initBeforeAfter(): the plate subscribes to the divider
+       the range already owns, and reads its resting position from it */
+    initBeforeAfterGL();
     initTestimonials();
     initFAQ();
     initQuoteForm();
     initCounters();
+    initLineMask();
+    initHeroParallax();
     initReliefBackground();
     const yearEl = document.querySelector("[data-year]");
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());

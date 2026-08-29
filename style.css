@@ -1837,6 +1837,45 @@
       filter: var(--canvas-ink-halo);
     }
 
+    /* the four pillars restated as the sequence a crew actually runs */
+    .standard-protocol {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 36px;
+      padding-top: 22px;
+      border-top: 1px solid var(--canvas-rule);
+    }
+
+    .protocol-step {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 22px 6px 0;
+      margin-right: 22px;
+      border-right: 1px solid var(--canvas-rule-soft);
+      font-family: var(--font-ui);
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--canvas-muted);
+    }
+
+    .protocol-step:last-child {
+      border-right: 0;
+      margin-right: 0;
+      padding-right: 0;
+    }
+
+    .protocol-step b {
+      font-family: var(--font-serif);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--canvas-accent);
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
     /* =========================================================
    07. SERVICES
    ========================================================= */
@@ -2005,7 +2044,7 @@
 
     .service-card:hover .card-more,
     .service-card.is-active .card-more {
-      max-height: 260px;
+      max-height: 380px;
       opacity: 1;
     }
 
@@ -2039,6 +2078,26 @@
       margin-top: 10px;
       padding-left: 14px;
       border-left: 1px solid var(--line-gold);
+    }
+
+    /* the frequency/coverage/contract facts already shown on the mobile cover,
+       mirrored here so the desktop card carries the same evidence. The card's
+       ground is a fixed dark scrim regardless of the relief engine, so the ink
+       is stated here the same way .floorcare states its own. */
+    .card-more .card-specs {
+      margin-top: 14px;
+      --canvas-ink: rgba(255, 255, 255, .88);
+      --canvas-muted: rgba(255, 255, 255, .6);
+      --canvas-rule: rgba(255, 255, 255, .22);
+      --canvas-rule-soft: rgba(255, 255, 255, .16);
+      --canvas-accent: var(--champagne);
+    }
+
+    .card-more .card-specs>dt,
+    .card-more .card-specs>dd {
+      padding-top: 9px;
+      padding-bottom: 9px;
+      font-size: .8rem;
     }
 
     .card-cta {
@@ -2246,6 +2305,25 @@
       font-weight: 800;
     }
 
+    /* which spaces this cadence actually fits, so the tab picker doubles as a
+       decision tool instead of just a filter for the list below it */
+    .freq-fit {
+      margin: 0 0 18px;
+      padding-bottom: 18px;
+      border-bottom: 1px dashed var(--line-light);
+      font-size: .86rem;
+      line-height: 1.5;
+      color: var(--charcoal);
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity var(--dur-med) var(--ease), transform var(--dur-med) var(--ease);
+    }
+
+    .freq-fit.is-in {
+      opacity: 1;
+      transform: none;
+    }
+
     .freq-list {
       display: grid;
     }
@@ -2421,6 +2499,30 @@
       color: rgba(255, 255, 255, .82);
       font-size: 1.02rem;
       line-height: 1.62;
+    }
+
+    /* the one line of method + inspection the brief asked for, kept to a
+       margin note so it never competes with the manifesto above it */
+    .fc-note {
+      position: relative;
+      margin: 22px 0 0 2px;
+      padding: 2px 0 0 22px;
+      border-left: 1px solid var(--canvas-rule-soft);
+      color: rgba(255, 255, 255, .68);
+      font-size: .88rem;
+      line-height: 1.6;
+      max-width: 42ch;
+    }
+
+    .fc-note::before {
+      content: '';
+      position: absolute;
+      left: -3px;
+      top: .6em;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--canvas-accent);
     }
 
     /* ---------- the dossier ---------- */
@@ -2746,6 +2848,15 @@
       font-family: var(--font-serif);
       font-style: italic;
       font-size: .95rem;
+      line-height: 1.5;
+      color: var(--canvas-muted);
+      max-width: 52ch;
+    }
+
+    /* ties the single case back to the recurring service it demonstrates */
+    .ba-context {
+      margin-top: 10px;
+      font-size: .82rem;
       line-height: 1.5;
       color: var(--canvas-muted);
       max-width: 52ch;
@@ -3108,6 +3219,44 @@
       font-size: .92rem;
     }
 
+    /* the visit as a ritual: arrival, care, handoff */
+    .residential-ritual {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 34px;
+      padding-top: 26px;
+      border-top: 1px solid var(--line-light);
+    }
+
+    .ritual-step {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .ritual-num {
+      font-family: var(--font-serif);
+      font-size: 1.05rem;
+      color: var(--champagne-text);
+      flex: none;
+    }
+
+    .ritual-step div strong {
+      display: block;
+      color: var(--navy);
+      font-size: .92rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      margin-bottom: 4px;
+    }
+
+    .ritual-step div span {
+      color: var(--charcoal);
+      font-size: .86rem;
+      line-height: 1.5;
+    }
+
     .residential .btn {
       margin-top: 32px;
     }
@@ -3220,6 +3369,14 @@
       transition-delay: .58s;
     }
 
+    /* the one line tying the mark back to the two confirmed facts it stands for */
+    .impact-viz-caption {
+      display: block;
+      margin-top: 14px;
+      font-size: .78rem;
+      color: var(--navy-2);
+    }
+
     .impact h2 {
       color: var(--navy-dark);
       font-size: clamp(1.9rem, 3.4vw, 2.7rem);
@@ -3299,6 +3456,20 @@
       border-color: rgba(255, 255, 255, .3);
     }
 
+    /* the operational facts behind "we come to you" — no radius, no promise
+       beyond what the copy above already states. Areas is a fixed-dark ground
+       outside the relief engine, so the ink is stated the same way .floorcare
+       states its own. */
+    .areas-logic {
+      margin: 22px 0 26px;
+      max-width: 420px;
+      --canvas-ink: rgba(255, 255, 255, .88);
+      --canvas-muted: rgba(255, 255, 255, .55);
+      --canvas-rule: rgba(255, 255, 255, .3);
+      --canvas-rule-soft: rgba(255, 255, 255, .18);
+      --canvas-accent: var(--sage);
+    }
+
     /* coverage and client types are two families, but they only say so on the
        mobile edition: here the tags flow as the single row they always were */
     .areas-group {
@@ -3319,6 +3490,17 @@
     .areas-graphic svg {
       width: 100%;
       height: 100%;
+    }
+
+    .areas-graphic-caption {
+      display: block;
+      margin-top: 14px;
+      text-align: center;
+      font-family: var(--font-ui);
+      font-size: .68rem;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      color: var(--sage);
     }
 
     .areas-graphic circle.pulse {
@@ -3462,6 +3644,29 @@
       font-size: clamp(1.4rem, 3vw, 2rem);
       line-height: 1.35;
       color: var(--navy);
+    }
+
+    /* names the service each testimonial is actually about, made explicit
+       instead of left implicit in the quote */
+    .t-service-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: var(--font-ui);
+      font-size: .7rem;
+      font-weight: 800;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--champagne-text);
+      margin-bottom: 14px;
+    }
+
+    .t-service-tag::before {
+      content: '';
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: var(--champagne);
     }
 
     .t-meta {
@@ -3812,6 +4017,40 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+    }
+
+    /* what happens after the four steps are submitted */
+    .quote-steps {
+      margin-top: 30px;
+      padding-top: 22px;
+      border-top: 1px solid var(--line-light);
+      display: grid;
+      gap: 18px;
+    }
+
+    .quote-steps li {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+    }
+
+    .quote-steps li b {
+      font-family: var(--font-serif);
+      color: var(--champagne-text);
+      font-size: 1rem;
+      flex: none;
+    }
+
+    .quote-steps li strong {
+      display: block;
+      color: var(--navy);
+      font-size: .92rem;
+    }
+
+    .quote-steps li span {
+      color: var(--charcoal);
+      font-size: .86rem;
+      line-height: 1.5;
     }
 
     .quote-form {
@@ -4423,6 +4662,10 @@
       .impact-inner,
       .areas-inner,
       .quote-inner {
+        grid-template-columns: 1fr;
+      }
+
+      .residential-ritual {
         grid-template-columns: 1fr;
       }
 
@@ -5117,6 +5360,23 @@
         margin-top: 46px;
       }
 
+      .standard-protocol {
+        flex-direction: column;
+        margin-top: 26px;
+        padding-top: 18px;
+      }
+
+      .protocol-step {
+        border-right: 0;
+        border-bottom: 1px solid var(--canvas-rule-soft);
+        margin-right: 0;
+        padding: 10px 0;
+      }
+
+      .protocol-step:last-child {
+        border-bottom: 0;
+      }
+
       /* the table becomes a stack of chapters, each with room to be read */
       .pillar {
         display: block;
@@ -5226,7 +5486,7 @@
       }
 
       .service-card.is-active .card-more {
-        max-height: 460px;
+        max-height: 560px;
       }
 
       .card-more p {
@@ -5362,6 +5622,12 @@
 
       .freq-panel-head small {
         font-size: .66rem;
+      }
+
+      .freq-fit {
+        font-size: .82rem;
+        margin-bottom: 14px;
+        padding-bottom: 14px;
       }
 
       .freq-list li {
@@ -5760,6 +6026,13 @@
         margin: 0;
         opacity: .8;
         z-index: 0;
+      }
+
+      /* the graphic is a background signature at this size — the caption
+         would sit faint and behind the copy, and the same two facts are
+         already stated in .areas-logic above */
+      .areas-graphic-caption {
+        display: none;
       }
 
       /* six loose capsules become two scannable families */
@@ -6912,6 +7185,15 @@
       html {
         scroll-snap-type: none;
       }
+
+      /* Keep hover paint-only on wide desktop. Expanding an intrinsic grid row
+         while a stationary pointer crosses it during wheel scroll makes browser
+         scroll anchoring push the document backwards. The explicit + control
+         still opens the details through .is-active. */
+      .service-card:not(.is-active):hover .card-more {
+        max-height: 0;
+        opacity: 0;
+      }
     }
 
     @media (min-width:1201px) and (min-height:640px) and (prefers-reduced-motion: no-preference) {
@@ -7321,70 +7603,826 @@
     }
 
     /* =========================================================
-       QUIET MATERIAL FIELD — DESKTOP ORNAMENT CLEANUP
+       QUIET MATERIAL FIELD — DESKTOP ORNAMENT BALANCE
 
-       The field now carries the desktop atmosphere. Keep the legacy visual
-       vocabulary available to the tablet/mobile edition, but do not layer it
-       over the relief field on viewports where it is active.
+       An earlier pass answered "the field carries the atmosphere" by removing
+       the whole construction vocabulary above 915px. It removed too much: with
+       the hairlines, the registration corners, the index nodes and the numeric
+       markers gone, the desktop composition had nothing stitching one scene to
+       the next, and every chapter read as a stack of blocks on a moving ground.
+
+       The distinction that actually matters is not ornament vs. no ornament —
+       it is *drawn* vs. *painted*. A 1px rule, an open corner, a 5px node and a
+       tabular numeral are drawing: they cost the field nothing because they
+       have no mass. A filled watermark at architectural scale, a rotating
+       radar sweep or a photographic figure competes with it.
+
+       So: the drawn vocabulary comes back, re-weighted against the field in
+       §22 below. Only the massed pieces stay out on the desktop composition.
        ========================================================= */
     @media (min-width:916px) {
 
-      .watermark,
-      .fc-figure,
-      .impact-viz,
-      .areas-graphic,
-      .section-joint {
+      /* Massed, filled or continuously animated marks: these are the ones that
+         genuinely layer over the relief field, and they stay with the
+         tablet/mobile edition. */
+      .watermark {
         display: none;
       }
+    }
 
+    /* =========================================================
+   22. EDITORIAL POLISH
+   =========================================================
+   A refinement pass, not a redesign. No chapter is recomposed, no copy, asset,
+   id, data attribute or CTA moves, and nothing here reaches the Mobile Edition
+   (≤767px), whose range every rule below deliberately clears.
+
+   What it adds is depth, timing and finish:
+     · one long editorial curve and one short feedback curve, as tokens;
+     · Fraunces display type arriving line by line out of a mask;
+     · the drawn vocabulary — rules, nodes, corners, numerals — re-weighted so
+       it stitches the scenes instead of decorating them;
+     · one local WebGL plate, on the Before/After, and nowhere else.
+   ========================================================= */
+
+    /* ---------- 22a. motion tokens ----------
+       Strictly additive. No existing token is redefined, so every rule written
+       before this block keeps the exact timing it was approved with, mobile
+       included. New and refined rules read from these. */
+    :root {
+      /* the long one: anything that arrives, opens, or settles */
+      --ease-editorial: cubic-bezier(.25, 1, .5, 1);
+      /* the short one: the same family, read at feedback speed */
+      --ease-quick: cubic-bezier(.32, .96, .52, 1);
+
+      --dur-reveal: 1.05s;
+      --dur-hover: .34s;
+      --dur-micro: .22s;
+
+      /* Champagne, dark enough to be read as small type on the *rendered*
+         light ground rather than on the token.
+         --champagne-text was derived against pure Paper (#FFFDF8) and measures
+         4.77:1 there. But no chapter is pure Paper any more: the relief field
+         lays a broad diffuse shadow over it, and where the quote progress and
+         the FAQ index actually sit the ground measures ~0.855 relative
+         luminance, not 0.983 — which drops --champagne-text to 4.18:1 at
+         11.8px. Same hue, same family, one step darker: 4.66:1 on the measured
+         ground, 5.32:1 on Paper itself.
+         --champagne-text is left untouched; it is what the Mobile Edition
+         reads, and there the flat CSS grounds really are Paper. */
+      --champagne-ink: #7E6738;
+    }
+
+    /* The hero photograph's slow push, held in a registered property of its
+       own. The zoom keeps its 8s clock; the scroll parallax shares the same
+       transform and lands on the frame it was written in, instead of being
+       dragged through an eight-second transition. */
+    @property --hero-zoom {
+      syntax: '<number>';
+      inherits: true;
+      initial-value: 1.08;
+    }
+
+    /* ---------- 22b. line masking for display type ----------
+       Every line rises out of its own mask. The lines are measured from the
+       real rendering (script.js → initLineMask), so the breaks are the ones
+       the browser chose at this width and this font size — never hard-coded,
+       and re-measured whenever either changes.
+
+       The mask is drawn, not clipped: overflow:hidden would also cut the
+       text-shadow the hero and the closing headline are lit with. This mask
+       ends exactly at the line box's bottom edge and bleeds --lm-bleed on the
+       other three sides, so the glow survives and the incoming line does not. */
+    /* the original sentence, at zero height: it contributes nothing to the
+       page but the max-content width the unsplit heading had, which is what
+       every fit-content scene container is measured against */
+    .lm-ghost {
+      display: block;
+      height: 0;
+      overflow: hidden;
+      visibility: hidden;
+      pointer-events: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    .lm-line {
+      display: block;
+      --lm-bleed: 36px;
+      -webkit-mask-image: linear-gradient(#000, #000);
+      mask-image: linear-gradient(#000, #000);
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-size: calc(100% + var(--lm-bleed) * 2) calc(100% + var(--lm-bleed));
+      mask-size: calc(100% + var(--lm-bleed) * 2) calc(100% + var(--lm-bleed));
+      -webkit-mask-position: calc(var(--lm-bleed) * -1) calc(var(--lm-bleed) * -1);
+      mask-position: calc(var(--lm-bleed) * -1) calc(var(--lm-bleed) * -1);
+    }
+
+    .lm-in {
+      display: block;
+      transform: translate3d(0, 108%, 0);
+      opacity: 0;
+      transition:
+        transform var(--dur-reveal) var(--ease-editorial),
+        opacity calc(var(--dur-reveal) * .7) var(--ease-editorial);
+      transition-delay: calc(var(--lm-lead, 0ms) + var(--lm-i, 0) * var(--lm-step, 66ms));
+    }
+
+    [data-reveal].is-revealed .lm-in,
+    .hero-slide.is-active .lm-in {
+      transform: translate3d(0, 0, 0);
+      opacity: 1;
+    }
+
+    /* the headline stops travelling as one block the moment its lines travel:
+       the stagger already published by .hero-text > * would otherwise be
+       applied twice to the same glyphs */
+    .hero-slide .hero-text h1.is-line-masked {
+      opacity: 1;
+      transform: none;
+      --lm-lead: 150ms;
+    }
+
+    /* ---------- 22c. rules that draw themselves ----------
+       The eyebrow's closing rule already exists in every chapter head, so the
+       reading guide the brief asks for is not a new device — it is that rule,
+       given a starting length of zero while its block is still off screen.
+
+       Written as a closed state on the un-revealed side rather than an open
+       state on the revealed one: an eyebrow that lives outside any reveal
+       context — the 916–992px menu overlay — then keeps its full rule instead
+       of being stranded at zero forever. */
+    .eyebrow::after {
+      transform-origin: left center;
+      transition: transform var(--dur-reveal) var(--ease-editorial) .1s;
+    }
+
+    [data-reveal]:not(.is-revealed) .eyebrow::after,
+    .hero-slide:not(.is-active) .eyebrow::after {
+      transform: scaleX(0);
+    }
+
+    /* Reveal travel and curve, from the tablet width up. The Mobile Edition
+       sets its own 18px arrival and is left alone. */
+    @media (min-width:768px) {
+
+      /* Technical surfaces, not capsules. Controls and chips keep their own
+         explicit 100px; only the large panels come down to the editorial
+         range, which is the single change that stops the composition reading
+         as a collection of soft cards. Scoped from the tablet width so the
+         geometry does not step at 916px with the relief field. */
+      :root {
+        --radius-sm: 10px;
+        --radius-md: 13px;
+        --radius-lg: 16px;
+      }
+
+      [data-reveal] {
+        transform: translate3d(0, 22px, 0);
+        transition:
+          opacity var(--dur-reveal) var(--ease-editorial),
+          transform var(--dur-reveal) var(--ease-editorial);
+      }
+
+      [data-reveal="scale"] {
+        transform: translate3d(0, 22px, 0) scale(.985);
+      }
+
+      [data-reveal="rule"]::after {
+        transition: transform var(--dur-reveal) var(--ease-editorial);
+      }
+
+      /* Fraunces at display size wants a compact measure. These six headings
+         never declared a line-height and were inheriting the body's 1.55 — on
+         40–58px type that reads as loose leading, while every other headline on
+         the page already sits between .98 and 1.12. Same family, same weight,
+         same size: only the leading is brought into the system. */
+      .maintenance-head h2,
+      .residential h2,
+      .impact h2,
+      .areas h2,
+      .quote h2,
+      .final-cta h2 {
+        line-height: 1.08;
+      }
+
+      .card-body h3,
+      .q-step h3 {
+        line-height: 1.12;
+      }
+
+      /* ---------- quote progress: hierarchy by colour, not by opacity ----------
+         The four steps were separated by opacity alone — .6 upcoming, .85 done,
+         1 current. Measured against the ground the relief field actually paints
+         under them, .6 puts the upcoming step labels at 3.44:1 at 10.9px, which
+         is below AA for the one piece of copy in the form that tells you how
+         far you have to go.
+
+         Opacity is a blunt instrument here: it moves ink and ground together.
+         Colour separates them, and the site already owns three weights of navy
+         for exactly this. The current step keeps its own --navy-dark and its
+         filled rule; the step behind rests in --navy-2; the ones ahead are
+         suggested in --muted. Same reading order, three tokens instead of
+         three alphas. */
+      .quote-progress span {
+        opacity: 1;
+        color: var(--muted);
+      }
+
+      .quote-progress span.is-done {
+        opacity: 1;
+      }
+
+      .quote-progress span b {
+        color: var(--champagne-ink);
+      }
+    }
+
+    /* =========================================================
+       22d. CHAPTER REFINEMENT — desktop composition (≥916px)
+       ========================================================= */
+    @media (min-width:916px) {
+
+      /* the drawn vocabulary, re-weighted against the relief field */
       .cornered::before,
-      .cornered::after,
-      .eyebrow::before,
-      .eyebrow::after,
-      .hero-panel .hero-index::before,
-      .pillars::after,
-      .pillar::before,
-      .pillar-num::after,
-      .service-card::after,
-      .spec-plate::after,
-      .spec-list::before,
-      .residential::before,
-      .residential-media::before,
-      .residential-media::after,
-      .mobile-menu::after,
-      .footer-col h4::after,
-      .footer-joint::before,
-      .footer-joint::after,
-      .footer-joint > span,
-      .faq-a p::before {
-        display: none;
+      .cornered::after {
+        width: 13px;
+        height: 13px;
+        opacity: .78;
       }
 
+      .eyebrow::before {
+        opacity: .72;
+      }
+
+      .eyebrow::after {
+        opacity: .22;
+      }
+
+      .spec-list::before {
+        opacity: .7;
+      }
+
+      .service-card::after {
+        border-color: rgba(255, 255, 255, .22);
+      }
+
+      /* ---------- HEADER ---------- */
+      .site-header.is-scrolled {
+        background: rgba(7, 27, 46, .72);
+        backdrop-filter: blur(20px) saturate(118%);
+        -webkit-backdrop-filter: blur(20px) saturate(118%);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .07), 0 18px 44px rgba(7, 27, 46, .3);
+      }
+
+      .nav-desktop a::after {
+        transition: transform var(--dur-hover) var(--ease-editorial);
+      }
+
+      /* ---------- HERO: one plane deeper ---------- */
+      .hero-slide .hero-media::before {
+        --hero-zoom: 1.08;
+        transform: translate3d(0, var(--hero-par, 0px), 0) scale(var(--hero-zoom));
+        transition: --hero-zoom 8s linear;
+        will-change: transform;
+      }
+
+      .hero-slide.is-active .hero-media::before {
+        --hero-zoom: 1;
+      }
+
+      /* A directional vignette rather than a symmetric one: the light falls
+         from the upper right, the copy sits in the weighted corner, and the
+         frame closes at the foot. Three very wide ramps, no contour. */
+      .hero-slide::after {
+        background:
+          radial-gradient(122% 90% at 78% 20%, transparent 34%, rgba(7, 27, 46, .5) 100%),
+          linear-gradient(104deg, rgba(7, 27, 46, .52) 0%, rgba(7, 27, 46, .14) 46%, transparent 70%),
+          linear-gradient(to top, rgba(7, 27, 46, .82), transparent 36%);
+      }
+
+      .hero-panel {
+        background: rgba(16, 42, 67, .42);
+        border-color: rgba(255, 255, 255, .11);
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .1) inset, 0 26px 70px rgba(7, 27, 46, .42);
+      }
+
+      .hero-text .hero-support {
+        border-left-color: rgba(200, 169, 106, .38);
+      }
+
+      /* ---------- 4POINTS STANDARD: a protocol, not four rows ---------- */
+      .standard-head h2 {
+        line-height: .97;
+        letter-spacing: -.024em;
+      }
+
+      .pillar {
+        transition:
+          background var(--dur-hover) var(--ease-editorial),
+          opacity var(--dur-reveal) var(--ease-editorial),
+          transform var(--dur-reveal) var(--ease-editorial);
+      }
+
+      .pillar:hover {
+        background: linear-gradient(90deg, rgba(200, 169, 106, .055), transparent 58%);
+      }
+
+      .pillar-title {
+        transition: transform var(--dur-hover) var(--ease-editorial);
+      }
+
+      .pillar:hover .pillar-title {
+        transform: translateX(4px);
+      }
+
+      /* ---------- SERVICES: photographic depth, no SaaS card ---------- */
+      .service-card {
+        box-shadow:
+          inset 0 0 0 1px rgba(255, 255, 255, .08),
+          0 2px 6px rgba(7, 27, 46, .16),
+          0 26px 60px rgba(7, 27, 46, .28);
+        transition:
+          box-shadow var(--dur-hover) var(--ease-editorial),
+          transform var(--dur-hover) var(--ease-editorial);
+      }
+
+      .service-card:hover,
+      .service-card.is-active,
+      .service-card:focus-within {
+        box-shadow:
+          inset 0 0 0 1px rgba(200, 169, 106, .34),
+          0 4px 10px rgba(7, 27, 46, .2),
+          0 38px 88px rgba(7, 27, 46, .36);
+      }
+
+      /* the overlay stops being one flat ramp across the whole photograph and
+         becomes light falling on it: weight under the type, a cool opening at
+         the far corner */
+      .service-card::before {
+        background:
+          radial-gradient(114% 64% at 16% 104%, rgba(7, 27, 46, .74), transparent 62%),
+          radial-gradient(86% 54% at 88% -8%, rgba(255, 255, 255, .07), transparent 58%);
+      }
+
+      /* almost imperceptible, and long enough that the eye reads depth rather
+         than a zoom */
+      .service-card .card-media {
+        transition:
+          transform 1.6s var(--ease-editorial),
+          filter var(--dur-hover) var(--ease-editorial);
+      }
+
+      .service-card:hover .card-media,
+      .service-card.is-active .card-media,
+      .service-card:focus-within .card-media {
+        transform: scale(1.035);
+        filter: brightness(1.045) saturate(1.04);
+      }
+
+      .card-more {
+        transition:
+          max-height .52s var(--ease-editorial),
+          opacity .42s var(--ease-editorial),
+          margin .52s var(--ease-editorial);
+      }
+
+      .card-cta::after,
+      .card-cta .icon {
+        transition: transform var(--dur-hover) var(--ease-editorial);
+      }
+
+      /* ---------- MAINTENANCE: a planning instrument ----------
+         The plan was a heavy panel floating on a light ground. It becomes a
+         light physical object: less glass, a hairline instead of a border, and
+         a contact shadow doing the work the diffuse one was overdoing. */
+      .freq-panel {
+        background: color-mix(in srgb, var(--paper) 72%, transparent);
+        border-color: var(--line-light-soft);
+        box-shadow: 0 1px 2px rgba(7, 27, 46, .04), 0 16px 38px rgba(7, 27, 46, .07);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+      }
+
+      .freq-panel-head span {
+        letter-spacing: -.012em;
+      }
+
+      .freq-tab {
+        transition:
+          background var(--dur-micro) var(--ease-quick),
+          border-color var(--dur-micro) var(--ease-quick),
+          color var(--dur-micro) var(--ease-quick),
+          box-shadow var(--dur-hover) var(--ease-editorial);
+      }
+
+      .freq-tab.is-active {
+        box-shadow: 0 1px 0 rgba(255, 255, 255, .16) inset, 0 6px 18px rgba(18, 85, 107, .2);
+      }
+
+      .freq-list li {
+        transition:
+          opacity .52s var(--ease-editorial),
+          transform .52s var(--ease-editorial);
+      }
+
+      /* ---------- FLOOR CARE ----------
+         The dossier's registration figure comes back at a weight that reads as
+         a drawing behind the information rather than as a graphic on top of
+         the photograph. */
+      .fc-figure {
+        opacity: calc((.07 + var(--fc-enter) * .045) * (1 - var(--fc-exit) * .75));
+      }
+
+      /* ---------- BEFORE / AFTER ---------- */
       .ba-board {
-        border-top: 0;
-        border-bottom: 0;
+        border-top-color: var(--canvas-rule-soft);
+        border-bottom-color: var(--canvas-rule-soft);
       }
 
-      /* The FAQ keeps its accordion dividers and interaction states; only the
-         construction rule and node attached to the answer are removed. */
-      .faq-a p {
-        margin-left: 0;
-        padding-left: 0;
-        border-left: 0;
+      .ba-notes {
+        background: color-mix(in srgb, var(--paper) 76%, transparent);
+        border-color: var(--canvas-rule-soft);
       }
 
-      /* With the radar gone, Areas becomes a deliberate reading column rather
-         than retaining an empty half of the former two-column composition. */
+      /* ---------- RESIDENTIAL: soft depth, same light room ---------- */
+      .residential-media {
+        box-shadow: 0 2px 6px rgba(7, 27, 46, .06), 0 26px 64px rgba(7, 27, 46, .13);
+      }
+
+      .residential-media::before {
+        inset: -14px;
+        border-color: var(--line-light-soft);
+        border-radius: calc(var(--radius-lg) + 7px);
+      }
+
+      .residential-media::after {
+        opacity: .78;
+      }
+
+      .residential-list li {
+        transition: padding-left var(--dur-hover) var(--ease-editorial);
+      }
+
+      /* ---------- IMPACT: the ratio is the anchor ---------- */
+      .impact-ratio {
+        letter-spacing: -.03em;
+      }
+
+      .impact-viz {
+        margin-top: 28px;
+      }
+
+      .rv-mark {
+        border-color: rgba(23, 59, 90, .42);
+      }
+
+      .rv-mark.is-gift {
+        box-shadow: 0 3px 12px rgba(7, 27, 46, .22);
+      }
+
+      /* ---------- AREAS: a coverage radius, kept abstract ----------
+         The composition returns to two masses — the message and the reach
+         diagram — with the asymmetry the rest of the page is built on. The
+         diagram itself is calmed: it is a radius and four reporting points,
+         not a radar putting on a show. */
       .areas-inner {
-        grid-template-columns: minmax(0, 760px);
-        justify-content: start;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr);
       }
 
-      .areas-inner > div:first-child {
-        max-width: 760px;
+      .areas-graphic {
+        opacity: .68;
       }
 
-      .areas p {
-        max-width: 60ch;
+      .areas-graphic .sweep {
+        opacity: .5;
+      }
+
+      @media (prefers-reduced-motion: no-preference) {
+        .areas-graphic .sweep {
+          animation-duration: 26s;
+        }
+
+        .areas-graphic .ring-dash {
+          animation-duration: 96s;
+        }
+
+        .areas-graphic .node-pulse {
+          animation-duration: 7.2s;
+        }
+      }
+
+      /* ---------- TESTIMONIALS: one editorial piece at a time ---------- */
+      .t-carousel {
+        background: linear-gradient(180deg, rgba(247, 244, 239, .64), rgba(247, 244, 239, .2));
+        border-color: var(--line-light-soft);
+      }
+
+      .t-slide {
+        transition:
+          opacity .56s var(--ease-editorial),
+          transform .56s var(--ease-editorial);
+      }
+
+      .t-slide p {
+        line-height: 1.32;
+        letter-spacing: -.012em;
+      }
+
+      /* ---------- FAQ: the pace of a technical index ----------
+         Numbering is the one thing the accordion lacked to read as an index
+         rather than as a list of controls. It is drawn from a counter, so no
+         markup, no content and no ARIA changes hands. */
+      .faq-board {
+        background: linear-gradient(180deg, rgba(247, 244, 239, .64), rgba(247, 244, 239, .2));
+        border-color: var(--line-light-soft);
+        box-shadow: 0 1px 2px rgba(7, 27, 46, .04), 0 18px 44px rgba(7, 27, 46, .08);
+      }
+
+      .faq-list {
+        counter-reset: faq;
+      }
+
+      .faq-item {
+        counter-increment: faq;
+      }
+
+      /* the row is read left to right — index, question, control — so the
+         control is pushed to the edge rather than the question being pushed
+         to the middle by space-between */
+      .faq-q {
+        justify-content: flex-start;
+        gap: 18px;
+      }
+
+      .faq-q .icon {
+        margin-left: auto;
+      }
+
+      .faq-q::before {
+        content: counter(faq, decimal-leading-zero);
+        flex: none;
+        align-self: center;
+        font-family: var(--font-ui);
+        font-size: .66rem;
+        font-weight: 800;
+        letter-spacing: .12em;
+        font-variant-numeric: tabular-nums;
+        /* full strength: an index that says which question you are on is copy,
+           not decoration, and at 10.6px it has no room to be faded */
+        color: var(--muted);
+        transition: color var(--dur-micro) var(--ease-quick);
+      }
+
+      .faq-item:hover .faq-q::before,
+      .faq-item.is-open .faq-q::before,
+      .faq-q:focus-visible::before {
+        color: var(--champagne-ink);
+      }
+
+      .faq-a {
+        transition: max-height .5s var(--ease-editorial);
+      }
+
+      .faq-a p {
+        border-left-color: var(--line-light-soft);
+      }
+
+      /* ---------- QUOTE: the calmest surface on the page ---------- */
+      .quote-form {
+        background: color-mix(in srgb, #fff 72%, transparent);
+        border-color: var(--line-light-soft);
+        box-shadow: 0 1px 2px rgba(7, 27, 46, .05), 0 10px 26px rgba(7, 27, 46, .06), 0 34px 80px rgba(7, 27, 46, .1);
+      }
+
+      /* the step arrives, it does not slide in from off stage */
+      .q-step.is-active {
+        animation: qsettle .52s var(--ease-editorial);
+      }
+
+      @keyframes qsettle {
+        from {
+          opacity: 0;
+          transform: translate3d(10px, 0, 0);
+        }
+
+        to {
+          opacity: 1;
+          transform: translate3d(0, 0, 0);
+        }
+      }
+
+      /* the step behind you rests, the step you are on is lit, and the ones
+         ahead are suggested by their rule alone */
+      .quote-progress span {
+        transition:
+          color var(--dur-reveal) var(--ease-editorial),
+          opacity var(--dur-reveal) var(--ease-editorial);
+      }
+
+      .quote-progress span::after {
+        transition: transform .62s var(--ease-editorial);
+      }
+
+      /* The current step's numeral is deliberately NOT given --champagne-deep.
+         That token measures 3.24:1 on Paper and is the exact reason
+         --champagne-text (and now --champagne-ink) exists; the step gains its
+         emphasis from the filled rule above it and from the label's own token,
+         never from a warmer numeral that would fail at 11.8px. */
+
+      .q-option {
+        transition:
+          border-color var(--dur-micro) var(--ease-quick),
+          background var(--dur-micro) var(--ease-quick),
+          transform var(--dur-micro) var(--ease-quick),
+          box-shadow var(--dur-hover) var(--ease-editorial);
+      }
+
+      .q-option.is-selected {
+        box-shadow: 0 1px 2px rgba(18, 85, 107, .1), 0 8px 20px rgba(18, 85, 107, .08);
+      }
+
+      /* ---------- CLOSING SCENE ---------- */
+      .section-joint {
+        background: rgba(7, 27, 46, .55);
+        border-color: var(--line-dark-soft);
+        backdrop-filter: blur(6px);
+        -webkit-backdrop-filter: blur(6px);
+      }
+
+      .final-cta h2 {
+        letter-spacing: -.02em;
+      }
+
+      .footer-joint {
+        margin-bottom: 42px;
+      }
+
+      .footer-joint::before,
+      .footer-joint::after {
+        background: var(--line-dark-soft);
+      }
+    }
+
+    /* ---------- 22e. FLOOR CARE — raking light ----------
+       A single very wide directional band over the treated floor, sharing
+       --fc-mask with the photograph and the scrim so all three dissolve as one
+       object and no new edge appears at either end of the chapter. It rides
+       against the photograph's own parallax, which is what makes the surface
+       read as polished rather than as lit.
+
+       Scoped to ≥993px: below that the photograph is re-heighted for the
+       vertical poster (§19 and the Mobile Edition) and inset:0 would no longer
+       describe where it is. */
+    .fc-sheen {
+      display: none;
+    }
+
+    @media (min-width:993px) {
+      .fc-sheen {
+        display: block;
+        position: absolute;
+        inset: 0;
+        z-index: 1;
+        pointer-events: none;
+        -webkit-mask-image: var(--fc-mask);
+        mask-image: var(--fc-mask);
+        background: linear-gradient(101deg,
+            transparent 30%,
+            rgba(255, 255, 255, .02) 44%,
+            rgba(255, 255, 255, .062) 51%,
+            rgba(255, 255, 255, .016) 59%,
+            transparent 74%);
+        opacity: calc(.3 + var(--fc-enter, 1) * .7);
+        transform: translate3d(0, calc(var(--parallax, 0px) * -.5), 0);
+      }
+
+      /* the content clears the new plane */
+      .floorcare .container {
+        z-index: 2;
+      }
+
+      /* ---------- the 01–04 spine ----------
+         The four points are already rows on a hairline. What was missing is
+         the line that runs *down* them, so the eye is carried from 01 to 04
+         instead of landing on four separate rows. It stands on the edge of the
+         number column, and each point's own rule now reaches it when the row
+         is being read: the point reports in to the protocol.
+
+         ≥993px because below that width §19 collapses the pillar grid to two
+         columns and there is no number column for the spine to stand on. */
+      .pillars {
+        --pillar-spine: 120px;
+      }
+
+      .pillars::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: var(--pillar-spine);
+        width: 1px;
+        background: var(--canvas-rule-soft);
+        transform: scaleY(0);
+        transform-origin: top center;
+        transition: transform 1.25s var(--ease-editorial) .16s;
+      }
+
+      .pillars.is-revealed::before {
+        transform: scaleY(1);
+      }
+
+      .pillar-num::after {
+        flex: 1;
+        width: auto;
+        transform: scaleX(.42);
+      }
+
+      .pillar:hover .pillar-num::after,
+      .pillar:focus-within .pillar-num::after {
+        transform: scaleX(1);
+        opacity: .9;
+      }
+    }
+
+    /* =========================================================
+       22f. BEFORE / AFTER — LOCAL WebGL PLATE
+       =========================================================
+       Progressive enhancement, and the only WebGL on the site. It mounts on
+       desktop (≥916px) with a fine pointer and no reduced-motion preference,
+       and only once both photographs have decoded; until then — and forever,
+       if the context fails — the two CSS layers below it are the page.
+
+       Stacking. The canvas is the FIRST child of the frame, so the two .ba-img
+       layers still paint above it and keep owning their captions; when the
+       plate is live those layers simply stop carrying an image. The divider,
+       the hint and the native range stay above everything. The host never
+       takes a pointer event, a hit test or a tab stop: the range is still the
+       one gesture surface, and it is still the source of truth the shader
+       reads — never the other way round.
+       ========================================================= */
+    .ba-gl {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .7s var(--ease-editorial);
+    }
+
+    .ba-gl canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+
+    .ba-frame.is-gl .ba-gl {
+      opacity: 1;
+    }
+
+    /* the fallback layers stay in the DOM for their captions and for the
+       clip-path that retires them, but stop painting the photograph twice */
+    .ba-frame.is-gl .ba-img {
+      background-image: none;
+      background-color: transparent;
+    }
+
+    .ba-handle-track {
+      z-index: 2;
+    }
+
+    /* =========================================================
+       22g. REDUCED MOTION
+       =========================================================
+       The final state, immediately, with nothing left mid-travel. The global
+       reduced-motion block near the top of this file already collapses every
+       duration; these rules exist because a masked line and a rule at scaleX(0)
+       are *positions*, not durations, and would otherwise stay where they are. */
+    @media (prefers-reduced-motion: reduce) {
+
+      .lm-in {
+        transform: none !important;
+        opacity: 1 !important;
+        transition: none !important;
+      }
+
+      .lm-line {
+        -webkit-mask-image: none;
+        mask-image: none;
+      }
+
+      .eyebrow::after,
+      [data-reveal]:not(.is-revealed) .eyebrow::after,
+      .hero-slide:not(.is-active) .eyebrow::after {
+        transform: scaleX(1) !important;
+      }
+
+      .pillars::before {
+        transform: scaleY(1) !important;
+      }
+
+      .fc-sheen {
+        transform: none !important;
       }
     }

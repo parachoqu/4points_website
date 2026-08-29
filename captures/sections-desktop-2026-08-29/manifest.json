@@ -1,0 +1,202 @@
+{
+  "generatedAt": "2026-08-29T04:05:03.127Z",
+  "pageUrl": "http://127.0.0.1:4173/index.html",
+  "viewport": {
+    "width": 1440,
+    "height": 900,
+    "deviceScaleFactor": 1
+  },
+  "settleMs": 3200,
+  "captureMethod": "one stabilized viewport per visible scroll chapter; fixed stateful background preserved",
+  "initialAudit": {
+    "bgState": "ready",
+    "noCanvas": false,
+    "documentWidth": 1440,
+    "viewportWidth": 1440,
+    "fonts": {
+      "status": "loaded",
+      "manrope": true,
+      "fraunces": true
+    },
+    "brokenImages": [],
+    "visibleChapterCount": 13,
+    "hiddenCoverCount": 4
+  },
+  "diagnostics": {
+    "consoleErrors": [],
+    "pageErrors": [],
+    "failedRequests": [],
+    "badResponses": []
+  },
+  "captured": [
+    {
+      "slug": "01-hero",
+      "selector": "main > .hero",
+      "tone": "navy-deep",
+      "file": "01-hero.png",
+      "top": 0,
+      "height": 900,
+      "scrollY": 0,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-navy-deep is-dark",
+      "canvasPol": "1",
+      "canvasLum": "0.01"
+    },
+    {
+      "slug": "02-standard",
+      "selector": "main > .standard",
+      "tone": "navy",
+      "file": "02-standard.png",
+      "top": 900,
+      "height": 900,
+      "scrollY": 900,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-navy is-dark",
+      "canvasPol": "1",
+      "canvasLum": "0.022"
+    },
+    {
+      "slug": "03-services",
+      "selector": "main > .services",
+      "tone": "navy",
+      "file": "03-services.png",
+      "top": 1800,
+      "height": 900,
+      "scrollY": 1800,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-navy is-dark",
+      "canvasPol": "1",
+      "canvasLum": "0.022"
+    },
+    {
+      "slug": "04-maintenance",
+      "selector": "main > .maintenance",
+      "tone": "paper",
+      "file": "04-maintenance.png",
+      "top": 2700,
+      "height": 900,
+      "scrollY": 2700,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-paper",
+      "canvasPol": "0",
+      "canvasLum": "0.983"
+    },
+    {
+      "slug": "05-floor-care",
+      "selector": "main > .floorcare",
+      "tone": "petrol",
+      "file": "05-floor-care.png",
+      "top": 3600,
+      "height": 900,
+      "scrollY": 3600,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-petrol is-dark",
+      "canvasPol": "1",
+      "canvasLum": "0.077"
+    },
+    {
+      "slug": "06-before-after",
+      "selector": "main > .beforeafter",
+      "tone": "sand",
+      "file": "06-before-after.png",
+      "top": 4500,
+      "height": 900,
+      "scrollY": 4500,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-sand",
+      "canvasPol": "0",
+      "canvasLum": "0.871"
+    },
+    {
+      "slug": "07-residential",
+      "selector": "main > .residential",
+      "tone": "ivory",
+      "file": "07-residential.png",
+      "top": 5400,
+      "height": 900,
+      "scrollY": 5400,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-ivory",
+      "canvasPol": "0",
+      "canvasLum": "0.907"
+    },
+    {
+      "slug": "08-impact",
+      "selector": "main > .impact",
+      "tone": "sand",
+      "file": "08-impact.png",
+      "top": 6300,
+      "height": 900,
+      "scrollY": 6300,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-sand",
+      "canvasPol": "0",
+      "canvasLum": "0.871"
+    },
+    {
+      "slug": "09-areas",
+      "selector": "main > .areas",
+      "tone": "navy",
+      "file": "09-areas.png",
+      "top": 7200,
+      "height": 900,
+      "scrollY": 7200,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-navy is-dark",
+      "canvasPol": "1",
+      "canvasLum": "0.022"
+    },
+    {
+      "slug": "10-testimonials",
+      "selector": "main > .testimonials",
+      "tone": "ivory",
+      "file": "10-testimonials.png",
+      "top": 8100,
+      "height": 900,
+      "scrollY": 8100,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-ivory",
+      "canvasPol": "0",
+      "canvasLum": "0.907"
+    },
+    {
+      "slug": "11-faq",
+      "selector": "main > .faq",
+      "tone": "paper",
+      "file": "11-faq.png",
+      "top": 9000,
+      "height": 900,
+      "scrollY": 9000,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-paper",
+      "canvasPol": "0",
+      "canvasLum": "0.983"
+    },
+    {
+      "slug": "12-quote",
+      "selector": "main > .quote",
+      "tone": "paper",
+      "file": "12-quote.png",
+      "top": 9900,
+      "height": 900,
+      "scrollY": 9900,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-paper",
+      "canvasPol": "0",
+      "canvasLum": "0.983"
+    },
+    {
+      "slug": "13-closing-scene",
+      "selector": "body > .closing-scene",
+      "tone": "navy-deep",
+      "file": "13-closing-scene.png",
+      "top": 10800,
+      "height": 900,
+      "scrollY": 10800,
+      "bgState": "ready",
+      "bgClasses": "bg-root tone-navy-deep is-dark",
+      "canvasPol": "1",
+      "canvasLum": "0.01"
+    }
+  ]
+}

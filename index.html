@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=ccb526e1125b">
+  <link rel="stylesheet" href="style.css?v=00b8cff64a53">
 </head>
 
 <body>
@@ -282,6 +282,14 @@
               or a corner office.</p>
           </div>
         </div>
+
+        <div class="standard-protocol" data-reveal="rule">
+          <span class="protocol-step"><b>01</b>Preparation</span>
+          <span class="protocol-step"><b>02</b>Checklist</span>
+          <span class="protocol-step"><b>03</b>Execution</span>
+          <span class="protocol-step"><b>04</b>Inspection</span>
+          <span class="protocol-step"><b>05</b>Handoff</span>
+        </div>
       </div>
     </section>
 
@@ -317,6 +325,14 @@
                   <li>Touchpoint Cleaning</li>
                   <li>Custom Maintenance Plans</li>
                 </ul>
+                <dl class="spec-list card-specs">
+                  <dt>Frequency</dt>
+                  <dd>Daily · Weekly · Bi-weekly · Monthly</dd>
+                  <dt>Coverage</dt>
+                  <dd>Greater Boston &amp; Massachusetts</dd>
+                  <dt>Contract</dt>
+                  <dd>Flexible, no long-term lock-in</dd>
+                </dl>
               </div>
               <span class="card-cta">Request Commercial Quote <svg class="icon" viewBox="0 0 24 24"
                   style="width:14px;height:14px">
@@ -345,6 +361,14 @@
                   <li>High-Traffic Floors</li>
                   <li>Sunday Service</li>
                 </ul>
+                <dl class="spec-list card-specs">
+                  <dt>Schedule</dt>
+                  <dd>Sundays &amp; after hours</dd>
+                  <dt>Contract</dt>
+                  <dd>Recurring or one-time</dd>
+                  <dt>Coverage</dt>
+                  <dd>Greater Boston &amp; Massachusetts</dd>
+                </dl>
               </div>
               <span class="card-cta">Request Floor Care <svg class="icon" viewBox="0 0 24 24"
                   style="width:14px;height:14px">
@@ -372,6 +396,12 @@
                   <li>Move-In</li>
                   <li>Move-Out</li>
                 </ul>
+                <dl class="spec-list card-specs">
+                  <dt>Coverage</dt>
+                  <dd>Greater Boston &amp; Massachusetts</dd>
+                  <dt>Contract</dt>
+                  <dd>Per-visit, no subscription required</dd>
+                </dl>
               </div>
               <span class="card-cta">Request Home Cleaning <svg class="icon" viewBox="0 0 24 24"
                   style="width:14px;height:14px">
@@ -400,6 +430,12 @@
                   <li>Surface Detailing</li>
                   <li>Window &amp; Frame Cleaning</li>
                 </ul>
+                <dl class="spec-list card-specs">
+                  <dt>Scheduling</dt>
+                  <dd>One-time, timed to your project close-out</dd>
+                  <dt>Coverage</dt>
+                  <dd>Greater Boston &amp; Massachusetts</dd>
+                </dl>
               </div>
               <span class="card-cta">Request Post-Construction <svg class="icon" viewBox="0 0 24 24"
                   style="width:14px;height:14px">
@@ -434,6 +470,7 @@
             <span data-freq-title>Daily Plan</span>
             <small>Included <b data-freq-count>04</b></small>
           </div>
+          <p class="freq-fit" data-freq-fit></p>
           <ul class="freq-list" data-freq-list></ul>
         </div>
       </div>
@@ -444,6 +481,10 @@
      ========================================================= -->
     <section class="floorcare scroll-snap-section" id="floorcare"
       style="--img-floor-lg:url('assets/images/floor-care.jpg')">
+      <!-- Raking light over the treated floor. It shares --fc-mask with the
+           photograph and the scrim, so the three dissolve as one object and no
+           new edge is introduced at either end of the chapter. -->
+      <span class="fc-sheen" aria-hidden="true"></span>
       <div class="container">
         <div class="floorcare-inner">
 
@@ -457,6 +498,7 @@
                 <circle cx="12" cy="12" r="9" />
                 <path d="M12 7v5l3 2" />
               </svg>Sunday Service Available</span>
+            <p class="fc-note">Polishing, waxing and restoration, matched to the floor's existing finish — the same crew reviews the result before handoff.</p>
             <div><a class="btn btn-champagne" href="#quote">Request Floor Care Quote</a></div>
           </div>
 
@@ -502,6 +544,12 @@
 
             <div class="ba-frame" data-before-after
               style="--img-before:url('assets/images/vinyl-floor-before.png'); --img-after:url('assets/images/vinyl-floor-after.png')">
+              <!-- Progressive enhancement only. The canvas is the base plate when
+                   WebGL is available; the two CSS layers below stay in the DOM as
+                   the full fallback and keep owning the captions. It never takes a
+                   pointer, a tab stop or a hit test: the native range still owns
+                   the whole gesture surface above it. -->
+              <div class="ba-gl" data-ba-gl aria-hidden="true"></div>
               <div class="ba-img ba-before"><span class="ba-label">Traffic-worn vinyl</span></div>
               <div class="ba-img ba-after" data-ba-after style="clip-path:inset(0 0 0 50%)"><span
                   class="ba-label">Wax &amp; buff finish</span></div>
@@ -521,10 +569,11 @@
 
             <p class="ba-caption" data-canvas-ink>One commercial lobby, one camera position, before and after deep
               cleaning and wax &amp; buffing for vinyl flooring.</p>
+            <p class="ba-context" data-canvas-ink>One example from our recurring Floor Care service — the same polishing, waxing and restoration process used on every scheduled visit.</p>
           </div>
 
           <aside class="ba-notes cornered" data-canvas-ink data-reveal>
-            <span class="spec-plate">PL—02<i>Case</i></span>
+            <span class="spec-plate">PL—02<i>Case Study</i></span>
             <dl class="spec-list">
               <dt>Surface</dt>
               <dd>Commercial lobby, LVT vinyl plank</dd>
@@ -573,6 +622,19 @@
               <div><strong>Move-In / Move-Out</strong><span>A spotless start or a clean handoff.</span></div>
             </li>
           </ul>
+
+          <div class="residential-ritual" data-reveal="rule">
+            <div class="ritual-step"><span class="ritual-num">01</span>
+              <div><strong>Arrival</strong><span>A fully insured crew arrives at the scheduled time.</span></div>
+            </div>
+            <div class="ritual-step"><span class="ritual-num">02</span>
+              <div><strong>Care</strong><span>The same professional standard used across our commercial accounts, room by room.</span></div>
+            </div>
+            <div class="ritual-step"><span class="ritual-num">03</span>
+              <div><strong>Handoff</strong><span>A clean handoff, every time.</span></div>
+            </div>
+          </div>
+
           <a class="btn btn-primary" href="#quote">Request Home Cleaning</a>
         </div>
       </div>
@@ -595,6 +657,7 @@
             <span class="rv-rule"></span>
             <span class="rv-mark is-gift"></span>
           </div>
+          <span class="impact-viz-caption">5 residential cleanings &rarr; 1 support cleaning, delivered with PPEAL.</span>
         </div>
         <div data-reveal>
           <span class="eyebrow on-sage">Our Impact</span>
@@ -620,6 +683,14 @@
           <h2>We come to you.</h2>
           <p>4Points has no storefront: our crews travel directly to your property, fully equipped, on schedule. That's
             what lets us stay flexible for facility managers and homeowners alike.</p>
+          <dl class="spec-list areas-logic">
+            <dt>Storefront</dt>
+            <dd>None — fully mobile service</dd>
+            <dt>Equipment</dt>
+            <dd>Crews arrive fully equipped</dd>
+            <dt>Response</dt>
+            <dd>On schedule, direct to your property</dd>
+          </dl>
           <div class="areas-tags">
             <div class="areas-group">
               <span class="areas-group-label">Coverage</span>
@@ -666,6 +737,7 @@
             <circle class="node" cx="290" cy="250" r="4" fill="#8BAE8B" />
             <circle class="node" cx="120" cy="150" r="4" fill="#8BAE8B" />
           </svg>
+          <span class="areas-graphic-caption">Mobile crews serving Greater Boston &amp; Massachusetts — no storefront, no fixed radius.</span>
         </div>
       </div>
     </section>
@@ -696,6 +768,7 @@
           </div>
           <div class="t-track" data-testimonial-track>
             <div class="t-slide is-active" data-testimonial-slide aria-hidden="false">
+              <span class="t-service-tag">Commercial &amp; Janitorial</span>
               <p>4Points took over our office cleaning six months ago and it's the first vendor we haven't had to
                 babysit. Restrooms, break rooms, floors, every single time.</p>
               <div class="t-meta"><b class="t-avatar" aria-hidden="true">DF</b>
@@ -703,6 +776,7 @@
               </div>
             </div>
             <div class="t-slide" data-testimonial-slide aria-hidden="true">
+              <span class="t-service-tag">Floor Care</span>
               <p>We schedule floor waxing with them every other Sunday so it never disrupts the school week. Consistent,
                 on time, and the halls look brand new every time.</p>
               <div class="t-meta"><b class="t-avatar" aria-hidden="true">MS</b>
@@ -710,6 +784,7 @@
               </div>
             </div>
             <div class="t-slide" data-testimonial-slide aria-hidden="true">
+              <span class="t-service-tag">Residential — Move-Out</span>
               <p>They came for a move-out clean and the landlord returned our full deposit without a single question.
                 Worth every dollar.</p>
               <div class="t-meta"><b class="t-avatar" aria-hidden="true">PA</b>
@@ -717,6 +792,7 @@
               </div>
             </div>
             <div class="t-slide" data-testimonial-slide aria-hidden="true">
+              <span class="t-service-tag">Commercial &amp; Janitorial</span>
               <p>What sold us wasn't the price, it was how they explained the maintenance plan. Weekly touchpoint
                 cleaning has genuinely cut down on sick days in the office.</p>
               <div class="t-meta"><b class="t-avatar" aria-hidden="true">RC</b>
@@ -873,6 +949,12 @@
             <span><b>03</b><i>Size</i></span>
             <span><b>04</b><i>Contact</i></span>
           </div>
+
+          <ol class="quote-steps" data-reveal="rule">
+            <li><b>01</b><div><strong>Review</strong><span>Your request reaches our team right away.</span></div></li>
+            <li><b>02</b><div><strong>Quote</strong><span>We follow up shortly with your quote.</span></div></li>
+            <li><b>03</b><div><strong>Next Steps</strong><span>We confirm the details and next steps together.</span></div></li>
+          </ol>
         </div>
 
         <form class="quote-form cornered" data-quote-form data-reveal novalidate>
@@ -1229,7 +1311,7 @@
     </div>
   </section>
 
-  <script type="module" src="script.js?v=9d25a4847137"></script>
+  <script type="module" src="script.js?v=41b9dd52dbc4"></script>
 </body>
 
 </html>

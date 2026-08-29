@@ -49,7 +49,8 @@ O esquema de cores foi selecionado para transmitir elegância corporativa, higie
 | `--sage-soft` | `#DDE8D8` | 🍃 Sálvia Suave | Tags de contraste sobre superfícies escuras |
 | `--champagne` | `#C8A96A` | 🟡 Dourado/Champagne | Botões de Ação Principal (CTA) "Request a Quote" |
 | `--champagne-deep` | `#A9894C` | 🟤 Champagne Escuro | Tinta adaptativa da `.standard`; réguas e preenchimentos gráficos |
-| `--champagne-text` | `#876E3D` | 🟫 Champagne Texto | Champagne legível como texto pequeno sobre chão claro |
+| `--champagne-text` | `#876E3D` | 🟫 Champagne Texto | Champagne legível como texto pequeno sobre chão claro **chapado** (Mobile Edition) |
+| `--champagne-ink` | `#7E6738` | 🟤 Champagne Tinta | Champagne legível como texto pequeno sobre o chão claro **renderizado pelo campo de relevo** (≥768px) |
 | `--ivory` | `#F7F4EF` | 📜 Marfim | Seções de contraste suave |
 | `--paper` | `#FFFDF8` | 📄 Papel | Fundo limpo principal da página |
 | `--graphite` | `#2B2F32` | 📓 Grafite | Texto do corpo de altíssima legibilidade |
@@ -83,6 +84,22 @@ O esquema de cores foi selecionado para transmitir elegância corporativa, higie
 > **Pendente com o cliente:** `.t-stars` (as cinco estrelas dos depoimentos) usa `--champagne`
 > sobre Paper, 2.21:1. Não foi alterado — são ícones de 20px com `aria-hidden="true"`, portanto
 > decorativos e isentos, e deixá-los conformes exigiria estrelas marrons: decisão de marca.
+
+> ⚠️ **O chão medido não é o chão declarado (2026-08-29).** As razões acima foram calculadas contra
+> os tokens de tom (Paper `#FFFDF8`, Ivory, Sand). Mas nenhum capítulo é o token puro: o campo de
+> relevo deita uma sombra difusa larga por cima dele. Amostrando o pixel realmente renderizado atrás
+> do texto, em 1440×900:
+>
+> | Onde | Chão declarado | Chão medido | Efeito |
+> | :--- | :--- | :--- | :--- |
+> | Numerais da Quote | Paper, L≈.983 | L≈.855 | `--champagne-text` cai de 4.77 → **4.18:1** |
+> | `.ba-caption` | Sand, L≈.871 | `rgb(206,202,200)`, L≈.603 | `--canvas-muted` cai de 4.99 → **3.53:1** |
+>
+> O primeiro foi resolvido com `--champagne-ink` (≥768px). **O segundo continua em aberto** e é
+> decisão de design: `.ba-caption` é o único texto `--canvas-muted` que não se apoia em nenhum painel
+> e cai justamente na parte mais escura da sombra do relevo. Corrigi-lo exige escolher entre escurecer
+> `--muted` globalmente ou dar tinta local à legenda — e tinta local contraria o princípio de que o
+> `.spec-list`/`.ba-*` recebem a tinta do canvas, nunca de si mesmos.
 
 ```css
 :root {
@@ -515,8 +532,9 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
   uma especialidade. Um dos três picos visuais do site.
 - **Composição (desktop):** manifesto à esquerda — eyebrow, `Polishing. Waxing. Restoring.`, uma
   frase de manifesto, badge de domingo e CTA — e, na margem direita, o **dossiê `FC—01`**
-  (`.spec-list`) impresso sobre a fotografia. Acima de `915px`, a composição mantém somente
-  conteúdo e fotografia; os ornamentos de construção ficam restritos às regras tablet/mobile.
+  (`.spec-list`) impresso sobre a fotografia, com a figura de registro `--mark-figure` atrás dele,
+  ancorada ao próprio dossiê. Desde §22 o desktop também recebe `.fc-sheen`: uma faixa direcional
+  larga que compartilha `--fc-mask` com foto e scrim e desliza contra o parallax.
 - **A costura, feita com alpha:** o `background-color` sólido saiu. A fotografia (`::before`) e o
   scrim (`::after`) compartilham `--fc-mask` e **perdem alpha** nas duas pontas, revelando o campo
   de relevo. Não existe faixa de cor em lugar nenhum porque a camada de cima perde alpha em vez de
@@ -589,8 +607,10 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 ### 9. Áreas Atendidas (`.section.areas`)
 
 - **Design:** Apresentação do conceito de Serviço 100% Móvel e da cobertura em Greater Boston e
-  Massachusetts. No desktop, o campo Navy → Navy Dark encerra completamente o motivo `5:1`; a
-  ilustração ornamental existente permanece restrita a `≤915px`.
+  Massachusetts. Desde §22 o desktop volta às duas massas assimétricas (`1.15fr / .85fr`): a
+  mensagem e o **raio de cobertura** — anéis, linhas de alcance e quatro pontos que se reportam.
+  Abstrato por construção, e calmado (sweep 11s → 26s, anel 48s → 96s): é um raio, não um radar
+  fazendo demonstração. Nenhum mapa falso em lugar nenhum.
 
 ![Áreas de Atendimento e Raio Móvel](/home/https/.gemini/antigravity-ide/brain/ce12fde1-0eb2-4d3d-947c-877d16257892/section_9_areas_serve_1786380011203.png)
 
@@ -614,8 +634,9 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 - **Estados:** a pergunta aberta troca para Fraunces e ganha a régua champagne, o deslocamento e
   um wash que se apaga bem antes da borda da coluna (um wash, não um painel). O controle `+`
   responde à mesma régua champagne em vez de virar um botão preenchido de aplicativo.
-- **Profundidade:** vem do Quiet Material Field, com terraços largos que se assentam sob o conteúdo
-  e sem ornamentos adicionais no desktop.
+- **Profundidade:** vem do Quiet Material Field, com terraços largos que se assentam sob o conteúdo.
+  Desde §22 o accordion recupera o ritmo de índice técnico: numeração `01–08` por `counter()`, e a
+  régua com nó de volta na resposta.
 - **Encerramento:** FAQ e Quote permanecem sobre campo claro na trilha document-space. A entrada
   escura só começa depois da leitura da Quote, na Final CTA, onde o perfil assume Petrol → Navy →
   Navy Dark.
@@ -644,13 +665,124 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 
 ---
 
+## ✨ 22. Editorial Polish (2026-08-29)
+
+Passagem de **polimento**, não de redesenho. Nenhum capítulo foi recomposto, nenhum texto, imagem,
+`id`, `data-*` ou CTA se moveu, e **nada abaixo de 767px foi tocado** — toda regra do bloco está em
+`min-width:768px` ou acima. Vive em um bloco único no fim de `style.css` (`/* 22. EDITORIAL POLISH */`),
+depois do bloco Desktop Scene Layout, para vencer por ordem de fonte.
+
+### 22a. Tokens de movimento (aditivos)
+
+Nenhum token existente foi redefinido — por isso toda regra escrita antes deste bloco mantém
+exatamente o timing aprovado, mobile incluído.
+
+```css
+--ease-editorial: cubic-bezier(.25, 1, .5, 1);   /* chega, abre, assenta */
+--ease-quick:     cubic-bezier(.32, .96, .52, 1); /* feedback */
+--dur-reveal: 1.05s;  --dur-hover: .34s;  --dur-micro: .22s;
+--champagne-ink: #7E6738;
+```
+
+### 22b. Line masking
+
+Títulos em Fraunces entram **linha a linha, cada uma saindo da própria máscara**. As linhas não são
+autoradas: `initLineMask()` mede o resultado real do navegador e reconstrói o heading a partir dele,
+então as quebras são as que o browser escolheu naquela largura, com aquelas métricas. Remede em
+`resize`, `orientationchange` e `document.fonts.ready`. Só toca headings de texto puro — um heading
+que já carrega elementos próprios (as três especialidades da Floor Care) é reconhecido e ignorado.
+
+> ⚠️ **`.lm-ghost` não é decoração — é o que segura a composição.** Linhas são caixas de bloco, então
+> um heading quebrado contribui apenas com a **linha mais longa** para `max-content`, onde o heading
+> inteiro contribuía com a frase toda. Como toda cena de desktop centraliza um container
+> `fit-content` (margem auto em flex column ⇒ o item não estica), isso sozinho **reduziu a coluna da
+> Quote de 1189px para 948px** — e as linhas tinham sido medidas contra a largura que a coluna deixou
+> de ter. O ghost carrega a frase original com `height:0`, devolvendo a contribuição intrínseca
+> original. Removê-lo reabre o loop de realimentação.
+
+> A máscara é **desenhada, não recortada.** `overflow:hidden` cortaria também o `text-shadow` do hero
+> e da Final CTA. A máscara termina exatamente na borda inferior da caixa de linha e sangra
+> `--lm-bleed` (36px) nos outros três lados.
+
+### 22c. Vocabulário desenhado, reequilibrado
+
+A passagem anterior respondeu "o campo carrega a atmosfera" removendo **toda** a construção acima de
+915px. Removeu demais: sem hairlines, cantoneiras, nós de índice e marcadores numéricos, nada costurava
+uma cena à seguinte. A distinção que importa não é ornamento × nada — é **desenhado × pintado**:
+
+- **volta** (peso reajustado): cantoneiras `.cornered`, tique e régua do `.eyebrow`, régua superior e
+  espinha 01→04 da `.standard`, cantoneira do `.service-card`, régua/nó do `.spec-list`, moldura da
+  `.residential-media`, régua e nó da resposta do FAQ, diagrama 5:1 do Impact, raio de cobertura do
+  Areas (e sua composição em duas massas), medalhão da Closing Scene e as réguas do rodapé;
+- **continua fora** do desktop: `.watermark` — massa preenchida em escala arquitetônica, a única que
+  de fato disputa com o campo.
+
+A régua de fechamento do `.eyebrow` agora **se desenha** na entrada da seção. Está escrita como estado
+*fechado* no lado não revelado (`[data-reveal]:not(.is-revealed)`), nunca como estado aberto no lado
+revelado — assim um eyebrow fora de qualquer contexto de reveal (o overlay de menu de 916–992px) mantém
+a régua inteira em vez de ficar preso em `scaleX(0)`.
+
+### 22d/e. Por capítulo
+
+| Capítulo | O que mudou |
+| :--- | :--- |
+| Hero | Vinheta direcional (luz do alto à direita) + parallax de baixa amplitude (±13px). O push lento passou para `@property --hero-zoom`, para que o relógio de 8s fique no zoom e o parallax pouse no frame em que foi escrito |
+| Standard | Espinha vertical na borda da coluna de numerais, desenhada na entrada; a régua de cada ponto agora atravessa a coluna e **encosta na espinha** no hover — o ponto se reporta ao protocolo |
+| Services | Overlay vira luz caindo sobre a foto (dois radiais) em vez de uma rampa chapada; zoom quase imperceptível (1.035) em 1.6s |
+| Maintenance | Painel do plano perde peso: menos vidro, hairline no lugar de borda, sombra de contato |
+| Floor Care | `.fc-sheen` — uma faixa direcional larga compartilhando `--fc-mask` com foto e scrim, deslocando contra o parallax. Piso tratado sob luz rasante, sem reflexo especular |
+| Before/After | Prancha WebGL local (§22f) |
+| Impact / Areas | Diagrama 5:1 e raio de cobertura de volta, calmos (sweep 11s → 26s, ring 48s → 96s) |
+| FAQ | Índice numérico `01–08` por `counter()` — zero markup, zero ARIA nova. `justify-content` passa a `flex-start` com o `+` empurrado por `margin-left:auto` |
+| Quote | Hierarquia das etapas migra de **opacidade para cor** (ver contraste acima) |
+
+Seis headings (`.maintenance-head h2`, `.residential h2`, `.impact h2`, `.areas h2`, `.quote h2`,
+`.final-cta h2`) nunca declararam `line-height` e herdavam o `1.55` do body — em tipo de 40–58px isso
+lê como entrelinha frouxa enquanto todo o resto da página já vive entre `.98` e `1.12`. Só a entrelinha
+entrou no sistema; família, peso e tamanho não mudaram.
+
+### 22f. A prancha WebGL do Before/After
+
+Único WebGL do site, e o único lugar onde ele se paga: é o capítulo cujo argumento é materialidade,
+então a fronteira entre as duas fotografias pode se comportar como uma lâmina d'água em vez de um corte
+reto.
+
+**Monta apenas** em `≥916px`, `pointer: fine`, sem `prefers-reduced-motion`, e só depois de as duas
+fotografias decodificarem. Antes disso — e para sempre, se o contexto falhar — as duas camadas CSS
+**são** a página.
+
+- **O `input[type=range]` continua sendo a fonte de verdade.** O shader só traduz onde ele está;
+  nunca escreve de volta. Verificado por `elementFromPoint` nas três terças do frame: o range recebe
+  todos os hit tests.
+- **Empilhamento:** o canvas é o **primeiro** filho do `.ba-frame`, então as duas `.ba-img` pintam
+  por cima e continuam donas das suas legendas; com a prancha ativa elas apenas param de carregar a
+  fotografia (`background-image:none; background-color:transparent`).
+- **A máscara** mistura as duas texturas por ruído de valor de baixa frequência, duas oitavas.
+  Deslocamento da fronteira: 0.75% da prancha em repouso, ~1.8% durante o arraste.
+- **Dentro da faixa** (±2%): deslocamento UV amortecido, RGB split de ~0.15%, e um brilho petrol frio
+  a ~8% — leitura de superfície úmida, nunca glitch.
+- **Inércia curta:** o divisor persegue o alvo com `dt*11` e a energia decai `0.06^dt` (metade em
+  ~250ms). Quando assenta, **o loop rAF para de vez** — a fronteira mantém a forma orgânica e nada
+  mais se move. Por isso o contexto usa `preserveDrawingBuffer: true`: é um renderizador sob demanda.
+- **Pausa** fora da viewport (IntersectionObserver), com a aba oculta, e desmonta em
+  `webglcontextlost`, em ponteiro grosso ou com movimento reduzido.
+- As fotografias são lidas de `--img-before` / `--img-after` no próprio frame — uma fonte só para a
+  prancha e para o fallback. O mapeamento reproduz `cover` com o mesmo ponto focal do CSS
+  (`center 62%`), e o shader reproduz as duas lavagens (grafite no gasto, aresta fria no restaurado),
+  senão trocar entre prancha e fallback seria um corte.
+
+---
+
 ## 🛠️ Tecnologias Utilizadas
 
 - **HTML5 Semântico:** `<header>`, `<main>`, `<section>`, `<article>`, `<footer>` com acessibilidade ARIA completa.
 - **Vanilla CSS:** Sem dependências externas de frameworks CSS (Tailwind ou Bootstrap), proporcionando desempenho máximo e controle total sobre o design system.
 - **Vanilla JavaScript (ES6+):** Código limpo em IIFE, modularizado e focado em eventos passivos e `IntersectionObserver`.
 - **Background em CSS puro:** o Relevo Arquitetônico é uma superfície fixa de gradientes desfocados.
-  Zero dependências — não há Three.js, WebGL, shader nem vendor local.
+  Nenhum WebGL, shader ou dependência participa dele.
+- **WebGL nativo, em um único lugar:** a prancha local do Before/After (§22f de `style.css`,
+  `initBeforeAfterGL()` em `script.js`). Sem Three.js, sem biblioteca de animação, sem vendor local —
+  ~90 linhas de GLSL e o contexto `webgl` cru, com fallback CSS completo.
 - **Google Fonts:** Fraunces e Manrope.
 
 ---

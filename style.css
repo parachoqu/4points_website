@@ -86,9 +86,10 @@
     /* ---------------------------------------------------------
        ADAPTIVE CANVAS INK
 
-       WebGL publishes one luminance reading, one binary polarity and one glow
-       colour. Text never interpolates through an illegible grey state: only
-       the luminance-fed halo and the atmospheric glow ease between samples.
+       The relief field publishes one luminance reading, one binary polarity and
+       one glow colour per chapter. Text never interpolates through an illegible
+       grey state: only the luminance-fed halo and the atmospheric glow ease
+       between chapters.
        --------------------------------------------------------- */
     @property --canvas-lum {
       syntax: '<number>';
@@ -129,9 +130,13 @@
 
     :root,
     [data-canvas-ink] {
+      /* Both durations track the 1.8s ground cross-fade in the relief field, so
+         the luminance the halo is computed from is the luminance actually on
+         screen. A faster reading would land the halo before the ground moved,
+         which is precisely the moment it exists to cover. */
       transition:
-        --canvas-lum .28s linear,
-        --canvas-glow .36s linear;
+        --canvas-lum 1.8s linear,
+        --canvas-glow 1.8s linear;
 
       /* 1 = dark ground, therefore light ink. Polarity is written only as 0/1. */
       /* Pure endpoints are intentional: black and white overlap at 4.5:1 in
@@ -192,76 +197,293 @@
     }
 
     /* =========================================================
-       02a. QUIET MATERIAL FIELD LAYERS
+       02a. ARCHITECTURAL RELIEF FIELD
+
+       One fixed surface behind the whole scroll. Not a scene per section: a
+       continuous field of light and shadow that drifts and recolours as the
+       page advances. Nothing here has a contour, an edge or a closed shape —
+       every layer is a soft gradient plus blur, never a line.
+
+       The engine is desktop-only. Below 916px `.no-canvas` stays on and the
+       flat per-section grounds further down own the page instead.
        ========================================================= */
-    #canvas-fixed {
-      position: fixed;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      display: block;
-      pointer-events: none;
-      visibility: hidden;
-      opacity: 0;
-      transition: opacity .8s var(--ease);
-    }
-
-    html[data-webgl-state="ready"]:not(.no-canvas) #canvas-fixed {
-      visibility: visible;
-      opacity: 1;
-    }
-
-    #canvas-grain,
-    #canvas-vignette {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      visibility: hidden;
-      opacity: 0;
-    }
-
-    #canvas-grain {
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='.75'/%3E%3C/svg%3E");
-      mix-blend-mode: overlay;
-    }
-
-    #canvas-vignette {
-      z-index: 2;
-      background: radial-gradient(120% 90% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, .22) 100%);
-      mix-blend-mode: multiply;
+    .bg-root {
+      display: none;
     }
 
     @media (min-width:916px) {
-      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-grain,
-      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-vignette {
-        visibility: visible;
+      .bg-root {
+        display: block;
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        pointer-events: none;
+        background: var(--navy-dark);
+        transition: background 1.8s cubic-bezier(.22, .61, .36, 1);
       }
 
-      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-grain {
-        opacity: .11;
+      /* the six grounds; the engine writes exactly one of these at a time */
+      .bg-root.tone-navy-deep { background: var(--navy-dark); }
+      .bg-root.tone-navy { background: var(--navy); }
+      .bg-root.tone-petrol { background: var(--petrol-deep); }
+      .bg-root.tone-paper { background: var(--paper); }
+      .bg-root.tone-sand { background: var(--sand); }
+      .bg-root.tone-ivory { background: var(--ivory); }
+
+      /* Relief layers — large planes of light and shadow, never closed forms.
+         `.is-dark` rides along with the dark tones and flips each layer from
+         black-shadow to white-highlight, so the gradients are written twice
+         rather than once per tone. */
+      .relief-layer {
+        position: absolute;
+        inset: -10%;
+        will-change: transform, opacity;
+        transition: opacity 2.2s cubic-bezier(.22, .61, .36, 1);
+        pointer-events: none;
       }
 
-      html[data-webgl-state="ready"]:not(.no-canvas) #canvas-vignette {
-        opacity: .8;
+      /* --- A: the master wave, the widest diffuse plane --- */
+      #relief-a {
+        background:
+          radial-gradient(ellipse 70% 55% at 78% 18%,
+            rgba(255, 255, 255, .05) 0%,
+            rgba(255, 255, 255, .018) 38%,
+            transparent 70%),
+          radial-gradient(ellipse 65% 50% at 15% 82%,
+            rgba(0, 0, 0, .14) 0%,
+            rgba(0, 0, 0, .05) 42%,
+            transparent 72%);
+        filter: blur(40px);
+        transform: translate3d(0, 0, 0) scale(1.05);
       }
-    }
 
-    @media (max-width:915px) {
-      #canvas-fixed,
-      #canvas-grain,
-      #canvas-vignette {
-        display: none;
+      .is-dark #relief-a {
+        background:
+          radial-gradient(ellipse 70% 55% at 78% 18%,
+            rgba(255, 255, 255, .055) 0%,
+            rgba(255, 255, 255, .02) 40%,
+            transparent 70%),
+          radial-gradient(ellipse 65% 50% at 15% 85%,
+            rgba(0, 0, 0, .32) 0%,
+            rgba(0, 0, 0, .12) 45%,
+            transparent 75%);
+      }
+
+      /* --- B: a second depression, slower, crossing on the diagonal --- */
+      #relief-b {
+        background:
+          radial-gradient(ellipse 60% 80% at 30% 40%,
+            rgba(0, 0, 0, .05) 0%,
+            rgba(0, 0, 0, .015) 45%,
+            transparent 75%);
+        filter: blur(56px);
+        transform: translate3d(0, 0, 0) scale(1.08);
+        opacity: .85;
+      }
+
+      .is-dark #relief-b {
+        background:
+          radial-gradient(ellipse 60% 80% at 30% 40%,
+            rgba(255, 255, 255, .03) 0%,
+            rgba(255, 255, 255, .01) 45%,
+            transparent 75%);
+      }
+
+      /* --- C: corner pressure, anchors the edges. This is the layer that
+             replaced the old multiply vignette: same job, no hard falloff. --- */
+      #relief-c {
+        background:
+          radial-gradient(ellipse 50% 45% at 95% 95%,
+            rgba(0, 0, 0, .10) 0%,
+            transparent 65%),
+          radial-gradient(ellipse 45% 40% at 3% 3%,
+            rgba(255, 255, 255, .04) 0%,
+            transparent 60%);
+        filter: blur(48px);
+        transform: translate3d(0, 0, 0);
+      }
+
+      .is-dark #relief-c {
+        background:
+          radial-gradient(ellipse 50% 45% at 95% 95%,
+            rgba(0, 0, 0, .26) 0%,
+            transparent 65%),
+          radial-gradient(ellipse 45% 40% at 3% 3%,
+            rgba(255, 255, 255, .05) 0%,
+            transparent 60%);
+      }
+
+      /* --- D: a very discreet directional band, at full strength only in
+             Floor Care. Reads as a treated finish under raking light — never
+             as a specular highlight. --- */
+      #relief-directional {
+        background: linear-gradient(115deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0) 42%,
+          rgba(255, 255, 255, .055) 50%,
+          rgba(255, 255, 255, 0) 58%,
+          transparent 70%);
+        filter: blur(30px);
+        opacity: 0;
+        transform: translate3d(0, 0, 0) scaleX(1.3);
+        transition:
+          opacity 2.4s cubic-bezier(.22, .61, .36, 1),
+          transform 3s cubic-bezier(.22, .61, .36, 1);
+      }
+
+      .is-dark #relief-directional {
+        background: linear-gradient(115deg,
+          transparent 30%,
+          rgba(255, 255, 255, 0) 42%,
+          rgba(255, 255, 255, .08) 50%,
+          rgba(255, 255, 255, 0) 58%,
+          transparent 70%);
+      }
+
+      /* --- E: five very wide, very weak pressure zones, used only in Impact.
+             It never draws a point — these are shifts in shadow at distinct
+             positions, which is what "five regions" has to look like when the
+             background is forbidden a map. --- */
+      #relief-zones {
+        opacity: 0;
+        transition: opacity 2.2s cubic-bezier(.22, .61, .36, 1);
+        background:
+          radial-gradient(ellipse 32% 24% at 50% 30%, rgba(0, 0, 0, .11) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 22% 55%, rgba(0, 0, 0, .09) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 78% 55%, rgba(0, 0, 0, .09) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 32% 82%, rgba(0, 0, 0, .08) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 68% 82%, rgba(0, 0, 0, .08) 0%, transparent 72%);
+        filter: blur(46px);
+      }
+
+      .is-dark #relief-zones {
+        background:
+          radial-gradient(ellipse 32% 24% at 50% 30%, rgba(255, 255, 255, .075) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 22% 55%, rgba(255, 255, 255, .06) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 78% 55%, rgba(255, 255, 255, .06) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 32% 82%, rgba(255, 255, 255, .05) 0%, transparent 72%),
+          radial-gradient(ellipse 28% 22% at 68% 82%, rgba(255, 255, 255, .05) 0%, transparent 72%);
+      }
+
+      /* --- 2.5D fog: translucent layers with a smoothed cursor parallax, three
+             speeds reading as three distances. Strictly behind the content and
+             never allowed a defined edge — it is additional depth softening,
+             not a new element. --- */
+      .fog-layer {
+        position: absolute;
+        inset: -18%;
+        pointer-events: none;
+        will-change: transform, opacity;
+        transition: opacity 2.4s cubic-bezier(.22, .61, .36, 1);
+      }
+
+      #fog-far {
+        background:
+          radial-gradient(ellipse 85% 60% at 50% 15%,
+            rgba(255, 255, 255, .05) 0%,
+            rgba(255, 255, 255, .02) 40%,
+            transparent 72%);
+        filter: blur(90px);
+        opacity: .55;
+        transform: translate3d(0, 0, 0) scale(1.1);
+      }
+
+      #fog-mid {
+        background:
+          radial-gradient(ellipse 70% 50% at 65% 60%,
+            rgba(255, 255, 255, .04) 0%,
+            rgba(255, 255, 255, .015) 42%,
+            transparent 70%);
+        filter: blur(70px);
+        opacity: .45;
+        transform: translate3d(0, 0, 0) scale(1.12);
+      }
+
+      #fog-near {
+        background:
+          radial-gradient(ellipse 55% 40% at 30% 80%,
+            rgba(255, 255, 255, .035) 0%,
+            transparent 65%);
+        filter: blur(55px);
+        opacity: .35;
+        transform: translate3d(0, 0, 0) scale(1.15);
+      }
+
+      /* On a light ground white fog only washes it out. Far inverts to a very
+         weak diffuse shadow, and the two nearer layers drop out entirely —
+         Paper and Ivory are the reading chapters, and they need silence. */
+      .bg-root:not(.is-dark) #fog-far {
+        background: radial-gradient(ellipse 85% 60% at 50% 15%,
+            rgba(0, 0, 0, .028) 0%, rgba(0, 0, 0, .01) 40%, transparent 72%);
+        opacity: .4;
+      }
+
+      .bg-root.tone-ivory #fog-far {
+        background: radial-gradient(ellipse 85% 60% at 50% 15%,
+            rgba(0, 0, 0, .015) 0%, transparent 68%);
+        opacity: .22;
+      }
+
+      .bg-root:not(.is-dark) #fog-mid,
+      .bg-root:not(.is-dark) #fog-near {
+        opacity: 0;
+      }
+
+      /* --- Chromatic accent: a faint tint only, never a neon bloom or a
+             contour. Champagne under Floor Care and Impact, sage under
+             Residential and Before/After. --- */
+      .relief-accent {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        transition: opacity 2.4s ease;
+        mix-blend-mode: soft-light;
+        pointer-events: none;
+      }
+
+      #accent-champagne {
+        background: radial-gradient(ellipse 55% 40% at 82% 65%,
+            rgba(200, 169, 106, .14) 0%, transparent 68%);
+      }
+
+      #accent-sage {
+        background: radial-gradient(ellipse 45% 35% at 20% 25%,
+            rgba(139, 174, 139, .10) 0%, transparent 68%);
+      }
+
+      /* Grain, below the threshold of conscious perception. It exists to break
+         the banding of the gradients, not to read as texture. */
+      .grain {
+        position: absolute;
+        inset: 0;
+        opacity: .025;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        mix-blend-mode: overlay;
+        pointer-events: none;
+      }
+
+      .is-dark .grain {
+        opacity: .04;
+      }
+
+      /* The field keeps its depth without ever moving: tones still cross-fade,
+         but nothing translates under the reader. */
+      @media (prefers-reduced-motion: reduce) {
+        .relief-layer,
+        .fog-layer {
+          transform: none !important;
+        }
       }
     }
 
     /* ---------------------------------------------------------
-       NO WEBGL
+       NO RELIEF FIELD
 
-       In normal operation the WebGL canvas owns the page ground. If the context
-       fails, flat CSS grounds return here only, preserving contrast without the
-       atmospheric field.
+       Above 916px the relief surface owns the page ground and every chapter is
+       transparent over it. Below that — and before the engine mounts —
+       `.no-canvas` returns flat CSS grounds here, preserving contrast without
+       the atmospheric field.
        --------------------------------------------------------- */
     /* the polarity tokens are resolved where they are declared, so a fallback
        cannot just flip --canvas-pol further down the tree: it has to restate
@@ -272,6 +494,8 @@
     .no-canvas .areas,
     .no-canvas .floorcare {
       background-color: var(--navy-dark);
+      /* Floor Care restates this below: its relief tone is petrol, and the two
+         paths have to name the same chapter the same colour. */
       --canvas-ink: var(--paper);
       --canvas-strong: #FFFFFF;
       --canvas-rule: var(--line-dark);
@@ -319,6 +543,10 @@
     .no-canvas .quote,
     .no-canvas .testimonials {
       background-color: var(--paper);
+    }
+
+    .no-canvas .floorcare {
+      background-color: var(--petrol-deep);
     }
 
     .no-canvas .maintenance {
@@ -817,39 +1045,28 @@
    ========================================================= */
     [data-reveal] {
       opacity: 0;
-      transform: translateY(28px);
-      transition: opacity var(--dur-slow) var(--ease), transform var(--dur-slow) var(--ease);
+      transform: translate3d(0, 30px, 0);
+      transition:
+        opacity var(--dur-slow) var(--ease),
+        transform var(--dur-slow) var(--ease);
     }
 
     [data-reveal].is-revealed {
       opacity: 1;
-      transform: translateY(0);
-    }
-
-    [data-reveal="clip"] {
-      clip-path: inset(0 0 100% 0);
-      transform: none;
-      transition: clip-path var(--dur-slow) var(--ease);
-    }
-
-    [data-reveal="clip"].is-revealed {
-      clip-path: inset(0 0 0% 0);
+      transform: translate3d(0, 0, 0);
     }
 
     [data-reveal="scale"] {
-      transform: scale(.94);
+      transform: translate3d(0, 30px, 0) scale(.98);
     }
 
     [data-reveal="scale"].is-revealed {
-      transform: scale(1);
+      transform: translate3d(0, 0, 0) scale(1);
     }
 
     /* a rule that draws itself as the block arrives */
     [data-reveal="rule"] {
-      opacity: 1;
-      transform: none;
       transform-origin: left center;
-      transition: none;
     }
 
     [data-reveal="rule"]::after {
@@ -860,6 +1077,21 @@
 
     [data-reveal="rule"].is-revealed::after {
       transform: scaleX(1);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+      [data-reveal],
+      [data-reveal="scale"] {
+        opacity: 1 !important;
+        transform: none !important;
+        transition: none !important;
+      }
+
+      [data-reveal="rule"]::after {
+        transform: scaleX(1) !important;
+        transition: none !important;
+      }
     }
 
     .hover-lift {
@@ -1883,7 +2115,7 @@
    08. RECURRING MAINTENANCE
    ========================================================= */
     /* The readable light ground for this chapter is supplied by the measured
-       WebGL field; the section keeps only content and local UI surfaces. */
+       relief field; the section keeps only content and local UI surfaces. */
     .maintenance {
       background-color: transparent;
       background-image: none;
@@ -2726,7 +2958,7 @@
     /* =========================================================
    11. RESIDENTIAL
    ========================================================= */
-    /* The ivory ground is part of the document-space WebGL field; this wrapper
+    /* The ivory ground is part of the document-space relief field; this wrapper
        remains transparent. */
     .residential {
       background-color: transparent;
@@ -3472,7 +3704,7 @@
     /* =========================================================
    16. QUOTE FORM
    ========================================================= */
-    /* Quote reads on the explicit paper ground supplied by the WebGL field. */
+    /* Quote reads on the explicit paper ground supplied by the relief field. */
     .quote {
       background-color: transparent;
       background-image: none;
@@ -3856,7 +4088,7 @@
     /* =========================================================
    17. FINAL CTA
    ========================================================= */
-    /* The closing petrol/navy face is part of the WebGL ground field. */
+    /* The closing navy face is part of the relief ground field. */
     .final-cta {
       background-color: transparent;
       background-image: none;
@@ -6660,7 +6892,7 @@
    Above 1200px each chapter keeps its editorial desktop framing while the
    document remains a continuous, freely scrolling page.
 
-   The only layer that still crosses a boundary is the WebGL atmosphere, which
+   The only layer that still crosses a boundary is the relief atmosphere, which
    is intentional — it does not know where sections stop. Nothing here paints a
    ground, and nothing here hides content to make it fit: every chapter is
    re-framed by compressing space, never by cropping, clipping or shrinking
@@ -7093,7 +7325,7 @@
 
        The field now carries the desktop atmosphere. Keep the legacy visual
        vocabulary available to the tablet/mobile edition, but do not layer it
-       over the raymarched material on viewports where WebGL is active.
+       over the relief field on viewports where it is active.
        ========================================================= */
     @media (min-width:916px) {
 

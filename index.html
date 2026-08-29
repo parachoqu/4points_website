@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en-US" class="no-canvas" data-webgl-state="booting">
+<html lang="en-US" class="no-canvas" data-bg-state="booting">
 
 <head>
   <meta charset="utf-8">
@@ -18,9 +18,23 @@
 
 <body>
   <div id="loading" class="hidden" aria-hidden="true">Carregando</div>
-  <canvas id="canvas-fixed" aria-hidden="true"></canvas>
-  <div id="canvas-grain" aria-hidden="true"></div>
-  <div id="canvas-vignette" aria-hidden="true"></div>
+  <!-- Uma única superfície fixa por trás de todo o scroll: não são cenas por
+       seção, é um campo contínuo de luz/sombra que se desloca e se recolore
+       conforme a página avança. Nenhuma camada tem contorno ou forma fechada —
+       tudo é gradiente + blur, nunca linha. -->
+  <div class="bg-root" id="bgRoot" aria-hidden="true">
+    <div class="relief-layer" id="relief-a"></div>
+    <div class="relief-layer" id="relief-b"></div>
+    <div class="relief-layer" id="relief-c"></div>
+    <div class="relief-layer" id="relief-directional"></div>
+    <div class="relief-layer" id="relief-zones"></div>
+    <div class="fog-layer" id="fog-far"></div>
+    <div class="fog-layer" id="fog-mid"></div>
+    <div class="fog-layer" id="fog-near"></div>
+    <div class="relief-accent" id="accent-champagne"></div>
+    <div class="relief-accent" id="accent-sage"></div>
+    <div class="grain"></div>
+  </div>
   <a class="skip-link" href="#main">Skip to content</a>
 
   <!-- =========================================================
@@ -212,7 +226,7 @@
     <!-- Mobile-only quick-trust strip: the same 4 credentials shown inside
          the hero panel on desktop, promoted to their own row below the photo
          on mobile so the image and CTA stay uncluttered. -->
-    <ul class="m-trust" aria-label="Why 4Points">
+    <ul class="m-trust" aria-label="Why 4Points" data-reveal>
       <li><svg class="icon" viewBox="0 0 24 24">
           <circle cx="12" cy="12" r="9" />
           <path d="M12 7v5l3 2" />
@@ -661,7 +675,7 @@
      ========================================================= -->
     <section class="section testimonials depth scroll-snap-section">
       <div class="container">
-        <div class="t-carousel cornered" data-testimonial-carousel tabindex="0" aria-roledescription="carousel"
+        <div class="t-carousel cornered" data-testimonial-carousel data-reveal tabindex="0" aria-roledescription="carousel"
           aria-label="Customer testimonials">
           <div class="t-stars" aria-hidden="true">
             <svg class="icon" viewBox="0 0 24 24">
@@ -741,7 +755,7 @@
           </dl>
         </div>
 
-        <div class="faq-list">
+        <div class="faq-list" data-reveal>
           <div class="faq-item">
             <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-1">
               How much does cleaning cost?
@@ -861,7 +875,7 @@
           </div>
         </div>
 
-        <form class="quote-form cornered" data-quote-form novalidate>
+        <form class="quote-form cornered" data-quote-form data-reveal novalidate>
 
           <div class="q-step is-active" data-q-step="1">
             <span class="q-step-label">Step 01</span>
@@ -950,7 +964,7 @@
 
     <footer class="site-footer depth">
       <div class="container footer-joint" aria-hidden="true"><span></span></div>
-      <div class="container footer-grid">
+      <div class="container footer-grid" data-reveal>
         <div>
           <div class="footer-logo">
             <svg class="logo-mark" viewBox="0 0 24 24" aria-hidden="true">
@@ -989,7 +1003,7 @@
           </ul>
         </div>
       </div>
-      <div class="container footer-bottom">
+      <div class="container footer-bottom" data-reveal>
         <span>© <span data-year></span> 4Points Cleaning Services. Mobile Cleaning Service | Serving Greater Boston &amp;
           Massachusetts.</span>
         <div class="footer-actions">

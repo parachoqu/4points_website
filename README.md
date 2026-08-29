@@ -56,10 +56,12 @@ O esquema de cores foi selecionado para transmitir elegância corporativa, higie
 | `--sand` | `#F5EFEB` | 🏜️ Areia | Chão claro mais quente — Before/After, Impact, FAQ |
 | `--muted` | `#526980` | 🌫️ Cinza Muted | Descrições secundárias e metadados sobre chão claro |
 
-> **Haze (`#114159`) só existe no canvas.** É navy puxado parte do caminho até petrol, e vive em
-> `PALETTE.haze` no `script.js` sem token CSS correspondente — de propósito. Ele é chão e névoa da
-> Floor Care e mais nada; petrol saturado usado como fundo de página inteira é uma cor de marca
-> virando background, e o site deixa de ser este site. Não promova para `:root`.
+> **Petrol Deep é chão da Floor Care e mais nada.** Ele é o tom `petrol` do campo de relevo, e o
+> único capítulo que o veste. Petrol saturado usado como fundo de página inteira é uma cor de marca
+> virando background, e o site deixa de ser este site. Não estenda o tom a outros capítulos.
+>
+> *(O antigo `PALETTE.haze` — `#114159`, navy puxado até petrol — existia só dentro do shader
+> WebGL e saiu junto com ele.)*
 
 > ⚠️ **Duas correções de contraste (2026-08-20).** Esta tabela documentava `--muted` como
 > `#62717D`, valor que **nunca esteve no CSS** — o arquivo sempre teve `#627D98`. Ao medir
@@ -102,85 +104,88 @@ O esquema de cores foi selecionado para transmitir elegância corporativa, higie
 
 ---
 
-## 🌫️ Quiet Material Field
+## 🌫️ Relevo Arquitetônico
 
-O background WebGL de desktop (`createThreeWorld`, em `script.js`) é um único campo material
-raymarched. A cena Three.js contém somente uma câmera ortográfica, um quad fullscreen e um
-`ShaderMaterial`: não há câmera em perspectiva, luzes de cena ou objetos 3D. Canvas, grão e
-vinheta ficam abaixo do conteúdo; textos, controles e componentes continuam no DOM real.
+O background de desktop é **uma única superfície fixa** de gradientes desfocados, inteiramente em
+CSS. Não são cenas por seção: é um campo contínuo de luz e sombra que se desloca e se recolore
+conforme a página avança. Nenhuma camada tem contorno, aresta ou forma fechada — tudo é gradiente
+suave mais blur, nunca linha.
 
-O canvas existe apenas acima de `915px`. Tablet, mobile e navegadores sem WebGL usam os fundos CSS
-existentes, sem perder conteúdo ou funcionalidade.
+Não há WebGL, shader, canvas nem dependência externa. `initReliefBackground()` em `script.js` só
+decide qual capítulo está sendo lido, que tom ele veste e o quanto os planos já viajaram; as
+camadas em si vivem no bloco `02a` de `style.css`.
 
-### Trilha material em document-space
+O campo existe apenas acima de `915px`. Abaixo disso ele não é escondido, é **desmontado**:
+`.no-canvas` volta, `.bg-root` sai com `display:none` e os fundos CSS chapados por seção assumem.
 
-Cada capítulo real declara paleta e estado material. As posições vêm de `offsetTop` e
-`offsetHeight`, portanto acompanham a altura efetiva do DOM em vez de uma sequência de alturas
-fixas. A medição é refeita em `load`, `resize`, `orientationchange`, `document.fonts.ready`, por
-`ResizeObserver` e quando FAQ, Quote ou outro conteúdo expandido altera o documento.
+### As camadas
 
-No fragment shader, a posição vertical da viewport é convertida em posição do documento:
-
-```glsl
-docY = scrollY + viewportY;
-palette = samplePaletteTrack(docY);
-```
-
-Assim, uma mesma viewport pode atravessar dois perfis sem costura, inclusive entre `916–1200px`.
-As cores são amostradas por fragmento nessa trilha vertical. Os demais parâmetros — relevo,
-polimento, juntas, câmera e atmosfera — são interpolados em JavaScript entre os centros reais dos
-capítulos medidos, com a mesma geometria do documento.
-
-| Seção real | Paleta | Estado material |
+| Camada | Papel | Quando |
 | :--- | :--- | :--- |
-| Hero / Standard | Navy Dark → Navy / Navy 2 | Fosco, névoa profunda e quatro forças quase imperceptíveis |
-| Services | Navy → Navy Dark | Relevo com mais ritmo e terraços suaves |
-| Maintenance | Paper → Ivory | Planos claros, recorrentes e de baixo contraste |
-| Floor Care | Navy Dark → Petrol Deep | Polimento crescente e juntas discretas |
-| Before / After | Paper → Sand | Passagem entre acabamento fosco e restaurado |
-| Residential | Ivory → Sage Soft | Sombra macia e relevo reduzido |
-| Impact | Sand | Cinco presenças suaves em torno de uma ausência central; pico exclusivo do `5:1` |
-| Areas | Navy → Navy Dark | Dissolução completa do `5:1`, sem símbolo residual |
-| Testimonials | Paper → Ivory | Campo calmo, ordenado e pouco especular |
-| FAQ | Paper → Sand | Terraços largos que se assentam |
-| Quote | Paper | Laje quase imóvel para o formulário |
-| Closing / Footer | Petrol → Navy → Navy Dark | Plano amplo e ordenado de fechamento |
+| `#relief-a` | Onda mestra, o plano difuso mais amplo | Sempre |
+| `#relief-b` | Segunda depressão, mais lenta, cruzando em diagonal | Sempre |
+| `#relief-c` | Pressão de canto — herdou o papel da antiga vinheta, sem falloff duro | Sempre |
+| `#relief-directional` | Faixa direcional: acabamento tratado sob luz rasante, nunca reflexo especular | Só Floor Care |
+| `#relief-zones` | Cinco zonas de pressão amplas e fracas — "cinco regiões" sem virar mapa | Só Impact |
+| `#fog-far/-mid/-near` | Névoa 2.5D, três velocidades de paralaxe de cursor lendo como três distâncias | Sempre (invertida no claro) |
+| `#accent-champagne` | Tingimento quente em `soft-light` | Floor Care, Impact |
+| `#accent-sage` | Tingimento frio em `soft-light` | Before/After, Residential |
+| `.grain` | Grão abaixo do limiar consciente, só para quebrar banding | Sempre |
 
-### Material, movimento e repouso
+A classe utilitária `.is-dark` acompanha os tons escuros e inverte cada camada de relevo entre
+sombra preta e realce branco — por isso os gradientes são escritos duas vezes, e não uma vez por tom.
 
-O raymarch combina relevo amplo e terraceado, névoa, oclusão, sombras curtas, reflexos
-anisotrópicos, grão e vinheta. O ponteiro produz apenas uma paralaxe mínima. Velocidade de scroll
-alimenta tempo e rotação; depois da rolagem, os seguidores amortecem até os limites de chegada e o
-loop estaciona, evitando draws contínuos numa página parada.
+### Mapa de tons
 
-Com `prefers-reduced-motion: reduce`, paralaxe, deriva e amortecimento são desligados. O shader
-recebe diretamente o estado estável correspondente ao scroll, sem animação residual.
+Posições vêm de `offsetTop` / `offsetHeight`, então acompanham a altura efetiva do DOM, incluindo
+FAQ aberto e etapas da Quote. O capítulo corrente é decidido por um único ponto —
+`scrollY + innerHeight * .52` — porque com um fundo fixo **a viewport inteira é um tom só** a cada
+instante.
 
-### Qualidade adaptativa e ciclo de vida
+| Seção real | Tom | Ground | Acento | Camada especial |
+| :--- | :--- | :--- | :--- | :--- |
+| Hero | `navy-deep` | Navy Dark | Petrol | — |
+| Standard | `navy` | Navy | Petrol | — |
+| Services | `navy` | Navy | Petrol Light | — |
+| Maintenance | `paper` | Paper | Petrol | — |
+| Floor Care | `petrol` | Petrol Deep | Champagne | `#relief-directional` |
+| Before / After | `sand` | Sand | Petrol | `#accent-sage` |
+| Residential | `ivory` | Ivory | Sage | `#accent-sage` |
+| Impact | `sand` | Sand | Champagne | `#relief-zones` |
+| Areas | `navy` | Navy | Petrol | — |
+| Testimonials | `ivory` | Ivory | Champagne | — |
+| FAQ | `paper` | Paper | Petrol | — |
+| Quote | `paper` | Paper | Petrol | — |
+| Closing / Footer | `navy-deep` | Navy Dark | Petrol Light | — |
 
-A resolução interna respeita limites de DPR, hardware e orçamento de pixels. Sob pressão de frame,
-o render scale desce em níveis; quando há margem estável, volta com cautela. Essa adaptação altera
-somente a resolução do canvas, nunca layout, medidas do documento ou a resolução da interface.
+### Movimento e repouso
 
-O boot valida o primeiro frame antes de publicar o canvas. A renderização pausa com a aba oculta,
-responde a `webglcontextlost` e reconstrói os recursos em `webglcontextrestored`.
+O relevo se desloca lentamente com o progresso do scroll; a névoa carrega um offset de scroll
+próprio, mais lento — essa diferença de ritmo é a razão inteira de ela ler como camada mais
+distante. A posição do cursor é suavizada por interpolação contínua, nunca seguida diretamente; em
+ponteiro grosso a névoa deriva sozinha em vez de ficar estática.
 
-### Paleta, contraste e ponte canvas → CSS
+Com `prefers-reduced-motion: reduce`, relevo e névoa não se deslocam e o loop de névoa nem é
+agendado. Os tons continuam trocando. A névoa também para com a aba oculta.
 
-A polaridade vem da paleta e do perfil material da seção. Limites de iluminação impedem que
-reflexos ou névoa atravessem o envelope de contraste reservado ao conteúdo; a decisão de tinta não
-depende do antigo sampler de glow.
+### Ponte tom → CSS e contraste
 
-Continuam públicos os contratos `.no-canvas`, `data-webgl-state`, `data-canvas-ink` e
-`--canvas-*`. Elementos adaptativos recebem a tinta correspondente ao capítulo medido; no fallback,
-o CSS reafirma cores concretas e legíveis.
+Continuam públicos os contratos `.no-canvas`, `data-canvas-ink` e `--canvas-*`. O que mudou é a
+**fonte**: `--canvas-lum`, `--canvas-pol` e `--canvas-glow` não são mais amostrados de um chão
+renderizado — são o que o tom do capítulo é, computados uma vez a partir do hex do ground. Como
+`--canvas-pol` é registrada com `inherits: true` e a viewport inteira é um tom só, basta escrever
+na raiz.
 
-### Fallback e dependência local
+> **A polaridade pousa no meio da travessia, não no início.** O ground leva 1.8s para cruzar;
+> `--canvas-lum` e `--canvas-glow` acompanham essa mesma curva, para que o halo alimentado por
+> luminância abra exatamente enquanto o chão está no meio do caminho. Mas polaridade é binária e não
+> pode interpolar: virá-la no primeiro frame poria tipografia escura sobre um chão ainda escuro por
+> quase um segundo. Por isso ela é escrita com 900ms de atraso.
 
-O renderer importa somente `assets/vendor/three-r128.module.js`. Não há CDN, asset externo ou nova
-dependência. Se WebGL não inicializar ou o primeiro frame falhar, `.no-canvas` permanece ativa e
-`data-webgl-state` registra o estado de fallback enquanto os fundos CSS preservam a paleta e a
-leitura da página.
+`data-webgl-state` foi substituído por **`data-bg-state`** (`booting` / `ready` / `disabled`).
+
+Contraste medido de tinta contra ground, nos treze capítulos: corpo ≥ 8.28:1, texto `muted`
+≥ 4.99:1, acento ≥ 3.68:1. Nenhum par reprova.
 
 ---
 
@@ -207,8 +212,8 @@ valor com ~250px e transformam "Greater Boston & Massachusetts" em três linhas 
 
 No Desktop amplo a página deixa de ser uma coluna contínua de seções com alturas próprias e passa a
 ser uma sequência de cenas: **um capítulo, uma viewport**. Quando o scroll estabiliza, uma única
-seção domina o frame de ponta a ponta. A única camada que ainda atravessa a fronteira é o campo
-material WebGL — a interpolação contínua entre perfis é intencional.
+seção domina o frame de ponta a ponta. A única camada que ainda atravessa a fronteira é o campo de
+relevo — a recoloração contínua de 1.8s entre tons é intencional.
 
 Tudo vive em **um único bloco** no fim de `style.css` (`/* 21. DESKTOP FULL-VIEWPORT / SCROLL SNAP */`),
 depois do bloco Mobile.
@@ -275,15 +280,14 @@ que estados expandidos de FAQ e Quote continuem estáveis durante a leitura.
 O `transform` nunca é aplicado na própria `.scroll-snap-section`: Hero anima `.hero-content`, os
 capítulos regulares animam seu `.container` direto e a Closing Scene anima apenas `.final-cta` e
 `.site-footer`. Assim o layout do snap e as medições do documento não mudam. Essa camada não cria
-listeners de scroll e não toca no canvas WebGL. Navegadores sem View Timelines mantêm o snap nativo;
+listeners de scroll e não toca no campo de relevo. Navegadores sem View Timelines mantêm o snap nativo;
 com `prefers-reduced-motion: reduce`, todo o bloco Desktop Scroll Snap continua inativo.
 
-### Relação com a trilha material em document-space
+### Relação com o mapa de tons em document-space
 
-Nada é posicionado por uma sequência fixa no Three.js. A trilha lê `offsetTop` / `offsetHeight`
-reais e a remedição cobre `resize`, `load`, `fonts.ready`, `ResizeObserver` e mudanças de
-`scrollHeight`, incluindo FAQ aberto e etapas da Quote. O canvas acompanha o `scrollY` real; não há
-uma animação de background específica para o snap.
+Nada é posicionado por uma sequência fixa de alturas. O mapa lê `offsetTop` / `offsetHeight` reais e
+a remedição cobre `resize`, `orientationchange` e `load`, incluindo FAQ aberto e etapas da Quote. O
+campo acompanha o `scrollY` real; não há uma animação de background específica para o snap.
 
 Os seletores de capítulo são a chave comum entre DOM, paleta e perfil material. Ao renomear ou
 remover uma `.scroll-snap-section`, atualize a entrada correspondente na trilha para manter cor,
@@ -514,21 +518,22 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
   (`.spec-list`) impresso sobre a fotografia. Acima de `915px`, a composição mantém somente
   conteúdo e fotografia; os ornamentos de construção ficam restritos às regras tablet/mobile.
 - **A costura, feita com alpha:** o `background-color` sólido saiu. A fotografia (`::before`) e o
-  scrim (`::after`) compartilham `--fc-mask` e **perdem alpha** nas duas pontas, revelando o
-  canvas. Não existe faixa de cor em lugar nenhum porque a camada de cima perde alpha em vez de
+  scrim (`::after`) compartilham `--fc-mask` e **perdem alpha** nas duas pontas, revelando o campo
+  de relevo. Não existe faixa de cor em lugar nenhum porque a camada de cima perde alpha em vez de
   ganhar outra cor.
 
 > ⚠️ `--fc-mask` é construído a partir de `--fc-fade-top` / `--fc-fade`, que **são** o padding da
 > seção. A parte sólida da fotografia termina exatamente onde a content box termina, em qualquer
 > viewport. Uma versão anterior usava porcentagens e o fade atravessava o dossiê em certas
-> alturas — tinta branca sobre fotografia dissolvendo sobre canvas clareando. Não mexa em um sem
+> alturas — tinta branca sobre fotografia dissolvendo sobre um chão clareando. Não mexa em um sem
 > o outro.
 
 - **Planos:** `initFloorParallax` mantém o deslocamento da fotografia e escreve também as variáveis
   de entrada/saída usadas pela costura. Sob `prefers-reduced-motion`, a foto não deriva e a máscara
   é resolvida diretamente no estado estável.
-- **Campo material:** Navy Dark passa a Petrol Deep enquanto o polimento cresce e juntas discretas
-  aparecem. O efeito nasce no raymarch e não adiciona decoração ao DOM.
+- **Campo material:** o tom passa a Petrol Deep e `#relief-directional` acende — uma faixa longa,
+  difusa e fora de eixo, sugerindo acabamento polido sob luz rasante. Nunca um brilho de vitrine, e
+  nenhuma decoração adicionada ao DOM.
 - **Mobile:** o pôster vertical continua intacto; a fotografia recebe o pôster mais o próprio
   dissolve (`92svh + 210px`) e o dossiê continua abaixo, sobre o fallback CSS, como a próxima
   página do mesmo capítulo.
@@ -644,8 +649,8 @@ Abaixo está o detalhamento técnico e visual de cada uma das 13 seções do lay
 - **HTML5 Semântico:** `<header>`, `<main>`, `<section>`, `<article>`, `<footer>` com acessibilidade ARIA completa.
 - **Vanilla CSS:** Sem dependências externas de frameworks CSS (Tailwind ou Bootstrap), proporcionando desempenho máximo e controle total sobre o design system.
 - **Vanilla JavaScript (ES6+):** Código limpo em IIFE, modularizado e focado em eventos passivos e `IntersectionObserver`.
-- **Three.js r128 local:** câmera ortográfica, quad fullscreen e raymarch do Quiet Material Field em
-  `assets/vendor/three-r128.module.js`, sem CDN.
+- **Background em CSS puro:** o Relevo Arquitetônico é uma superfície fixa de gradientes desfocados.
+  Zero dependências — não há Three.js, WebGL, shader nem vendor local.
 - **Google Fonts:** Fraunces e Manrope.
 
 ---

@@ -2,7 +2,7 @@
   "use strict";
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const webGLDisabledOnMobile = window.matchMedia("(max-width: 915px)");
+  const backgroundDisabled = window.matchMedia("(max-width: 915px)");
   const mobileNav = window.matchMedia("(max-width: 767px)");
 
   /* ---------- shared: minimal focus trap for the iOS-style overlays ---------- */
@@ -51,26 +51,13 @@
   const relLuminance = (r, g, b) =>
     0.2126 * srgbToLinear(r) + 0.7152 * srgbToLinear(g) + 0.0722 * srgbToLinear(b);
 
-  /* GLSL smoothstep, reversed-edge form included: the backdrop shader uses it */
   const smoothstep = (edge0, edge1, x) => {
     const t = clamp01((x - edge0) / (edge1 - edge0));
     return t * t * (3 - 2 * t);
   };
 
-  /* Quintic Hermite. Both the first and the second derivative vanish at the
-     edges, so a ramp built on it has no knee at either end -- there is no frame
-     where the eye can say "the change starts here". Cubic smoothstep leaves a
-     discontinuity in curvature that reads, on a full-viewport colour field, as
-     exactly the moment of the switch. The ground uses this one, in the shader
-     and in the CPU sampler alike. */
-  const smootherstep = (edge0, edge1, x) => {
-    const t = clamp01((x - edge0) / (edge1 - edge0));
-    return t * t * t * (t * (t * 6 - 15) + 10);
-  };
-
   /* layout position, immune to the reveal transform (a client rect is not) */
   const docOffsetTop = (el) => { let y = 0; for (let n = el; n; n = n.offsetParent) y += n.offsetTop; return y; };
-  const docOffsetLeft = (el) => { let x = 0; for (let n = el; n; n = n.offsetParent) x += n.offsetLeft; return x; };
 
   /* ---------- header ---------- */
   function initHeader() {
@@ -844,1029 +831,276 @@
     observer.observe(el);
   }
 
-  /* ---------- Three.js Quiet Material Field ---------- */
-  let threeWorld = null;
-  let threeModule = null;
-  let threeBooting = false;
-  let restoreAttempted = false;
-  let removeThreeContextRecovery = null;
-  const THREE_MODULE_URL = new URL("./assets/vendor/three-r128.module.js", import.meta.url).href;
-  const WEBGL_REASONS = new Set(["module", "renderer", "frame", "context"]);
+  /* ---------- Architectural relief field ----------
 
-  const WORLD_PALETTE = {
-    navyDark: 0x071B2E,
-    navy: 0x102A43,
-    navy2: 0x173B5A,
-    petrolDeep: 0x12556B,
-    petrol: 0x1F6F8B,
-    petrolLight: 0x2A8EAA,
-    paper: 0xFFFDF8,
-    ivory: 0xF7F4EF,
-    sand: 0xF5EFEB,
-    sage: 0x8BAE8B,
-    sageSoft: 0xDDE8D8,
-    champagne: 0xC8A96A
+     One fixed surface behind the whole scroll. Not a scene per section: a
+     continuous field of light and shadow that drifts and recolours as the page
+     advances. The layers live in CSS; this only decides which chapter is being
+     read, which tone that chapter wears, and how far the planes have travelled.
+
+     It also carries the ink bridge. The typography reads --canvas-ink and its
+     siblings, all of which resolve from three registered properties. Those used
+     to be sampled off a rendered ground; here they are simply what the chapter's
+     tone is, computed once from its hex. */
+
+  const RELIEF_DARK_TONES = new Set(["navy", "navy-deep", "petrol"]);
+  const RELIEF_TONE_CLASSES = [
+    "tone-navy-deep", "tone-navy", "tone-petrol",
+    "tone-paper", "tone-sand", "tone-ivory", "is-dark"
+  ];
+
+  /* Ground and accent are the section's own tokens, restated as hex because the
+     luminance that decides polarity has to be computed, not read back. */
+  const RELIEF_CHAPTERS = [
+    { sel: ".hero", tone: "navy-deep", ground: "#071B2E", accent: "#1F6F8B" },
+    { sel: ".standard", tone: "navy", ground: "#102A43", accent: "#1F6F8B" },
+    { sel: ".services", tone: "navy", ground: "#102A43", accent: "#2A8EAA" },
+    { sel: ".maintenance", tone: "paper", ground: "#FFFDF8", accent: "#1F6F8B" },
+    { sel: ".floorcare", tone: "petrol", ground: "#12556B", accent: "#C8A96A", directional: true, champagne: true },
+    { sel: ".beforeafter", tone: "sand", ground: "#F5EFEB", accent: "#1F6F8B", sage: true },
+    { sel: ".residential", tone: "ivory", ground: "#F7F4EF", accent: "#8BAE8B", sage: true },
+    { sel: ".impact", tone: "sand", ground: "#F5EFEB", accent: "#C8A96A", zones: true, champagne: true },
+    { sel: ".areas", tone: "navy", ground: "#102A43", accent: "#1F6F8B" },
+    { sel: ".testimonials", tone: "ivory", ground: "#F7F4EF", accent: "#C8A96A" },
+    { sel: ".faq", tone: "paper", ground: "#FFFDF8", accent: "#1F6F8B" },
+    { sel: ".quote", tone: "paper", ground: "#FFFDF8", accent: "#1F6F8B" },
+    { sel: ".closing-scene", tone: "navy-deep", ground: "#071B2E", accent: "#2A8EAA" }
+  ];
+
+  /* The ground transition in CSS. Polarity lands at its midpoint. */
+  const RELIEF_TONE_MS = 1800;
+
+  const hexLuminance = (hex) => {
+    const n = parseInt(hex.slice(1), 16);
+    return relLuminance(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255);
   };
 
-  function setWebGLState(state, mode = "", reason = "") {
+  function initReliefBackground() {
     const root = document.documentElement;
-    root.dataset.webglState = state;
-    if (mode) root.dataset.webglMode = mode;
-    else delete root.dataset.webglMode;
-    if (reason) root.dataset.webglReason = reason;
-    else delete root.dataset.webglReason;
-  }
-
-  function makeWebGLError(reason, message) {
-    const error = new Error(message);
-    error.webglReason = reason;
-    return error;
-  }
-
-  function classifyWebGLError(error, fallback = "renderer") {
-    return WEBGL_REASONS.has(error?.webglReason) ? error.webglReason : fallback;
-  }
-
-  function replaceThreeCanvas(canvas = document.getElementById("canvas-fixed")) {
-    if (!canvas) return null;
-    removeThreeContextRecovery?.();
-    removeThreeContextRecovery = null;
-    const replacement = canvas.cloneNode(false);
-    replacement.removeAttribute("width");
-    replacement.removeAttribute("height");
-    canvas.replaceWith(replacement);
-    installThreeContextRecovery(replacement);
-    return replacement;
-  }
-
-  function disableThreeForMobile() {
-    const root = document.documentElement;
-    const controller = threeWorld;
-    threeWorld = null;
-    controller?.destroy();
-    removeThreeContextRecovery?.();
-    removeThreeContextRecovery = null;
-    root.classList.add("no-canvas");
-    setWebGLState("disabled", "mobile");
+    const bgRoot = document.getElementById("bgRoot");
     document.getElementById("loading")?.classList.add("hidden");
-  }
+    if (!bgRoot) return;
 
-  function syncThreeAvailability() {
-    if (webGLDisabledOnMobile.matches) {
-      disableThreeForMobile();
-      return;
-    }
-    installThreeContextRecovery();
-    void initThreeWorld();
-  }
-
-  function restartThreeWorld({ freshCanvas = false } = {}) {
-    if (webGLDisabledOnMobile.matches) {
-      disableThreeForMobile();
-      return;
-    }
-    const root = document.documentElement;
-    const controller = threeWorld;
-    threeWorld = null;
-    controller?.destroy();
-    if (freshCanvas) replaceThreeCanvas();
-    root.classList.add("no-canvas");
-    setWebGLState("booting");
-    void initThreeWorld();
-  }
-
-  async function initThreeWorld() {
-    let canvas = document.getElementById("canvas-fixed");
-    if (webGLDisabledOnMobile.matches) {
-      disableThreeForMobile();
-      return;
-    }
-    if (!canvas || threeBooting || threeWorld) return;
-    threeBooting = true;
-    setWebGLState("booting");
-
-    try {
-      try {
-        threeModule ||= await import(THREE_MODULE_URL);
-      } catch (error) {
-        const moduleError = makeWebGLError("module", "Local Three.js module could not be loaded");
-        moduleError.cause = error;
-        throw moduleError;
-      }
-      if (String(threeModule.REVISION) !== "128") {
-        throw makeWebGLError("module", `Unexpected Three.js revision ${threeModule.REVISION}`);
-      }
-      if (webGLDisabledOnMobile.matches) {
-        disableThreeForMobile();
-        return;
-      }
-
-      const modes = ["preferred", "compatibility"];
-      let firstFailure = null;
-      let lastError = null;
-      let lastReason = "renderer";
-
-      for (let attempt = 0; attempt < modes.length; attempt++) {
-        if (webGLDisabledOnMobile.matches) {
-          disableThreeForMobile();
-          return;
-        }
-        const mode = modes[attempt];
-        if (attempt > 0) canvas = replaceThreeCanvas(canvas);
-        if (!canvas) throw makeWebGLError("renderer", "WebGL canvas is unavailable");
-        setWebGLState("booting", mode);
-        let controller = null;
-
-        try {
-          controller = createThreeWorld(threeModule, canvas, mode);
-          threeWorld = controller;
-          controller.start();
-          if (threeWorld !== controller) throw makeWebGLError("context", "WebGL controller was interrupted during boot");
-          document.documentElement.classList.remove("no-canvas");
-          setWebGLState("ready", mode);
-          if (mode === "compatibility" && firstFailure) {
-            console.warn("[4Points WebGL] Preferred renderer failed; compatibility renderer is active.", firstFailure);
-          }
-          return;
-        } catch (error) {
-          controller?.destroy();
-          if (threeWorld === controller) threeWorld = null;
-          lastError = error;
-          lastReason = classifyWebGLError(error);
-          firstFailure ||= error;
-        }
-      }
-
-      if (lastError) lastError.webglReason = lastReason;
-      throw lastError || makeWebGLError("renderer", "WebGL renderer could not start");
-    } catch (error) {
-      const reason = classifyWebGLError(error);
-      threeWorld = null;
-      document.documentElement.classList.add("no-canvas");
-      setWebGLState("fallback", "", reason);
-      document.getElementById("loading")?.classList.add("hidden");
-      console.error(`[4Points WebGL] ${reason} failure; CSS fallback is active.`, error);
-    } finally {
-      threeBooting = false;
-    }
-  }
-
-  function installThreeContextRecovery(canvas = document.getElementById("canvas-fixed")) {
-    removeThreeContextRecovery?.();
-    removeThreeContextRecovery = null;
-    if (!canvas || webGLDisabledOnMobile.matches) return;
-
-    const onContextLost = (event) => {
-      event.preventDefault();
-      if (webGLDisabledOnMobile.matches) {
-        disableThreeForMobile();
-        return;
-      }
-      const mode = document.documentElement.dataset.webglMode || "";
-      const controller = threeWorld;
-      threeWorld = null;
-      controller?.destroy();
-      document.documentElement.classList.add("no-canvas");
-      setWebGLState("lost", mode, "context");
+    const layer = {
+      a: document.getElementById("relief-a"),
+      b: document.getElementById("relief-b"),
+      c: document.getElementById("relief-c"),
+      directional: document.getElementById("relief-directional"),
+      zones: document.getElementById("relief-zones"),
+      fogFar: document.getElementById("fog-far"),
+      fogMid: document.getElementById("fog-mid"),
+      fogNear: document.getElementById("fog-near"),
+      champagne: document.getElementById("accent-champagne"),
+      sage: document.getElementById("accent-sage")
     };
+    if (Object.values(layer).some((el) => !el)) return;
 
-    const onContextRestored = () => {
-      if (webGLDisabledOnMobile.matches) {
-        disableThreeForMobile();
-        return;
-      }
-      if (restoreAttempted) {
-        setWebGLState("fallback", "", "context");
-        return;
-      }
-      restoreAttempted = true;
-      replaceThreeCanvas(canvas);
-      setWebGLState("booting");
-      void initThreeWorld();
-    };
-
-    canvas.addEventListener("webglcontextlost", onContextLost);
-    canvas.addEventListener("webglcontextrestored", onContextRestored);
-    removeThreeContextRecovery = () => {
-      canvas.removeEventListener("webglcontextlost", onContextLost);
-      canvas.removeEventListener("webglcontextrestored", onContextRestored);
-    };
-  }
-
-  function createThreeWorld(THREE, canvas, rendererMode = "preferred") {
-    const root = document.documentElement;
-    const compactQuery = window.matchMedia("(max-width:1200px)");
-    const getProfile = () => compactQuery.matches ? "compact" : "wide";
-    const initialProfile = getProfile();
-    const compatibilityMode = rendererMode === "compatibility";
-    const TRAVEL = 152;
-    const TRACK_TARGET_SIZE = compatibilityMode ? 1024 : 2048;
-    const PARAM_KEYS = [
-      "relief", "freq", "order", "polish", "seam", "points", "five",
-      "fog", "hfog", "amb", "key", "az", "el", "camY", "pitch"
-    ];
-
-    const C = Object.fromEntries(
-      Object.entries(WORLD_PALETTE).map(([key, value]) => [key, new THREE.Color(value)])
-    );
-    const S = (...colors) => colors.map((color, index) => [
-      colors.length === 1 ? 0 : index / (colors.length - 1),
-      color
-    ]);
-
-    const chapterDefs = [
-      {
-        key: "hero", sel: ".hero",
-        ground: S(C.navyDark, C.navy), deep: S(C.navyDark), high: S(C.navy2),
-        skyLo: S(C.navyDark), skyHi: S(C.navy, C.navy2), fogCol: S(C.navyDark, C.navy),
-        accent: S(C.petrol), relief: .48, freq: .27, order: .08, polish: .10, seam: 0,
-        points: .28, five: 0, fog: .055, hfog: .55, amb: .23, key: .75,
-        az: -1.05, el: .17, camY: 3.0, pitch: -.115
-      },
-      {
-        key: "standard", sel: ".standard",
-        ground: S(C.navy, C.navy2), deep: S(C.navyDark, C.navy), high: S(C.navy2, C.petrolDeep),
-        skyLo: S(C.navyDark, C.navy), skyHi: S(C.navy2), fogCol: S(C.navy),
-        accent: S(C.petrol), relief: .62, freq: .29, order: .18, polish: .14, seam: 0,
-        points: .34, five: 0, fog: .052, hfog: .45, amb: .24, key: .76,
-        az: -1.0, el: .175, camY: 2.9, pitch: -.11
-      },
-      {
-        key: "services", sel: ".services",
-        ground: S(C.navy, C.navyDark), deep: S(C.navyDark), high: S(C.navy2),
-        skyLo: S(C.navyDark), skyHi: S(C.navy2, C.navy), fogCol: S(C.navy),
-        accent: S(C.petrolLight), relief: .95, freq: .34, order: .54, polish: .18, seam: 0,
-        points: .42, five: 0, fog: .05, hfog: .34, amb: .25, key: .79,
-        az: -.92, el: .16, camY: 2.8, pitch: -.105
-      },
-      {
-        key: "maintenance", sel: ".maintenance",
-        ground: S(C.paper, C.ivory), deep: S(C.ivory, C.sand), high: S(C.paper),
-        skyLo: S(C.ivory), skyHi: S(C.paper), fogCol: S(C.ivory),
-        accent: S(C.petrol), relief: .88, freq: .36, order: .74, polish: .24, seam: .08,
-        points: .30, five: 0, fog: .037, hfog: .08, amb: .57, key: .50,
-        az: -.85, el: .15, camY: 2.7, pitch: -.10
-      },
-      {
-        key: "floorcare", sel: ".floorcare",
-        ground: S(C.navyDark, C.petrolDeep), deep: S(C.navyDark, C.petrolDeep), high: S(C.petrolDeep, C.petrol),
-        skyLo: S(C.navyDark, C.petrolDeep), skyHi: S(C.navy, C.petrol), fogCol: S(C.navy, C.petrolDeep),
-        accent: S(C.champagne), relief: .82, freq: .30, order: .86, polish: .93, seam: .92,
-        points: .24, five: 0, fog: .044, hfog: .20, amb: .22, key: .84,
-        az: -.62, el: .095, camY: 2.15, pitch: -.085
-      },
-      {
-        key: "beforeafter", sel: ".beforeafter",
-        ground: S(C.paper, C.sand), deep: S(C.sand, C.ivory), high: S(C.paper),
-        skyLo: S(C.sand, C.ivory), skyHi: S(C.paper), fogCol: S(C.ivory, C.sand),
-        accent: S(C.petrol), relief: .78, freq: .32, order: .60, polish: .52, seam: .34,
-        points: .24, five: 0, fog: .039, hfog: .09, amb: .54, key: .54,
-        az: -.75, el: .13, camY: 2.5, pitch: -.10
-      },
-      {
-        key: "residential", sel: ".residential",
-        ground: S(C.ivory, C.sageSoft), deep: S(C.ivory, C.sageSoft), high: S(C.paper),
-        skyLo: S(C.ivory, C.sageSoft), skyHi: S(C.paper), fogCol: S(C.ivory, C.sageSoft),
-        accent: S(C.sage), relief: .62, freq: .30, order: .40, polish: .28, seam: .08,
-        points: .20, five: 0, fog: .034, hfog: .06, amb: .58, key: .48,
-        az: -.85, el: .155, camY: 2.6, pitch: -.10
-      },
-      {
-        key: "impact", sel: ".impact",
-        ground: S(C.sand), deep: S(C.sand), high: S(C.paper),
-        skyLo: S(C.sand), skyHi: S(C.paper), fogCol: S(C.sand),
-        accent: S(C.champagne), relief: .90, freq: .26, order: .16, polish: .25, seam: 0,
-        points: .10, five: 1, fog: .031, hfog: .05, amb: .60, key: .47,
-        az: -1.0, el: .18, camY: 2.9, pitch: -.115
-      },
-      {
-        key: "areas", sel: ".areas",
-        ground: S(C.navy, C.navyDark), deep: S(C.navyDark), high: S(C.navy2),
-        skyLo: S(C.navyDark), skyHi: S(C.navy2, C.navy), fogCol: S(C.navy),
-        accent: S(C.petrol), relief: .76, freq: .28, order: .30, polish: .22, seam: 0,
-        points: .20, five: 0, fog: .049, hfog: .34, amb: .25, key: .72,
-        az: -.95, el: .17, camY: 2.8, pitch: -.105
-      },
-      {
-        key: "testimonials", sel: ".testimonials",
-        ground: S(C.paper, C.ivory), deep: S(C.ivory), high: S(C.paper),
-        skyLo: S(C.ivory), skyHi: S(C.paper), fogCol: S(C.ivory),
-        accent: S(C.champagne), relief: .52, freq: .28, order: .78, polish: .18, seam: .04,
-        points: .12, five: 0, fog: .032, hfog: .05, amb: .60, key: .45,
-        az: -.86, el: .16, camY: 2.65, pitch: -.10
-      },
-      {
-        key: "faq", sel: ".faq",
-        ground: S(C.paper, C.sand), deep: S(C.ivory, C.sand), high: S(C.paper),
-        skyLo: S(C.ivory, C.sand), skyHi: S(C.paper), fogCol: S(C.sand),
-        accent: S(C.petrol), relief: .68, freq: .30, order: .72, polish: .28, seam: .08,
-        points: .16, five: 0, fog: .035, hfog: .06, amb: .57, key: .49,
-        az: -.88, el: .15, camY: 2.7, pitch: -.10
-      },
-      {
-        key: "quote", sel: ".quote",
-        ground: S(C.paper), deep: S(C.ivory), high: S(C.paper),
-        skyLo: S(C.ivory), skyHi: S(C.paper), fogCol: S(C.paper),
-        accent: S(C.petrol), relief: .42, freq: .28, order: .92, polish: .30, seam: .04,
-        points: .08, five: 0, fog: .030, hfog: .04, amb: .61, key: .43,
-        az: -.80, el: .14, camY: 2.5, pitch: -.095
-      },
-      {
-        key: "closing", sel: ".closing-scene",
-        ground: S(C.petrol, C.navy, C.navyDark), deep: S(C.petrolDeep, C.navyDark), high: S(C.petrol, C.navy2),
-        skyLo: S(C.petrolDeep, C.navyDark), skyHi: S(C.petrol, C.navy), fogCol: S(C.petrolDeep, C.navyDark),
-        accent: S(C.petrolLight, C.champagne), relief: .44, freq: .26, order: .95, polish: .40, seam: 0,
-        points: .14, five: 0, fog: .055, hfog: .46, amb: .23, key: .73,
-        az: -.95, el: .165, camY: 2.4, pitch: -.09
-      }
-    ];
-
-    let renderer;
-    try {
-      renderer = new THREE.WebGLRenderer({
-        canvas,
-        antialias: false,
-        alpha: false,
-        powerPreference: compatibilityMode ? "default" : "high-performance",
-        failIfMajorPerformanceCaveat: false
-      });
-    } catch (error) {
-      const rendererError = makeWebGLError("renderer", "WebGL renderer creation failed");
-      rendererError.cause = error;
-      throw rendererError;
-    }
-
-    const gl = renderer.getContext();
-    if (!gl) throw makeWebGLError("renderer", "WebGL context creation returned no context");
-    const maxRenderbufferSize = Number(gl.getParameter(gl.MAX_RENDERBUFFER_SIZE)) || 4096;
-    const maxTextureSize = Number(gl.getParameter(gl.MAX_TEXTURE_SIZE)) || 2048;
-    const trackSize = Math.max(256, Math.min(TRACK_TARGET_SIZE, maxTextureSize));
-    const qualityMin = compatibilityMode ? .40 : initialProfile === "compact" ? .44 : .48;
-    const qualityMax = compatibilityMode ? .54 : initialProfile === "compact" ? .68 : .78;
-    let qualityScale = compatibilityMode ? .46 : initialProfile === "compact" ? .54 : .62;
-    renderer.setClearColor(C.navyDark, 1);
-
-    const makeTrack = () => {
-      const data = new Uint8Array(trackSize * 4);
-      const texture = new THREE.DataTexture(data, trackSize, 1, THREE.RGBAFormat, THREE.UnsignedByteType);
-      texture.minFilter = THREE.LinearFilter;
-      texture.magFilter = THREE.LinearFilter;
-      texture.wrapS = THREE.ClampToEdgeWrapping;
-      texture.wrapT = THREE.ClampToEdgeWrapping;
-      texture.generateMipmaps = false;
-      return { data, texture };
-    };
-    const trackKeys = ["ground", "deep", "high", "skyLo", "skyHi", "fogCol"];
-    const tracks = Object.fromEntries(trackKeys.map((key) => [key, makeTrack()]));
-
-    const vertexShader = "void main(){ gl_Position = vec4(position.xy, 0.0, 1.0); }";
-    const fragmentShader = [
-      "precision highp float;",
-      "uniform vec2 uRes;",
-      "uniform float uScrollY, uViewportH, uDocHeight;",
-      "uniform vec3 uRO, uFwd;",
-      "uniform float uFocal, uTime, uSpin;",
-      "uniform float uRelief, uFreq, uOrder, uPolish, uSeam, uPoints, uFive;",
-      "uniform float uFog, uHFog, uAmb, uKey, uHMax;",
-      "uniform vec2 uLight;",
-      "uniform sampler2D uGroundMap, uDeepMap, uHighMap, uSkyLoMap, uSkyHiMap, uFogMap;",
-      "const float TMAX = 62.0;",
-      "float hash21(vec2 p){",
-      "  vec3 p3 = fract(vec3(p.xyx) * 0.1031);",
-      "  p3 += dot(p3, p3.yzx + 33.33);",
-      "  return fract((p3.x + p3.y) * p3.z);",
-      "}",
-      "float vnoise(vec2 p){",
-      "  vec2 i=floor(p), f=fract(p), u=f*f*(3.0-2.0*f);",
-      "  float a=hash21(i), b=hash21(i+vec2(1.0,0.0));",
-      "  float c=hash21(i+vec2(0.0,1.0)), d=hash21(i+vec2(1.0,1.0));",
-      "  return mix(mix(a,b,u.x),mix(c,d,u.x),u.y);",
-      "}",
-      "float fbm(vec2 p,float lod){",
-      "  float s=0.0,a=0.5,w=0.0;",
-      "  for(int i=0;i<5;i++){",
-      "    float g=clamp(lod-float(i),0.0,1.0);",
-      "    g=g*g*(3.0-2.0*g);",
-      "    s+=a*g*vnoise(p); w+=a*g;",
-      "    p=mat2(0.86,0.51,-0.51,0.86)*p*2.03+7.31; a*=0.52;",
-      "  }",
-      "  return w>0.0?s/w:0.5;",
-      "}",
-      "float bump(vec2 d,float w){ float k=max(0.0,1.0-dot(d,d)*w); return k*k*k; }",
-      "float terrace(float h,float steps,float sharp){",
-      "  float s=h*steps, i=floor(s), f=fract(s);",
-      "  float k=clamp(sharp,0.03,0.99);",
-      "  f=smoothstep(0.5-k*0.5,0.5+k*0.5,f);",
-      "  return (i+f)/steps;",
-      "}",
-      "float fourPoints(vec2 q){",
-      "  float P=12.0, cell=floor(q.y/P), zc=q.y-(cell+0.5)*P;",
-      "  float ang=cell*0.73+uSpin, ca=cos(ang), sa=sin(ang);",
-      "  vec2 lq=vec2(q.x,zc), a=vec2(ca,sa)*vec2(4.2,3.4), b=vec2(-sa,ca)*vec2(4.2,3.4);",
-      "  float w=0.050;",
-      "  float wells=bump(lq-a,w)+bump(lq+a,w)+bump(lq-b,w)+bump(lq+b,w);",
-      "  float halo=bump(lq-a,w*0.26)+bump(lq+a,w*0.26)+bump(lq-b,w*0.26)+bump(lq+b,w*0.26);",
-      "  float fade=1.0-smoothstep(P*0.30,P*0.50,abs(zc));",
-      "  return (halo*0.34-wells*0.58)*fade;",
-      "}",
-      "float fivePresence(vec2 q){",
-      "  float P=16.0, cell=floor(q.y/P), zc=q.y-(cell+0.5)*P;",
-      "  float ang=cell*0.41, ca=cos(ang), sa=sin(ang);",
-      "  vec2 lq=vec2(q.x,zc);",
-      "  lq=vec2(lq.x*ca-lq.y*sa,lq.x*sa+lq.y*ca);",
-      "  float acc=0.0;",
-      "  for(int i=0;i<5;i++){",
-      "    float a=float(i)*1.25663706+uSpin*0.35-1.5707963;",
-      "    acc+=bump(lq-vec2(cos(a),sin(a))*vec2(5.4,4.6),0.052);",
-      "  }",
-      "  float centre=bump(lq,0.10);",
-      "  float fade=1.0-smoothstep(P*0.28,P*0.50,abs(zc));",
-      "  return (acc*0.40-centre*0.78)*fade*0.72;",
-      "}",
-      "vec2 heightF(vec2 q,float lod){",
-      "  float n=fbm(q*uFreq*0.5,lod);",
-      "  float broad=(n-0.5)*uRelief*1.6, h=broad;",
-      "  if(uOrder>0.004){",
-      "    float st=mix(1.6,4.2,uOrder), sp=mix(0.95,0.20,uOrder);",
-      "    h=mix(h,terrace(h,st,sp),uOrder*0.85);",
-      "  }",
-      "  h+=fourPoints(q)*uPoints*0.9;",
-      "  if(uFive>0.004) h+=fivePresence(q)*uFive;",
-      "  if(uSeam>0.004){",
-      "    float w=q.x*0.34+broad*0.55;",
-      "    float seam=smoothstep(0.41,0.50,abs(fract(w)-0.5));",
-      "    h-=seam*uSeam*0.085;",
-      "  }",
-      "  if(lod>2.05) h+=(fbm(q*3.1+5.0,lod)-0.5)*uRelief*0.10*clamp(lod-2.0,0.0,1.0);",
-      "  return vec2(h,broad);",
-      "}",
-      "float hMarch(vec2 q){ return heightF(q,1.4).x; }",
-      "vec3 decodeMap(sampler2D map,float u){ return pow(texture2D(map,vec2(u,0.5)).rgb,vec3(2.2)); }",
-      "float shadow(vec3 P,vec3 L){",
-      "  float s=1.0,t=0.07;",
-      "  for(int i=0;i<16;i++){",
-      "    vec3 q=P+L*t; float d=q.y-hMarch(q.xz);",
-      "    s=min(s,clamp(d*7.0/t,0.0,1.0));",
-      "    t+=clamp(d*0.85,0.06,0.95);",
-      "    if(t>6.5) break;",
-      "  }",
-      "  return clamp(s,0.0,1.0);",
-      "}",
-      "void main(){",
-      "  vec2 fragUV=gl_FragCoord.xy/max(uRes,vec2(1.0));",
-      "  float viewportY=(1.0-fragUV.y)*uViewportH;",
-      "  float trackU=clamp((uScrollY+viewportY)/max(uDocHeight,1.0),0.0,1.0);",
-      "  vec3 floorCol=decodeMap(uGroundMap,trackU);",
-      "  vec3 deep=decodeMap(uDeepMap,trackU), high=decodeMap(uHighMap,trackU);",
-      "  vec3 skyLo=decodeMap(uSkyLoMap,trackU), skyHi=decodeMap(uSkyHiMap,trackU);",
-      "  vec3 fogCol=decodeMap(uFogMap,trackU);",
-      "  vec2 uv=(gl_FragCoord.xy-0.5*uRes)/uRes.y;",
-      "  vec3 fwd=normalize(uFwd);",
-      "  vec3 rgt=normalize(cross(fwd,vec3(0.0,1.0,0.0)));",
-      "  vec3 up=cross(rgt,fwd);",
-      "  vec3 rd=normalize(uv.x*rgt+uv.y*up+fwd*uFocal), ro=uRO;",
-      "  float t=0.40,tPrev=t; bool hit=false;",
-      "  for(int i=0;i<78;i++){",
-      "    vec3 p=ro+rd*t;",
-      "    if(t>TMAX) break;",
-      "    if(rd.y>0.0&&p.y>uHMax) break;",
-      "    float d=p.y-hMarch(p.xz);",
-      "    if(d<0.0022*t){ hit=true; break; }",
-      "    tPrev=t; t+=max(d*0.60,0.03+t*0.013);",
-      "  }",
-      "  vec3 col;",
-      "  if(hit){",
-      "    float a=tPrev,b=t;",
-      "    for(int i=0;i<5;i++){",
-      "      float m=0.5*(a+b); vec3 p=ro+rd*m;",
-      "      if(p.y-hMarch(p.xz)>0.0) a=m; else b=m;",
-      "    }",
-      "    t=0.5*(a+b); vec3 P=ro+rd*t;",
-      "    float lod=clamp(4.8-t*0.135,1.4,4.8), e=max(0.010,t*0.0038);",
-      "    vec2 hc=heightF(P.xz,lod);",
-      "    float hx=heightF(P.xz+vec2(e,0.0),lod).x;",
-      "    float hz=heightF(P.xz+vec2(0.0,e),lod).x;",
-      "    vec3 N=normalize(vec3(hc.x-hx,e,hc.x-hz));",
-      "    vec3 L=normalize(vec3(cos(uLight.x)*cos(uLight.y),sin(uLight.y),sin(uLight.x)*cos(uLight.y)));",
-      "    vec3 V=-rd;",
-      "    float ao=clamp(0.58+(hc.x-hc.y)*1.35,0.24,1.0);",
-      "    float diff=clamp((dot(N,L)+0.38)/1.38,0.0,1.0);",
-      "    diff=diff*diff*(3.0-2.0*diff);",
-      "    float sh=mix(1.0,shadow(P,L),0.72*(1.0-smoothstep(14.0,36.0,t)));",
-      "    float hn=clamp(hc.x/(uRelief*1.7+0.001)*0.5+0.5,0.0,1.0);",
-      "    vec3 alb=mix(deep,high,smoothstep(0.14,0.86,hn));",
-      "    alb*=mix(0.945,1.055,fbm(P.xz*0.68+19.0,min(lod,2.6)));",
-      "    vec3 Ns=normalize(N*vec3(1.0,1.0,mix(1.0,0.20,uPolish)));",
-      "    vec3 H=normalize(L+V);",
-      "    float spec=pow(max(dot(Ns,H),0.0),mix(18.0,760.0,uPolish));",
-      "    float fres=pow(1.0-max(dot(N,V),0.0),5.0);",
-      "    float sy=clamp(reflect(rd,N).y*0.5+0.5,0.0,1.0);",
-      "    vec3 env=mix(skyLo,skyHi,smoothstep(0.34,0.96,sy));",
-      "    col=alb*(uAmb*ao+uKey*diff*sh);",
-      "    col+=env*(0.09+0.52*uPolish)*(0.035+fres*0.85)*ao;",
-      "    col+=vec3(1.0)*spec*(0.045+0.50*uPolish)*sh*ao;",
-      "    float fogA=1.0-exp(-uFog*t);",
-      "    float pool=exp(-max(P.y+0.6,0.0)*1.1);",
-      "    fogA=clamp(fogA*(1.0+uHFog*pool*0.9),0.0,1.0);",
-      "    col=mix(col,fogCol,fogA);",
-      "  }else{",
-      "    float sy=clamp(rd.y*0.5+0.5,0.0,1.0);",
-      "    col=mix(skyLo,skyHi,smoothstep(0.34,0.96,sy));",
-      "    col=mix(col,fogCol,smoothstep(0.26,-0.03,rd.y));",
-      "  }",
-      "  col=mix(col,vec3(1.0)-exp(-col*1.25),0.30);",
-      "  float floorLum=dot(floorCol,vec3(0.2126,0.7152,0.0722));",
-      "  float lum=max(dot(col,vec3(0.2126,0.7152,0.0722)),0.0001);",
-      "  if(floorLum<0.179&&lum>0.155) col*=0.155/lum;",
-      "  if(floorLum>=0.179&&lum<0.230) col+=vec3(0.230-lum);",
-      "  col=pow(max(col,vec3(0.0)),vec3(1.0/2.2));",
-      "  col+=(hash21(gl_FragCoord.xy+fract(uTime)*71.3)-0.5)*0.0045;",
-      "  gl_FragColor=vec4(clamp(col,0.0,1.0),1.0);",
-      "}"
-    ].join("\n");
-
-    const uniforms = {
-      uRes: { value: new THREE.Vector2(1, 1) },
-      uScrollY: { value: window.scrollY || 0 },
-      uViewportH: { value: window.innerHeight || 800 },
-      uDocHeight: { value: 1 },
-      uRO: { value: new THREE.Vector3(0, 3, 0) },
-      uFwd: { value: new THREE.Vector3(0, -.11, 1).normalize() },
-      uFocal: { value: 1.42 },
-      uTime: { value: 0 },
-      uSpin: { value: 0 },
-      uRelief: { value: chapterDefs[0].relief },
-      uFreq: { value: chapterDefs[0].freq },
-      uOrder: { value: chapterDefs[0].order },
-      uPolish: { value: chapterDefs[0].polish },
-      uSeam: { value: chapterDefs[0].seam },
-      uPoints: { value: chapterDefs[0].points },
-      uFive: { value: 0 },
-      uFog: { value: chapterDefs[0].fog },
-      uHFog: { value: chapterDefs[0].hfog },
-      uAmb: { value: chapterDefs[0].amb },
-      uKey: { value: chapterDefs[0].key },
-      uHMax: { value: 2.3 },
-      uLight: { value: new THREE.Vector2(chapterDefs[0].az, chapterDefs[0].el) },
-      uGroundMap: { value: tracks.ground.texture },
-      uDeepMap: { value: tracks.deep.texture },
-      uHighMap: { value: tracks.high.texture },
-      uSkyLoMap: { value: tracks.skyLo.texture },
-      uSkyHiMap: { value: tracks.skyHi.texture },
-      uFogMap: { value: tracks.fogCol.texture }
-    };
-
-    const material = new THREE.ShaderMaterial({
-      uniforms,
-      vertexShader,
-      fragmentShader,
-      depthTest: false,
-      depthWrite: false
-    });
-    const scene = new THREE.Scene();
-    const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
-    const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), material);
-    quad.frustumCulled = false;
-    scene.add(quad);
-
-    let chapters = [];
-    let documentHeight = 1;
-    let viewWidth = window.innerWidth || 1200;
-    let viewHeight = window.innerHeight || 800;
-    let animationFrame = 0;
-    let destroyed = false;
-    let dirty = true;
-    let measureQueued = false;
-    let measureTimer = 0;
-    let resizeObserver = null;
-    let controllerApi = null;
-    let time = 0;
-    let spin = 0;
-    let cameraZ = 0;
-    let scrollSpeed = 0;
-    let lastScrollY = window.scrollY || 0;
-    let lastFrameTime = 0;
-    let qualityFrames = 0;
-    let qualityTime = 0;
-    let qualityCooldown = 45;
-    const pointer = new THREE.Vector2();
-    const pointerTarget = new THREE.Vector2();
-    const colorScratchA = new THREE.Color();
-    const colorScratchB = new THREE.Color();
-    const colorScratchC = new THREE.Color();
-    const bufferSize = new THREE.Vector2();
-    const current = {};
-    const target = {};
-    PARAM_KEYS.forEach((key) => {
-      current[key] = chapterDefs[0][key];
-      target[key] = chapterDefs[0][key];
+    const chapters = RELIEF_CHAPTERS.map((definition) => {
+      const lum = hexLuminance(definition.ground);
+      /* Black and white ink overlap at 4.5:1 through the .175-.183 band; every
+         ground here sits an order of magnitude clear of it on one side or the
+         other, so a single threshold is enough and no hysteresis is needed. */
+      return { ...definition, lum, pol: lum < .18 ? 1 : 0, element: null, start: 0, height: 1 };
     });
 
-    const colorAtStops = (stops, progress, out) => {
-      let left = stops[0];
-      for (let index = 1; index < stops.length; index++) {
-        const right = stops[index];
-        if (progress <= right[0]) {
-          const span = Math.max(.0001, right[0] - left[0]);
-          return out.copy(left[1]).lerp(right[1], smoothstep(0, 1, (progress - left[0]) / span));
-        }
-        left = right;
-      }
-      return out.copy(stops[stops.length - 1][1]);
-    };
+    const finePointer = window.matchMedia("(pointer: fine)");
 
-    const chapterIndexAt = (docY) => {
-      let index = 0;
-      while (index < chapters.length - 1 && docY >= chapters[index + 1].start) index++;
-      return index;
-    };
+    let mounted = false;
+    let scrollFrame = 0;
+    let fogFrame = 0;
+    let polTimer = 0;
+    let activeIndex = -1;
+    let appliedPol = -1;
+    let fogScrollY = 0;
+    let pointerTX = 0, pointerTY = 0, pointerCX = 0, pointerCY = 0;
+    let driftT = 0;
 
-    const sampleTrackColor = (docY, key, out) => {
-      if (!chapters.length) return colorAtStops(chapterDefs[0][key], 0, out);
-      for (let index = 1; index < chapters.length; index++) {
-        const left = chapters[index - 1];
-        const right = chapters[index];
-        const band = Math.max(72, Math.min(240, viewHeight * .28, Math.min(left.height, right.height) * .12));
-        if (Math.abs(docY - right.start) <= band * .5) {
-          colorAtStops(left[key], 1, colorScratchA);
-          colorAtStops(right[key], 0, colorScratchB);
-          return out.copy(colorScratchA).lerp(
-            colorScratchB,
-            smootherstep(right.start - band * .5, right.start + band * .5, docY)
-          );
-        }
-      }
-      const chapter = chapters[chapterIndexAt(docY)];
-      const local = clamp01((docY - chapter.start) / Math.max(1, chapter.height));
-      return colorAtStops(chapter[key], local, out);
-    };
-
-    const sampleMaterial = (docY, out) => {
-      if (!chapters.length) {
-        PARAM_KEYS.forEach((key) => { out[key] = chapterDefs[0][key]; });
-        return out;
-      }
-      let left = chapters[0];
-      let right = left;
-      const firstCenter = left.start + left.height * .5;
-      if (docY > firstCenter) {
-        for (let index = 1; index < chapters.length; index++) {
-          right = chapters[index];
-          const rightCenter = right.start + right.height * .5;
-          if (docY <= rightCenter) break;
-          left = right;
-        }
-      }
-      const leftCenter = left.start + left.height * .5;
-      const rightCenter = right.start + right.height * .5;
-      const mixValue = left === right ? 0 : smootherstep(leftCenter, rightCenter, docY);
-      PARAM_KEYS.forEach((key) => {
-        out[key] = THREE.MathUtils.lerp(left[key], right[key], mixValue);
+    /* offsetTop rather than a client rect: the reveal transforms would otherwise
+       move a chapter's measured start as it animates in */
+    const measure = () => {
+      const viewHeight = window.innerHeight || 800;
+      chapters.forEach((chapter, index) => {
+        const element = document.querySelector(chapter.sel);
+        chapter.element = element;
+        chapter.start = element ? docOffsetTop(element) : index * viewHeight;
+        chapter.height = Math.max(1, element?.offsetHeight || viewHeight);
       });
-      const impact = chapters.find((chapter) => chapter.key === "impact");
-      if (impact) {
-        const edge = Math.max(80, Math.min(impact.height * .22, viewHeight * .34));
-        const enter = smootherstep(impact.start, impact.start + edge, docY);
-        const exit = 1 - smootherstep(impact.end - edge, impact.end, docY);
-        out.five = Math.max(0, enter * exit);
-      } else {
-        out.five = 0;
+    };
+
+    /* The chapter under the reading line, not merely the one on screen. With a
+       single fixed ground the whole viewport is one tone at any instant, so the
+       decision has to come from one point — and the eye sits just below centre. */
+    const chapterAt = (scrollY) => {
+      const probe = scrollY + (window.innerHeight || 800) * .52;
+      for (let i = chapters.length - 1; i > 0; i -= 1) {
+        if (probe >= chapters[i].start) return i;
       }
-      return out;
+      return 0;
     };
 
-    const rebuildTracks = () => {
-      trackKeys.forEach((key) => {
-        const track = tracks[key];
-        for (let index = 0; index < trackSize; index++) {
-          const docY = documentHeight * index / Math.max(1, trackSize - 1);
-          sampleTrackColor(docY, key, colorScratchC);
-          const offset = index * 4;
-          track.data[offset] = Math.round(clamp01(colorScratchC.r) * 255);
-          track.data[offset + 1] = Math.round(clamp01(colorScratchC.g) * 255);
-          track.data[offset + 2] = Math.round(clamp01(colorScratchC.b) * 255);
-          track.data[offset + 3] = 255;
-        }
-        track.texture.needsUpdate = true;
-      });
-      uniforms.uDocHeight.value = documentHeight;
+    const applyChapter = (index) => {
+      if (index === activeIndex) return;
+      activeIndex = index;
+      const chapter = chapters[index];
+
+      RELIEF_TONE_CLASSES.forEach((name) => bgRoot.classList.remove(name));
+      bgRoot.classList.add("tone-" + chapter.tone);
+      if (RELIEF_DARK_TONES.has(chapter.tone)) bgRoot.classList.add("is-dark");
+
+      layer.directional.style.opacity = chapter.directional ? "1" : "0";
+      layer.directional.style.transform = chapter.directional
+        ? "translate3d(0,0,0) scaleX(1)"
+        : "translate3d(0,0,0) scaleX(1.3)";
+      layer.zones.style.opacity = chapter.zones ? "1" : "0";
+      layer.champagne.style.opacity = chapter.champagne ? ".6" : "0";
+      layer.sage.style.opacity = chapter.sage ? ".5" : "0";
+
+      /* Luminance and glow ease across on the ground's own curve, so the
+         luminance-fed halo opens exactly while the ground is mid-crossing.
+         Polarity is binary and cannot ease, so it lands at the midpoint of the
+         crossing rather than at its start: flipping it on the first frame would
+         put dark type on a still-dark ground for most of a second. */
+      root.style.setProperty("--canvas-lum", chapter.lum.toFixed(3));
+      root.style.setProperty("--canvas-glow", chapter.accent);
+
+      window.clearTimeout(polTimer);
+      polTimer = 0;
+      if (chapter.pol === appliedPol) return;
+      const writePol = () => {
+        polTimer = 0;
+        appliedPol = chapter.pol;
+        root.style.setProperty("--canvas-pol", String(chapter.pol));
+      };
+      if (appliedPol === -1 || reducedMotion.matches) writePol();
+      else polTimer = window.setTimeout(writePol, RELIEF_TONE_MS * .5);
     };
 
-    let inkTargets = [];
-    const measureInkTargets = () => {
-      inkTargets = [...document.querySelectorAll("[data-canvas-ink]")].map((element) => ({
-        element,
-        docY: docOffsetTop(element) + element.offsetHeight * .5,
-        lum: -1,
-        pol: 1,
-        accent: [-1, -1, -1]
-      }));
-    };
-
-    const measureChapters = () => {
-      viewWidth = window.innerWidth || 1200;
-      viewHeight = window.innerHeight || 800;
-      documentHeight = Math.max(
-        document.documentElement.scrollHeight || 0,
-        document.body?.scrollHeight || 0,
-        viewHeight
-      );
-      chapters = chapterDefs.map((definition, index) => {
-        const element = document.querySelector(definition.sel);
-        const start = element ? docOffsetTop(element) : index * viewHeight;
-        const height = Math.max(1, element?.offsetHeight || viewHeight);
-        return { ...definition, index, element, start, height, end: start + height };
-      });
-      rebuildTracks();
-      measureInkTargets();
-      dirty = true;
-    };
-
-    const getEffectiveScale = () => {
-      const hardwareCap = Math.min(
-        maxRenderbufferSize / Math.max(1, viewWidth),
-        maxRenderbufferSize / Math.max(1, viewHeight)
-      );
-      const pixelBudgetCap = Math.sqrt(3200000 / Math.max(1, viewWidth * viewHeight));
-      return Math.max(.25, Math.min(qualityScale, window.devicePixelRatio || 1, hardwareCap, pixelBudgetCap));
-    };
-
-    const resizeRenderer = (remeasure = true) => {
-      viewWidth = window.innerWidth || 1200;
-      viewHeight = window.innerHeight || 800;
-      renderer.setPixelRatio(getEffectiveScale());
-      renderer.setSize(viewWidth, viewHeight, false);
-      renderer.getDrawingBufferSize(bufferSize);
-      uniforms.uRes.value.copy(bufferSize);
-      uniforms.uViewportH.value = viewHeight;
-      if (remeasure) scheduleMeasure();
-      dirty = true;
-    };
-
-    function requestFrame() {
-      if (destroyed || document.hidden || animationFrame) return;
-      animationFrame = requestAnimationFrame(frame);
-    }
-
-    const scheduleMeasure = () => {
-      if (measureQueued || destroyed) return;
-      measureQueued = true;
-      measureTimer = window.setTimeout(() => {
-        measureTimer = 0;
-        measureQueued = false;
-        measureChapters();
-        requestFrame();
-      }, 16);
-    };
-
-    const writeInk = (entry, docY) => {
-      sampleTrackColor(docY, "ground", colorScratchA);
-      const lum = relLuminance(colorScratchA.r, colorScratchA.g, colorScratchA.b);
-      const nextPol = entry.pol ? (lum > .183 ? 0 : 1) : (lum < .175 ? 1 : 0);
-      if (Math.abs(lum - entry.lum) >= .008) {
-        entry.lum = lum;
-        entry.element.style.setProperty("--canvas-lum", lum.toFixed(3));
-      }
-      if (nextPol !== entry.pol) {
-        entry.pol = nextPol;
-        entry.element.style.setProperty("--canvas-pol", String(nextPol));
-      }
-      sampleTrackColor(docY, "accent", colorScratchB);
-      const delta = Math.max(
-        Math.abs(colorScratchB.r - entry.accent[0]),
-        Math.abs(colorScratchB.g - entry.accent[1]),
-        Math.abs(colorScratchB.b - entry.accent[2])
-      );
-      if (delta >= .008) {
-        entry.accent[0] = colorScratchB.r;
-        entry.accent[1] = colorScratchB.g;
-        entry.accent[2] = colorScratchB.b;
-        entry.element.style.setProperty("--canvas-glow", "#" + colorScratchB.getHexString());
-      }
-    };
-
-    const rootInk = { element: root, lum: -1, pol: 1, accent: [-1, -1, -1] };
-    const publishInk = (scrollY) => {
-      writeInk(rootInk, scrollY + viewHeight * .5);
-      inkTargets.forEach((entry) => writeInk(entry, entry.docY));
-    };
-
-    const applyUniforms = (scrollY) => {
-      uniforms.uScrollY.value = scrollY;
-      uniforms.uTime.value = time;
-      uniforms.uSpin.value = spin;
-      uniforms.uRelief.value = current.relief;
-      uniforms.uFreq.value = current.freq;
-      uniforms.uOrder.value = current.order;
-      uniforms.uPolish.value = current.polish;
-      uniforms.uSeam.value = current.seam;
-      uniforms.uPoints.value = current.points;
-      uniforms.uFive.value = current.five;
-      uniforms.uFog.value = current.fog;
-      uniforms.uHFog.value = current.hfog;
-      uniforms.uAmb.value = current.amb;
-      uniforms.uKey.value = current.key;
-      uniforms.uHMax.value = current.relief * 1.9 + 1.3;
-      uniforms.uLight.value.set(current.az, current.el);
-      const pitch = current.pitch + pointer.y * .016;
-      const yaw = pointer.x * .030;
-      const cp = Math.cos(pitch);
-      uniforms.uFwd.value.set(Math.sin(yaw) * cp, Math.sin(pitch), Math.cos(yaw) * cp);
-      uniforms.uRO.value.set(pointer.x * .55, current.camY + pointer.y * .22, cameraZ);
-    };
-
-    const update = (now) => {
-      const rawDt = lastFrameTime ? (now - lastFrameTime) / 1000 : 1 / 60;
-      const dt = Math.min(.05, Math.max(1 / 240, rawDt));
-      lastFrameTime = now;
+    const onScroll = () => {
       const scrollY = window.scrollY || window.pageYOffset || 0;
-      const instantSpeed = Math.abs(scrollY - lastScrollY) / Math.max(1, viewHeight) / dt;
-      lastScrollY = scrollY;
-      const speedMix = 1 - Math.exp(-8 * dt);
-      scrollSpeed += (instantSpeed - scrollSpeed) * speedMix;
-      sampleMaterial(scrollY + viewHeight * .52, target);
-      const maxScroll = Math.max(1, documentHeight - viewHeight);
-      const targetCameraZ = clamp01(scrollY / maxScroll) * TRAVEL;
-      let maxDelta = 0;
+      const span = Math.max(1, (root.scrollHeight || 0) - (window.innerHeight || 800));
+      const progress = clamp01(scrollY / span);
 
-      if (reducedMotion.matches) {
-        PARAM_KEYS.forEach((key) => { current[key] = target[key]; });
-        pointer.set(0, 0);
-        pointerTarget.set(0, 0);
-        cameraZ = targetCameraZ;
-        scrollSpeed = 0;
+      /* Slow, continuous displacement — never abrupt, and never far enough for
+         a plane to reveal where it ends. */
+      if (!reducedMotion.matches) {
+        layer.a.style.transform =
+          `translate3d(${(-6 * progress).toFixed(2)}%, ${(4 * progress).toFixed(2)}%, 0) scale(1.05)`;
+        layer.b.style.transform =
+          `translate3d(${(5 * progress).toFixed(2)}%, ${(-5 * progress).toFixed(2)}%, 0) scale(1.08)`;
+        layer.c.style.transform =
+          `translate3d(${(-3 * progress).toFixed(2)}%, ${(3 * progress).toFixed(2)}%, 0)`;
+        /* the fog carries its own, slower scroll offset: that difference in rate
+           is the whole reason it reads as a more distant layer */
+        fogScrollY = -3 * progress;
+      }
+
+      applyChapter(chapterAt(scrollY));
+    };
+
+    const requestScroll = () => {
+      if (scrollFrame) return;
+      scrollFrame = requestAnimationFrame(() => { scrollFrame = 0; onScroll(); });
+    };
+
+    /* Cursor position smoothed by continuous interpolation, never followed
+       directly. Three speeds read as three distances. On a coarse pointer the
+       fog drifts on its own instead of standing still. */
+    const fogLoop = () => {
+      if (finePointer.matches) {
+        pointerCX += (pointerTX - pointerCX) * .03;
+        pointerCY += (pointerTY - pointerCY) * .03;
       } else {
-        const materialMix = 1 - Math.exp(-7 * dt);
-        PARAM_KEYS.forEach((key) => {
-          if (key === "five") {
-            current.five = target.five;
-            return;
-          }
-          const delta = target[key] - current[key];
-          maxDelta = Math.max(maxDelta, Math.abs(delta));
-          current[key] += delta * materialMix;
-          if (Math.abs(delta) < .0001) current[key] = target[key];
-        });
-        const pointerMix = 1 - Math.exp(-5 * dt);
-        pointer.lerp(pointerTarget, pointerMix);
-        if (pointer.distanceToSquared(pointerTarget) < .0000002) pointer.copy(pointerTarget);
-        cameraZ += (targetCameraZ - cameraZ) * (1 - Math.exp(-8 * dt));
-        if (Math.abs(targetCameraZ - cameraZ) < .002) cameraZ = targetCameraZ;
-        const motion = Math.min(1, scrollSpeed * 1.15);
-        time += dt * motion * .55;
-        spin += dt * motion * .22;
+        driftT += .0015;
+        pointerCX = Math.sin(driftT) * .4;
+        pointerCY = Math.cos(driftT * .7) * .3;
       }
-
-      applyUniforms(scrollY);
-      publishInk(scrollY);
-      const pointerDelta = pointer.distanceToSquared(pointerTarget);
-      const cameraDelta = Math.abs(targetCameraZ - cameraZ);
-      return !reducedMotion.matches && (
-        scrollSpeed > .002 || maxDelta > .0005 || pointerDelta > .0000002 || cameraDelta > .01
-      );
+      layer.fogFar.style.transform =
+        `translate3d(${(pointerCX * 1.2).toFixed(3)}%, ${(pointerCY * .8 + fogScrollY * .6).toFixed(3)}%, 0) scale(1.1)`;
+      layer.fogMid.style.transform =
+        `translate3d(${(pointerCX * 2.2).toFixed(3)}%, ${(pointerCY * 1.6 + fogScrollY).toFixed(3)}%, 0) scale(1.12)`;
+      layer.fogNear.style.transform =
+        `translate3d(${(pointerCX * 3.4).toFixed(3)}%, ${(pointerCY * 2.4 + fogScrollY * 1.4).toFixed(3)}%, 0) scale(1.15)`;
+      fogFrame = requestAnimationFrame(fogLoop);
     };
 
-    const gradeQuality = (frameMs) => {
-      if (frameMs <= 0 || frameMs >= 80) return;
-      if (qualityCooldown > 0) {
-        qualityCooldown--;
-        return;
-      }
-      qualityTime += frameMs;
-      qualityFrames++;
-      if (qualityFrames < 45) return;
-      const average = qualityTime / qualityFrames;
-      qualityTime = 0;
-      qualityFrames = 0;
-      if (average > 24 && qualityScale > qualityMin) {
-        qualityScale = Math.max(qualityMin, qualityScale - .08);
-        resizeRenderer(false);
-        qualityCooldown = 55;
-      } else if (average < 14 && qualityScale < qualityMax) {
-        qualityScale = Math.min(qualityMax, qualityScale + .05);
-        resizeRenderer(false);
-        qualityCooldown = 55;
-      }
+    const startFog = () => {
+      if (fogFrame || reducedMotion.matches || document.hidden) return;
+      fogFrame = requestAnimationFrame(fogLoop);
     };
 
-    function frame(now) {
-      animationFrame = 0;
-      if (destroyed || document.hidden) return;
-      const previousTime = lastFrameTime;
-      const keepMoving = update(now);
-      renderer.render(scene, camera);
-      dirty = false;
-      if (previousTime && now - previousTime < 80) gradeQuality(now - previousTime);
-      if (keepMoving) requestFrame();
-      else {
-        scrollSpeed = 0;
-        lastFrameTime = 0;
-      }
-    }
+    const stopFog = () => {
+      if (fogFrame) cancelAnimationFrame(fogFrame);
+      fogFrame = 0;
+    };
 
-    const onScroll = () => { dirty = true; requestFrame(); };
     const onPointerMove = (event) => {
-      if (reducedMotion.matches || event.pointerType === "touch") return;
-      pointerTarget.set(
-        (event.clientX / Math.max(1, viewWidth) - .5) * 2,
-        (event.clientY / Math.max(1, viewHeight) - .5) * 2
-      );
-      dirty = true;
-      requestFrame();
+      pointerTX = (event.clientX / (window.innerWidth || 1200)) * 2 - 1;
+      pointerTY = (event.clientY / (window.innerHeight || 800)) * 2 - 1;
     };
-    const onMotionChange = () => {
-      if (reducedMotion.matches) {
-        pointer.set(0, 0);
-        pointerTarget.set(0, 0);
-      }
-      dirty = true;
-      requestFrame();
-    };
+
+    const onResize = () => { measure(); requestScroll(); };
+
     const onVisibility = () => {
-      if (document.hidden) {
-        cancelAnimationFrame(animationFrame);
-        animationFrame = 0;
-        lastFrameTime = 0;
-        return;
-      }
-      dirty = true;
-      requestFrame();
-    };
-    const onProfileChange = () => {
-      if (getProfile() === initialProfile || !controllerApi || threeWorld !== controllerApi) return;
-      restartThreeWorld({ freshCanvas: true });
+      if (!mounted) return;
+      if (document.hidden) stopFog();
+      else startFog();
     };
 
-    const validateFirstFrame = () => {
-      const context = renderer.getContext();
-      if (!context || context.isContextLost()) {
-        throw makeWebGLError("context", "WebGL context was lost during the first frame");
-      }
-      if (context.drawingBufferWidth < 1 || context.drawingBufferHeight < 1) {
-        throw makeWebGLError("frame", "WebGL drawing buffer is empty");
-      }
-      if (renderer.info.programs?.some((program) => program.diagnostics?.runnable === false)) {
-        throw makeWebGLError("frame", "A WebGL shader program is not runnable");
-      }
-      if (renderer.info.render.calls < 1) {
-        throw makeWebGLError("frame", "The first WebGL frame produced no draw calls");
-      }
-      const glError = context.getError();
-      if (glError !== context.NO_ERROR) {
-        throw makeWebGLError("frame", "The first WebGL frame returned error " + glError);
-      }
+    const onMotionChange = () => {
+      if (!mounted) return;
+      stopFog();
+      startFog();
+      onScroll();
     };
 
-    const start = () => {
-      resizeRenderer(false);
-      measureChapters();
-      update(performance.now());
-      renderer.render(scene, camera);
-      validateFirstFrame();
-      dirty = false;
-      window.addEventListener("scroll", onScroll, { passive: true });
+    const mount = () => {
+      if (mounted) return;
+      mounted = true;
+      measure();
+      window.addEventListener("scroll", requestScroll, { passive: true });
+      window.addEventListener("resize", onResize);
+      window.addEventListener("orientationchange", onResize);
+      window.addEventListener("load", onResize);
       window.addEventListener("pointermove", onPointerMove, { passive: true });
-      window.addEventListener("resize", resizeRenderer);
-      window.addEventListener("orientationchange", scheduleMeasure);
-      window.addEventListener("load", scheduleMeasure);
       document.addEventListener("visibilitychange", onVisibility);
-      reducedMotion.addEventListener?.("change", onMotionChange);
-      compactQuery.addEventListener?.("change", onProfileChange);
-      if (document.fonts?.ready) document.fonts.ready.then(scheduleMeasure);
-      if ("ResizeObserver" in window) {
-        resizeObserver = new ResizeObserver(scheduleMeasure);
-        [
-          document.body,
-          document.getElementById("main"),
-          ...chapters.map((chapter) => chapter.element),
-          document.querySelector(".closing-scene")
-        ].filter(Boolean).forEach((element) => resizeObserver.observe(element));
-      }
-      document.getElementById("loading")?.classList.add("hidden");
+      onScroll();
+      startFog();
+      root.classList.remove("no-canvas");
+      root.dataset.bgState = "ready";
     };
 
-    const destroy = () => {
-      if (destroyed) return;
-      destroyed = true;
-      cancelAnimationFrame(animationFrame);
-      clearTimeout(measureTimer);
-      resizeObserver?.disconnect();
-      window.removeEventListener("scroll", onScroll);
+    /* Below 916px the field is not merely hidden, it is dismantled: the flat
+       per-section grounds take over and nothing inline may survive to override
+       the polarity they restate. */
+    const unmount = () => {
+      if (!mounted) return;
+      mounted = false;
+      window.removeEventListener("scroll", requestScroll);
+      window.removeEventListener("resize", onResize);
+      window.removeEventListener("orientationchange", onResize);
+      window.removeEventListener("load", onResize);
       window.removeEventListener("pointermove", onPointerMove);
-      window.removeEventListener("resize", resizeRenderer);
-      window.removeEventListener("orientationchange", scheduleMeasure);
-      window.removeEventListener("load", scheduleMeasure);
       document.removeEventListener("visibilitychange", onVisibility);
-      reducedMotion.removeEventListener?.("change", onMotionChange);
-      compactQuery.removeEventListener?.("change", onProfileChange);
-      quad.geometry.dispose();
-      material.dispose();
-      Object.values(tracks).forEach((track) => track.texture.dispose());
-      renderer.dispose();
+      if (scrollFrame) cancelAnimationFrame(scrollFrame);
+      scrollFrame = 0;
+      stopFog();
+      window.clearTimeout(polTimer);
+      polTimer = 0;
+      activeIndex = -1;
+      appliedPol = -1;
+      root.style.removeProperty("--canvas-lum");
+      root.style.removeProperty("--canvas-pol");
+      root.style.removeProperty("--canvas-glow");
+      RELIEF_TONE_CLASSES.forEach((name) => bgRoot.classList.remove(name));
+      root.classList.add("no-canvas");
+      root.dataset.bgState = "disabled";
     };
 
-    controllerApi = { start, destroy };
-    return controllerApi;
+    const sync = () => { if (backgroundDisabled.matches) unmount(); else mount(); };
+
+    backgroundDisabled.addEventListener?.("change", sync);
+    reducedMotion.addEventListener?.("change", onMotionChange);
+    sync();
   }
   function initApp() {
     initHeader();
@@ -1885,8 +1119,7 @@
     initFAQ();
     initQuoteForm();
     initCounters();
-    webGLDisabledOnMobile.addEventListener?.("change", syncThreeAvailability);
-    syncThreeAvailability();
+    initReliefBackground();
     const yearEl = document.querySelector("[data-year]");
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
   }

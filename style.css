@@ -570,6 +570,78 @@
       background-color: var(--navy-dark);
     }
 
+    /* ---------------------------------------------------------
+       STATIC CANVAS INK
+
+       Some surfaces own a fixed ground (image plates, cards and fixed panels),
+       so their ink must not sample the document-level relief field. Pin the
+       complete token set on both the host and any explicit canvas-ink child:
+       [data-canvas-ink] declares its own token values, which would otherwise
+       reconnect the child to :root's scroll-driven --canvas-pol.
+
+       Apply .static-ink-dark to a light/fixed surface and .static-ink-light
+       to a dark/fixed surface. The !important flags are deliberate here: this
+       is an opt-in isolation utility and must also win over component-local
+       canvas tokens declared later in this file.
+       --------------------------------------------------------- */
+    .beforeafter,
+    .static-ink-dark,
+    .beforeafter [data-canvas-ink],
+    .static-ink-dark [data-canvas-ink] {
+      --canvas-lum: 1 !important;
+      --canvas-pol: 0 !important;
+      --canvas-glow: var(--petrol) !important;
+      --canvas-ink: var(--graphite) !important;
+      --canvas-strong: var(--navy) !important;
+      --canvas-rule: var(--line-light) !important;
+      --canvas-rule-soft: var(--line-light-soft) !important;
+      --canvas-muted: var(--muted) !important;
+      --canvas-accent-base: var(--petrol) !important;
+      --canvas-accent: var(--petrol) !important;
+      --canvas-halo: transparent !important;
+      --canvas-envelope: 0 !important;
+      --canvas-ink-halo: none !important;
+      color: var(--graphite) !important;
+    }
+
+    .static-ink-light,
+    .static-ink-light [data-canvas-ink] {
+      --canvas-lum: 0 !important;
+      --canvas-pol: 1 !important;
+      --canvas-glow: #FFF !important;
+      --canvas-ink: #FFF !important;
+      --canvas-strong: #FFF !important;
+      --canvas-rule: var(--line-dark) !important;
+      --canvas-rule-soft: var(--line-dark-soft) !important;
+      --canvas-muted: #FFF !important;
+      --canvas-accent-base: var(--champagne) !important;
+      --canvas-accent: var(--champagne) !important;
+      --canvas-halo: transparent !important;
+      --canvas-envelope: 0 !important;
+      --canvas-ink-halo: none !important;
+      color: #FFF !important;
+    }
+
+    /* Disable the scroll-driven registered-property transition at its source.
+       A reveal is a separate entrance treatment, so restore only its opacity /
+       transform transition below; no --canvas-* property can animate there. */
+    .beforeafter,
+    .static-ink-dark,
+    .static-ink-light,
+    .beforeafter [data-canvas-ink],
+    .static-ink-dark [data-canvas-ink],
+    .static-ink-light [data-canvas-ink] {
+      transition: none !important;
+    }
+
+    .beforeafter [data-canvas-ink][data-reveal],
+    .static-ink-dark [data-canvas-ink][data-reveal],
+    .static-ink-light [data-canvas-ink][data-reveal] {
+      transition:
+        opacity var(--dur-slow) var(--ease),
+        transform var(--dur-slow) var(--ease) !important;
+    }
+
     #loading {
       position: fixed;
       inset: 0;

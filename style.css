@@ -1003,50 +1003,59 @@
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      padding: 16px 30px;
-      border-radius: 100px;
+      gap: var(--btn-gap);
+      padding: var(--btn-pad-y) var(--btn-pad-x);
+      border-radius: var(--btn-radius);
       font-weight: 700;
       font-size: .95rem;
+      line-height: 1;
       border: 1.5px solid transparent;
-      transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
-      min-height: 44px;
+      transition: transform var(--dur-hover) var(--ease-editorial), background var(--dur-micro) var(--ease-quick), border-color var(--dur-micro) var(--ease-quick), color var(--dur-micro) var(--ease-quick), box-shadow var(--dur-hover) var(--ease-editorial);
+      min-height: var(--btn-height);
       white-space: nowrap;
       position: relative;
       overflow: hidden;
       isolation: isolate;
     }
 
-    /* a single light pass across the face on hover: the only flourish buttons get */
-    .btn::after {
-      content: '';
-      position: absolute;
-      inset: 0;
-      z-index: -1;
-      background: linear-gradient(100deg, transparent 30%, rgba(255, 255, 255, .22) 50%, transparent 70%);
-      transform: translateX(-120%);
-      transition: transform var(--dur-slow) var(--ease);
+    .btn:active {
+      transform: translateY(.5px);
+      box-shadow: var(--btn-shadow-rest);
+      transition-duration: var(--dur-micro);
+    }
+
+    .btn:disabled,
+    .btn.is-disabled,
+    .btn[aria-disabled="true"] {
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
       pointer-events: none;
     }
 
-    .btn:hover::after {
-      transform: translateX(120%);
-    }
-
-    .btn:active {
-      transform: translateY(0) scale(.985);
+    .btn:disabled::after,
+    .btn.is-disabled::after,
+    .btn[aria-disabled="true"]::after {
+      display: none;
     }
 
     .btn-primary {
       background: var(--petrol);
       color: #fff;
-      box-shadow: 0 1px 0 rgba(255, 255, 255, .18) inset, 0 8px 20px rgba(18, 85, 107, .28);
+      box-shadow: var(--btn-shadow-rest), 0 1px 0 rgba(255, 255, 255, .16) inset, 0 4px 10px rgba(18, 85, 107, .16);
     }
 
     .btn-primary:hover {
       background: var(--petrol-light);
-      transform: translateY(-2px);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, .22) inset, 0 14px 30px rgba(18, 85, 107, .34);
+      border-color: rgba(255, 255, 255, .2);
+      transform: translateY(-1.5px);
+      box-shadow: var(--btn-shadow-hover), 0 1px 0 rgba(255, 255, 255, .2) inset, 0 10px 20px rgba(18, 85, 107, .26);
+    }
+
+    .btn-primary:disabled {
+      background: var(--muted);
+      color: rgba(255, 255, 255, .7);
+      border-color: transparent;
     }
 
     .btn-ghost {
@@ -1055,10 +1064,36 @@
       border-color: rgba(16, 42, 67, .25);
     }
 
+    .btn-ghost::after {
+      content: '';
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 8px;
+      height: 1.5px;
+      background: currentColor;
+      opacity: .5;
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform var(--dur-hover) var(--ease-editorial), opacity var(--dur-micro) var(--ease-quick);
+      pointer-events: none;
+    }
+
     .btn-ghost:hover {
       border-color: var(--navy);
-      transform: translateY(-2px);
-      background: rgba(16, 42, 67, .04);
+      background: var(--btn-surface-soft);
+      transform: translateY(-1.5px);
+      box-shadow: var(--btn-shadow-hover);
+    }
+
+    .btn-ghost:hover::after {
+      transform: scaleX(1);
+    }
+
+    .btn-ghost:disabled {
+      color: rgba(16, 42, 67, .4);
+      border-color: rgba(16, 42, 67, .14);
+      background: transparent;
     }
 
     .btn-outline-light {
@@ -1067,22 +1102,55 @@
       border-color: rgba(255, 255, 255, .4);
     }
 
+    .btn-outline-light::after {
+      content: '';
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      bottom: 8px;
+      height: 1.5px;
+      background: currentColor;
+      opacity: .5;
+      transform: scaleX(0);
+      transform-origin: center;
+      transition: transform var(--dur-hover) var(--ease-editorial), opacity var(--dur-micro) var(--ease-quick);
+      pointer-events: none;
+    }
+
     .btn-outline-light:hover {
       border-color: #fff;
-      transform: translateY(-2px);
-      background: rgba(255, 255, 255, .08);
+      background: var(--btn-surface-soft-dark);
+      transform: translateY(-1.5px);
+      box-shadow: var(--btn-shadow-hover);
+    }
+
+    .btn-outline-light:hover::after {
+      transform: scaleX(1);
+    }
+
+    .btn-outline-light:disabled {
+      color: rgba(255, 255, 255, .4);
+      border-color: rgba(255, 255, 255, .18);
+      background: transparent;
     }
 
     .btn-champagne {
       background: var(--champagne);
       color: var(--navy-dark);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, .4) inset, 0 8px 20px rgba(169, 137, 76, .3);
+      box-shadow: var(--btn-shadow-rest), 0 1px 0 rgba(255, 255, 255, .4) inset, 0 4px 10px rgba(169, 137, 76, .22);
     }
 
     .btn-champagne:hover {
-      transform: translateY(-2px);
-      filter: brightness(1.05);
-      box-shadow: 0 1px 0 rgba(255, 255, 255, .5) inset, 0 14px 30px rgba(169, 137, 76, .36);
+      background: color-mix(in srgb, var(--champagne) 94%, white);
+      border-color: rgba(255, 255, 255, .35);
+      transform: translateY(-1.5px);
+      box-shadow: var(--btn-shadow-hover), 0 1px 0 rgba(255, 255, 255, .5) inset, 0 10px 22px rgba(169, 137, 76, .3);
+    }
+
+    .btn-champagne:disabled {
+      background: color-mix(in srgb, var(--champagne) 55%, var(--sand));
+      color: rgba(7, 27, 46, .55);
+      border-color: transparent;
     }
 
     .tag {
@@ -1241,45 +1309,23 @@
     }
 
     .logo {
-      font-family: var(--font-serif);
-      font-size: 1.5rem;
-      letter-spacing: .03em;
-      color: #fff;
-      font-weight: 600;
-      display: flex;
-      align-items: baseline;
-      gap: 6px;
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
     }
 
-    .logo em {
-      font-style: normal;
-      color: var(--champagne);
+    .logo:hover {
+      opacity: .88;
+      transform: translateY(-1px);
     }
 
-    .logo-mark {
-      width: 15px;
-      height: 15px;
-      align-self: center;
-      margin-right: 2px;
-      color: var(--champagne);
-      overflow: visible;
-      transition: transform var(--dur-med) var(--ease);
-    }
-
-    .logo-mark circle {
-      fill: currentColor;
-      transition: opacity var(--dur-med) var(--ease);
-    }
-
-    .logo-mark .mark-ring {
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 1;
-      opacity: .45;
-    }
-
-    .logo:hover .logo-mark {
-      transform: rotate(45deg);
+    .logo-img {
+      height: 40px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .nav-desktop {
@@ -1362,6 +1408,7 @@
 
     .header-actions .btn-ghost:hover {
       border-color: #fff;
+      background: var(--btn-surface-soft-dark);
     }
 
     /* the phone glyph and the menu's contact block belong to the mobile edition
@@ -2245,12 +2292,17 @@
       justify-content: center;
       backdrop-filter: blur(8px);
       -webkit-backdrop-filter: blur(8px);
-      transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+      transition: transform var(--dur-hover) var(--ease-editorial), background var(--dur-micro) var(--ease-quick), border-color var(--dur-micro) var(--ease-quick);
     }
 
     .card-toggle:hover {
       background: rgba(255, 255, 255, .24);
       border-color: var(--champagne);
+      transform: scale(1.05);
+    }
+
+    .card-toggle:active {
+      transform: scale(.9);
     }
 
     .service-card.is-active .card-toggle {
@@ -2258,6 +2310,10 @@
       background: var(--champagne);
       border-color: var(--champagne);
       color: var(--navy-dark);
+    }
+
+    .service-card.is-active .card-toggle:active {
+      transform: rotate(45deg) scale(.9);
     }
 
     /* =========================================================
@@ -2314,16 +2370,18 @@
       transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease), box-shadow var(--dur-fast) var(--ease);
     }
 
-    /* the dot marks the selected plan without needing a second label */
+    /* the 4POINTS registration mark, at control scale: same hollow-centre
+       compass as .eyebrow::before/.section-joint::before, currentColor so it
+       always reads against whatever surface the tab currently has */
     .freq-tab::before {
       content: '';
-      width: 5px;
-      height: 5px;
+      width: 3px;
+      height: 3px;
       border-radius: 50%;
-      background: currentColor;
+      box-shadow: 0 -5px 0 currentColor, 5px 0 0 currentColor, 0 5px 0 currentColor, -5px 0 0 currentColor;
       opacity: .5;
       flex: none;
-      transition: background var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+      transition: color var(--dur-micro) var(--ease-quick), box-shadow var(--dur-micro) var(--ease-quick), opacity var(--dur-micro) var(--ease-quick), transform var(--dur-hover) var(--ease-editorial);
     }
 
     .freq-tab:hover {
@@ -2344,7 +2402,6 @@
     }
 
     .freq-tab.is-active::before {
-      background: var(--champagne);
       opacity: 1;
       transform: scale(1.2);
     }
@@ -3068,15 +3125,15 @@
       background: rgba(255, 253, 248, .95);
       border: 1px solid rgba(255, 255, 255, .85);
       box-shadow:
-        0 1px 2px rgba(7, 27, 46, .3),
-        0 10px 26px rgba(7, 27, 46, .3);
+        0 1px 2px rgba(7, 27, 46, .35),
+        0 3px 8px rgba(7, 27, 46, .22);
       display: flex;
       align-items: center;
       justify-content: center;
       color: var(--navy);
       position: relative;
       z-index: 2;
-      transition: transform var(--dur-fast) var(--ease);
+      transition: transform var(--dur-fast) var(--ease), outline-color var(--dur-micro) var(--ease-quick), box-shadow var(--dur-micro) var(--ease-quick);
     }
 
     .ba-frame:hover .ba-grip {
@@ -3154,6 +3211,15 @@
       z-index: 5;
       /* Native range behavior provides consistent mouse, touch and keyboard
          control while the frame's pan-y touch action preserves page scroll. */
+    }
+
+    /* .ba-range is the real control but renders at opacity:0, so its own
+       focus ring is invisible; re-anchor the same global ring on the grip
+       that sits on top of it, without moving hit-testing off the input. */
+    .ba-frame:has(.ba-range:focus-visible) .ba-grip {
+      outline: 2.5px solid var(--petrol-light);
+      outline-offset: 3px;
+      box-shadow: 0 0 0 6px rgba(42, 142, 170, .18), 0 1px 2px rgba(7, 27, 46, .35), 0 3px 8px rgba(7, 27, 46, .22);
     }
 
     /* =========================================================
@@ -3948,7 +4014,7 @@
       box-sizing: content-box;
       padding: 9px;
       border-radius: 50%;
-      border: 1px solid rgba(31, 111, 139, .25);
+      border: 1px solid rgba(31, 111, 139, .32);
       background: rgba(31, 111, 139, .06);
     }
 
@@ -4340,6 +4406,7 @@
       align-items: center;
       gap: 8px;
       padding: 8px 4px;
+      min-height: 44px;
       transition: color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
     }
 
@@ -4486,6 +4553,10 @@
       border-color: rgba(255, 255, 255, .4);
     }
 
+    .final-cta .btn-ghost:hover {
+      background: var(--btn-surface-soft-dark);
+    }
+
     /* the number itself is spelled out only where tapping it is the point */
     .final-cta .btn-ghost small {
       display: none;
@@ -4539,22 +4610,28 @@
     }
 
     .footer-logo {
-      font-family: var(--font-serif);
-      font-size: 1.6rem;
-      color: #fff;
       display: flex;
       align-items: center;
-      gap: 10px;
     }
 
-    .footer-logo em {
-      font-style: normal;
-      color: var(--champagne);
+    .footer-logo a {
+      display: inline-flex;
+      align-items: center;
+      text-decoration: none;
+      transition: opacity var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
     }
 
-    .footer-logo .logo-mark {
-      width: 14px;
-      height: 14px;
+    .footer-logo a:hover {
+      opacity: .88;
+      transform: translateY(-1px);
+    }
+
+    .footer-logo-img {
+      height: 44px;
+      width: auto;
+      max-width: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .footer-tagline {
@@ -4641,7 +4718,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: border-color var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), color var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+      transition: border-color var(--dur-micro) var(--ease-quick), background var(--dur-micro) var(--ease-quick), color var(--dur-micro) var(--ease-quick), transform var(--dur-hover) var(--ease-editorial);
     }
 
     .footer-social a:hover {
@@ -4667,30 +4744,31 @@
       display: inline-flex;
       align-items: center;
       gap: 9px;
+      min-height: 44px;
       font-size: .74rem;
       letter-spacing: .12em;
       text-transform: uppercase;
       font-weight: 700;
-      color: rgba(255, 255, 255, .6);
-      border: 1px solid rgba(255, 255, 255, .2);
-      border-radius: 100px;
-      padding: 9px 16px;
-      transition: color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
+      color: rgba(255, 255, 255, .55);
+      border: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, .22);
+      padding: 0 2px;
+      transition: color var(--dur-micro) var(--ease-quick), border-color var(--dur-micro) var(--ease-quick);
     }
 
     .footer-top .icon {
       width: 13px;
       height: 13px;
-      transition: transform var(--dur-fast) var(--ease);
+      transition: transform var(--dur-hover) var(--ease-editorial);
     }
 
     .footer-top:hover {
       color: #fff;
-      border-color: rgba(255, 255, 255, .5);
+      border-color: rgba(255, 255, 255, .55);
     }
 
     .footer-top:hover .icon {
-      transform: translateY(-2px);
+      transform: translateY(-3px);
     }
 
     /* =========================================================
@@ -5084,15 +5162,16 @@
       /* the padding buys a thumb-sized target; the negative margin gives the
          header back the height it would otherwise have gained */
       .logo {
-        font-size: 1.12rem;
-        gap: 5px;
-        padding: 9px 0;
-        margin: -9px 0;
+        padding: 6px 0;
+        margin: -6px 0;
       }
 
-      .logo-mark {
-        width: 12px;
-        height: 12px;
+      .logo-img {
+        height: 32px;
+      }
+
+      .footer-logo-img {
+        height: 36px;
       }
 
       .header-actions {
@@ -5109,6 +5188,11 @@
         padding: 0;
         border-radius: 50%;
         border-color: rgba(255, 255, 255, .3);
+      }
+
+      /* a circle has no room for the shared directional underline */
+      .header-actions .btn.btn-ghost::after {
+        content: none;
       }
 
       .header-actions .btn-ghost span {
@@ -5320,6 +5404,13 @@
         height: 1px;
         background: var(--champagne);
         flex: none;
+      }
+
+      /* this variant already carries its own static line via ::before and
+         is deliberately inert on touch — the shared hover-reveal ::after
+         from the base .btn-outline-light would duplicate it */
+      .hero .hero-cta .btn-outline-light::after {
+        content: none;
       }
 
       .hero .hero-cta .btn-outline-light:hover,
@@ -6432,6 +6523,10 @@
         color: rgba(255, 255, 255, .68);
       }
 
+      .final-cta .hero-cta .btn-ghost::after {
+        content: none;
+      }
+
       .final-cta .hero-cta .btn-ghost:hover {
         transform: none;
         background: transparent;
@@ -6529,10 +6624,6 @@
         height: 44px;
       }
 
-      .footer-top {
-        padding: 13px 18px;
-      }
-
       /* =========================================================
          20a. iOS NAVIGATION SYSTEM
          Net-new components with no desktop counterpart: top-bar options
@@ -6564,11 +6655,17 @@
 
       .m-options-toggle {
         display: inline-flex;
+        transition: border-color var(--dur-micro) var(--ease-quick), background var(--dur-micro) var(--ease-quick), color var(--dur-micro) var(--ease-quick);
+      }
+
+      .m-options-toggle:hover {
+        border-color: rgba(255, 255, 255, .55);
       }
 
       .m-options-toggle:active {
         border-color: var(--champagne);
         color: var(--champagne);
+        background: rgba(200, 169, 106, .12);
       }
 
       /* room for the tab bar at the foot of every page */
@@ -6809,6 +6906,16 @@
         display: flex;
         align-items: center;
         justify-content: center;
+        transition: border-color var(--dur-micro) var(--ease-quick), background var(--dur-micro) var(--ease-quick), transform var(--dur-micro) var(--ease-quick);
+      }
+
+      .m-cover-back:hover {
+        border-color: rgba(255, 255, 255, .6);
+      }
+
+      .m-cover-back:active {
+        transform: scale(.92);
+        background: rgba(7, 27, 46, .5);
       }
 
       .m-cover-bar span {
@@ -7761,6 +7868,19 @@
          --champagne-text is left untouched; it is what the Mobile Edition
          reads, and there the flat CSS grounds really are Paper. */
       --champagne-ink: #7E6738;
+
+      /* Action System — .btn and the interactive-control layer. Strictly
+         additive, same rule as the rest of this block: nothing above is
+         redefined. */
+      --btn-radius: 12px;          /* a hand's target, not a panel: deliberately outside the --radius-sm/md/lg scale, does not step at 768px */
+      --btn-height: 48px;
+      --btn-gap: 10px;
+      --btn-pad-y: 14px;
+      --btn-pad-x: 28px;
+      --btn-shadow-rest: 0 1px 2px rgba(7, 27, 46, .06);
+      --btn-shadow-hover: 0 1px 2px rgba(7, 27, 46, .09), 0 10px 20px rgba(7, 27, 46, .14);
+      --btn-surface-soft: rgba(16, 42, 67, .06);
+      --btn-surface-soft-dark: rgba(255, 255, 255, .08);
     }
 
     /* The hero photograph's slow push, held in a registered property of its
@@ -8099,7 +8219,43 @@
         letter-spacing: -.012em;
       }
 
+      /* four loose, independently-filled chips become one segmented
+         control — the same mechanism the Mobile Edition already proved,
+         brought up to desktop: --freq-i (published unconditionally by
+         initMaintenanceSelector) drives a single sliding indicator instead
+         of four competing surfaces. */
+      .freq-tabs {
+        position: relative;
+        isolation: isolate;
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 0;
+        padding: 3px;
+        border: 1px solid var(--line-light);
+        border-radius: 100px;
+        background: color-mix(in srgb, var(--paper) 62%, transparent);
+      }
+
+      .freq-tabs::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        top: 3px;
+        bottom: 3px;
+        left: 3px;
+        width: calc((100% - 6px) / 4);
+        border-radius: 100px;
+        background: var(--champagne);
+        box-shadow: 0 2px 8px rgba(169, 137, 76, .34);
+        transform: translateX(calc(var(--freq-i, 0) * 100%));
+        transition: transform var(--dur-hover) var(--ease-editorial);
+      }
+
       .freq-tab {
+        justify-content: center;
+        background: none;
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
         transition:
           background var(--dur-micro) var(--ease-quick),
           border-color var(--dur-micro) var(--ease-quick),
@@ -8108,7 +8264,10 @@
       }
 
       .freq-tab.is-active {
-        box-shadow: 0 1px 0 rgba(255, 255, 255, .16) inset, 0 6px 18px rgba(18, 85, 107, .2);
+        background: none;
+        border-color: transparent;
+        box-shadow: none;
+        color: var(--navy-dark);
       }
 
       .freq-list li {

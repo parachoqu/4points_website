@@ -13,7 +13,7 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap"
     rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=00b8cff64a53">
+  <link rel="stylesheet" href="style.css?v=21bcb4a00a9c">
 </head>
 
 <body>
@@ -747,26 +747,26 @@
      ========================================================= -->
     <section class="section testimonials depth scroll-snap-section">
       <div class="container">
-        <div class="t-carousel cornered" data-testimonial-carousel data-reveal tabindex="0" aria-roledescription="carousel"
+        <div class="t-carousel" data-testimonial-carousel data-reveal role="region" aria-roledescription="carousel"
           aria-label="Customer testimonials">
-          <div class="t-stars" aria-hidden="true">
-            <svg class="icon" viewBox="0 0 24 24">
-              <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-            </svg>
-            <svg class="icon" viewBox="0 0 24 24">
-              <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-            </svg>
-            <svg class="icon" viewBox="0 0 24 24">
-              <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-            </svg>
-            <svg class="icon" viewBox="0 0 24 24">
-              <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-            </svg>
-            <svg class="icon" viewBox="0 0 24 24">
-              <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-            </svg>
-          </div>
-          <div class="t-track" data-testimonial-track>
+          <div class="t-track" id="testimonial-track" data-testimonial-track>
+            <div class="t-stars" aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
+              </svg>
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
+              </svg>
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
+              </svg>
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
+              </svg>
+              <svg class="icon" viewBox="0 0 24 24">
+                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
+              </svg>
+            </div>
             <div class="t-slide is-active" data-testimonial-slide aria-hidden="false">
               <span class="t-service-tag">Commercial &amp; Janitorial</span>
               <p>4Points took over our office cleaning six months ago and it's the first vendor we haven't had to
@@ -800,8 +800,22 @@
               </div>
             </div>
           </div>
-          <p class="visually-hidden" data-testimonial-status
-            style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)"></p>
+          <div class="t-controls" role="group" aria-label="Testimonial navigation">
+            <button class="t-nav-btn prev" type="button" aria-label="Previous testimonial"
+              aria-controls="testimonial-track">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M15 6l-6 6 6 6" />
+              </svg>
+            </button>
+            <button class="t-nav-btn next" type="button" aria-label="Next testimonial"
+              aria-controls="testimonial-track">
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M9 6l6 6-6 6" />
+              </svg>
+            </button>
+          </div>
+          <p class="visually-hidden" data-testimonial-status role="status" aria-live="polite"
+            aria-atomic="true"></p>
         </div>
       </div>
     </section>
@@ -809,7 +823,7 @@
     <!-- =========================================================
      FAQ
      ========================================================= -->
-    <section class="section faq scroll-snap-section" id="faq">
+    <section class="section faq scroll-snap-section static-ink-dark" id="faq">
       <div class="container">
         <div class="faq-board cornered">
         <div class="faq-intro" data-reveal>
@@ -1311,7 +1325,7 @@
     </div>
   </section>
 
-  <script type="module" src="script.js?v=41b9dd52dbc4"></script>
+  <script type="module" src="script.js?v=84a3bf532bde"></script>
 </body>
 
 </html>

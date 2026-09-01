@@ -675,51 +675,76 @@
     setPosition(Number(range.value));
   }
 
-  /* ---------- testimonials ---------- */
+  /* ---------- testimonials: state-based depth stack ---------- */
   function initTestimonials() {
     const carousel = document.querySelector("[data-testimonial-carousel]");
     if (!carousel) return;
+
     const slides = [...carousel.querySelectorAll("[data-testimonial-slide]")];
-    const track = carousel.querySelector("[data-testimonial-track]");
+    const controls = carousel.querySelector(".t-controls");
+    const prevButton = carousel.querySelector(".t-nav-btn.prev");
+    const nextButton = carousel.querySelector(".t-nav-btn.next");
     const status = carousel.querySelector("[data-testimonial-status]");
-    let currentIndex = 0, autoplayId = null;
 
-    const show = (index, direction = 0) => {
-      /* the quote enters from the side the reader asked for: the offset has
-         to be committed before the class flips, or there is nothing to ease from */
-      if (track && direction !== 0) {
-        /* a short lateral fade: far enough to say which way the quote came
-           from, close enough that the card never appears to slide */
-        track.style.setProperty("--dx", direction > 0 ? "22px" : "-22px");
-        void track.offsetWidth;
-      }
-      currentIndex = (index + slides.length) % slides.length;
-      slides.forEach((slide, i) => {
-        const active = i === currentIndex;
+    if (!slides.length) {
+      if (controls) controls.hidden = true;
+      carousel.hidden = true;
+      return;
+    }
+
+    const initialIndex = slides.findIndex((slide) => slide.classList.contains("is-active"));
+    let activeIndex = initialIndex >= 0 ? initialIndex : 0;
+
+    const normalizeIndex = (index) => (index + slides.length) % slides.length;
+
+    /* Keep one logical predecessor at -1 so it can fall away or return from
+       below. Every other slide stays in forward circular order behind the
+       active card, including across the first/last boundary. */
+    const offsetFor = (slideIndex) => {
+      const forwardOffset = (slideIndex - activeIndex + slides.length) % slides.length;
+      return slides.length > 1 && forwardOffset === slides.length - 1 ? -1 : forwardOffset;
+    };
+
+    const render = (nextIndex) => {
+      activeIndex = normalizeIndex(nextIndex);
+      const recycledSlides = [];
+
+      slides.forEach((slide, slideIndex) => {
+        const offset = offsetFor(slideIndex);
+        const previousOffset = Number.parseInt(slide.style.getPropertyValue("--offset"), 10);
+        const active = offset === 0;
+        const recycling = previousOffset === -1 && offset > 0;
+
+        slide.classList.toggle("is-recycling", recycling);
+        slide.style.setProperty("--offset", String(offset));
         slide.classList.toggle("is-active", active);
+        slide.classList.toggle("is-past", offset < 0);
         slide.setAttribute("aria-hidden", String(!active));
+
+        if (recycling) recycledSlides.push(slide);
       });
-      if (status) status.textContent = `Testimonial ${currentIndex + 1} of ${slides.length}`;
+
+      /* A predecessor recycled to the back must not travel through the card
+         stack. Commit its new position while hidden, then let it fade in at
+         that position. This remains click/state-driven and needs no timer. */
+      if (recycledSlides.length) {
+        void carousel.offsetWidth;
+        recycledSlides.forEach((slide) => slide.classList.remove("is-recycling"));
+      }
+
+      if (status) {
+        status.textContent = `Testimonial ${activeIndex + 1} of ${slides.length}`;
+      }
+
+      carousel.classList.add("is-ready");
     };
 
-    const startAutoplay = () => {
-      window.clearInterval(autoplayId);
-      autoplayId = null;
-      if (reducedMotion.matches || document.hidden) return;
-      autoplayId = window.setInterval(() => show(currentIndex + 1, 1), 6000);
-    };
-    const pauseAutoplay = () => window.clearInterval(autoplayId);
-    const refreshAutoplay = () => startAutoplay();
+    if (controls) controls.hidden = slides.length < 2;
 
-    carousel.addEventListener("pointerenter", pauseAutoplay);
-    carousel.addEventListener("pointerleave", startAutoplay);
-    carousel.addEventListener("focusin", pauseAutoplay);
-    carousel.addEventListener("focusout", startAutoplay);
-    document.addEventListener("visibilitychange", refreshAutoplay);
-    reducedMotion.addEventListener?.("change", refreshAutoplay);
+    prevButton?.addEventListener("click", () => render(activeIndex - 1));
+    nextButton?.addEventListener("click", () => render(activeIndex + 1));
 
-    show(0);
-    startAutoplay();
+    render(activeIndex);
   }
 
   /* ---------- FAQ accordion ---------- */

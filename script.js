@@ -596,12 +596,14 @@
     /* empty until buildDots() runs, so the first pass always creates the row */
     let stops = [];
 
-    /* Whoever moved the track — a finger, the wheel, a dot, the keyboard — the
-       lit dot is simply the nearest stop, so every input is handled once. */
+    const nearestStop = () => stops.reduce((best, offset, i) => (
+      Math.abs(offset - track.scrollLeft) < Math.abs(stops[best] - track.scrollLeft) ? i : best
+    ), 0);
+
+    /* Whoever moved the track — a finger, the wheel, a dot, a drag, the keyboard
+       — the lit dot is simply the nearest stop, so every input is handled once. */
     const markActive = (forced) => {
-      const near = forced ?? stops.reduce((best, offset, i) => (
-        Math.abs(offset - track.scrollLeft) < Math.abs(stops[best] - track.scrollLeft) ? i : best
-      ), 0);
+      const near = forced ?? nearestStop();
       [...dots.children].forEach((dot, i) => dot.setAttribute("aria-current", String(i === near)));
     };
 
@@ -623,6 +625,7 @@
       const resized = next.length !== stops.length;
       stops = next;
       dots.hidden = stops.length < 2;
+      track.classList.toggle("is-draggable", stops.length > 1);
       /* a resize that did not change the count keeps its buttons: rebuilding
          would drop focus for anyone tabbing through the row */
       if (resized) {
@@ -643,6 +646,102 @@
 
     track.addEventListener("scroll", onScrollFrame(markActive), { passive: true });
     window.addEventListener("resize", debounce(buildDots, 150));
+
+    /* ---------- drag to scroll ----------
+       Mouse and pen only. A finger already has the native scroller, and
+       capturing a touch pointer here would replace its momentum with ours. */
+    const DRAG_SLOP = 5;      /* px before a shaky click becomes a drag */
+    const FLICK_SPEED = .5;   /* px/ms */
+    const FLICK_MIN = 40;     /* px, so a twitch is never read as a flick */
+
+    let dragId = null, dragFromX = 0, dragFromScroll = 0, dragFromStop = 0;
+    let lastX = 0, lastT = 0, velocity = 0, dragged = false, suppressClick = false;
+
+    const endDragStyling = () => track.classList.remove("is-dragging");
+
+    track.addEventListener("pointerdown", (e) => {
+      if (e.pointerType === "touch" || e.button !== 0) return;
+      /* the same guard addSwipeNavigation() uses: a press on the + or on a dot
+         is a press, not the start of a drag */
+      if (e.target.closest("a, button, input")) return;
+      if (stops.length < 2) return;
+      dragId = e.pointerId;
+      dragFromX = lastX = e.clientX;
+      dragFromScroll = track.scrollLeft;
+      dragFromStop = nearestStop();
+      lastT = e.timeStamp;
+      velocity = 0;
+      dragged = false;
+      suppressClick = false;
+      /* the pointer can already be gone by the time this runs — a button
+         released during the same task throws NotFoundError here, and losing the
+         handler to that would leave the drag half-armed */
+      try { track.setPointerCapture(dragId); } catch { /* drag still works uncaptured */ }
+    });
+
+    track.addEventListener("pointermove", (e) => {
+      if (dragId !== e.pointerId) return;
+      const dx = e.clientX - dragFromX;
+      if (!dragged) {
+        if (Math.abs(dx) < DRAG_SLOP) return;
+        dragged = true;
+        track.classList.add("is-dragging");
+      }
+      /* asked for, and it does suppress the compatibility mouse events; the
+         `user-select: none` on .is-dragging is what actually stops a selection
+         from forming, since selection follows selectstart rather than this */
+      e.preventDefault();
+      const dt = e.timeStamp - lastT;
+      if (dt > 0) velocity = (e.clientX - lastX) / dt;
+      lastX = e.clientX;
+      lastT = e.timeStamp;
+      track.scrollLeft = dragFromScroll - dx;
+    });
+
+    const endDrag = (e) => {
+      if (dragId !== e.pointerId) return;
+      try { track.releasePointerCapture(dragId); } catch { /* never captured */ }
+      dragId = null;
+      if (!dragged) return;
+      dragged = false;
+      /* whatever the pointer is over, this gesture was a drag: the click the
+         browser is about to fire must not reach a card */
+      suppressClick = true;
+
+      /* A card is ~566px wide on desktop, so settling purely on position would
+         ask for a 283px haul to change card and make a quick flick feel broken.
+         A fast gesture advances one stop instead — measured from where the drag
+         began, so a long fast drag lands one card on, never two. */
+      const dir = velocity < 0 ? 1 : -1;
+      const flicked = Math.abs(velocity) > FLICK_SPEED && Math.abs(lastX - dragFromX) > FLICK_MIN;
+      let target = nearestStop();
+      if (flicked) {
+        const fromStart = dragFromStop + dir;
+        target = dir > 0 ? Math.max(target, fromStart) : Math.min(target, fromStart);
+      }
+      scrollToStop(Math.max(0, Math.min(stops.length - 1, target)));
+
+      /* .is-dragging stays on for the glide: snap would fight the scrollTo.
+         The explicit behavior inside scrollToStop() outranks the class's
+         `scroll-behavior: auto`, so it still animates. scrollend never fires
+         when the target is where we already are, hence the timeout. */
+      if (reducedMotion.matches) { endDragStyling(); return; }
+      track.addEventListener("scrollend", endDragStyling, { once: true });
+      window.setTimeout(endDragStyling, 700);
+    };
+
+    track.addEventListener("pointerup", endDrag);
+    track.addEventListener("pointercancel", endDrag);
+
+    /* Capture runs root → target, so this sees the click before the capture
+       handler initServiceCovers() puts on each card — and stopping it there
+       also keeps it from the bubbling listeners on .card-toggle / .card-cta. */
+    track.addEventListener("click", (e) => {
+      if (!suppressClick) return;
+      suppressClick = false;
+      e.preventDefault();
+      e.stopPropagation();
+    }, true);
 
     /* initScrollReveal() observes against the viewport, so a card parked to the
        right of the fold never reaches its 15% threshold and would stay at

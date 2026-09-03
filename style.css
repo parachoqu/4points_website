@@ -2109,6 +2109,37 @@
       display: none;
     }
 
+    /* While the mouse is dragging the reel, both of the track's own scrolling
+       rules have to stand down: mandatory snap would drag the cards back under
+       the cursor, and `scroll-behavior: smooth` applies to writing scrollLeft
+       too — the reel would animate towards the pointer and trail behind it. */
+    .services-grid.is-dragging {
+      scroll-snap-type: none;
+      scroll-behavior: auto;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Same idiom as .hero.is-dragging. `is-draggable` is written by
+       initServicesCarousel() only while something actually overflows, so the
+       hand never promises a drag that would go nowhere. */
+    @media (hover: hover) and (pointer: fine) {
+      .services-grid.is-draggable {
+        cursor: grab;
+      }
+
+      .services-grid.is-dragging {
+        cursor: grabbing;
+      }
+    }
+
+    /* cursor inherits, and neither of these declares one of its own: without
+       this both would show the track's open hand instead of a pointer */
+    .card-toggle,
+    .card-cta {
+      cursor: pointer;
+    }
+
     .service-card {
       position: relative;
       flex: 0 0 var(--services-card-w);

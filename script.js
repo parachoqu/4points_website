@@ -345,7 +345,7 @@
       if (card.classList.contains("is-floor")) return "floor";
       if (card.classList.contains("is-residential")) return "residential";
       if (card.classList.contains("is-post-construction")) return "post-construction";
-      if (card.classList.contains("is-window")) return "window";
+      if (card.classList.contains("is-move-in-out")) return "move-in-out";
       return null;
     };
     const byKey = new Map(covers.map((cover) => [cover.dataset.serviceCover, cover]));

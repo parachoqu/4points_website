@@ -2234,8 +2234,8 @@
       background-color: var(--petrol-deep);
     }
 
-    .service-card.is-window .card-media {
-      background-image: linear-gradient(190deg, rgba(31, 111, 139, .12), rgba(7, 27, 46, .9)), var(--img-window);
+    .service-card.is-move-in-out .card-media {
+      background-image: linear-gradient(190deg, rgba(31, 111, 139, .12), rgba(7, 27, 46, .9)), var(--img-move-in-out);
       background-color: var(--petrol);
     }
 

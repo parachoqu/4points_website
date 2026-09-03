@@ -345,6 +345,7 @@
       if (card.classList.contains("is-floor")) return "floor";
       if (card.classList.contains("is-residential")) return "residential";
       if (card.classList.contains("is-post-construction")) return "post-construction";
+      if (card.classList.contains("is-window")) return "window";
       return null;
     };
     const byKey = new Map(covers.map((cover) => [cover.dataset.serviceCover, cover]));
@@ -560,6 +561,75 @@
         if (e.key === "Escape") setActive(false);
       });
     });
+  }
+
+  /* ---------- services carousel ----------
+     The track is a native scroll-snap scroller, so wheel, trackpad, swipe and
+     keyboard already move it and nothing here touches touch events: a swipe
+     must stay the browser's. These arrows are an accelerator on top, and they
+     sit outside [data-service-card] so the capture handler in
+     initServiceCovers() never swallows their clicks on a phone. */
+  function initServicesCarousel() {
+    const track = document.querySelector(".services-grid");
+    const nav = document.querySelector("[data-services-nav]");
+    if (!track || !nav) return;
+
+    const prevButton = nav.querySelector("[data-services-prev]");
+    const nextButton = nav.querySelector("[data-services-next]");
+    const cards = [...track.querySelectorAll("[data-service-card]")];
+    if (!cards.length) { nav.hidden = true; return; }
+
+    /* measured, never assumed: the card width and the gap are both tokens that
+       change at every breakpoint, so one card's travel is read back from layout */
+    const step = () => {
+      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
+      return cards[0].getBoundingClientRect().width + gap;
+    };
+
+    /* "instant", not "auto": the track declares scroll-behavior: smooth, and
+       "auto" would defer to exactly that declaration instead of overriding it */
+    const scrollByCard = (direction) => {
+      track.scrollBy({
+        left: direction * step(),
+        behavior: reducedMotion.matches ? "instant" : "smooth"
+      });
+    };
+
+    /* an arrow that cannot travel says so rather than going quiet, and the whole
+       row stands down when every card already fits */
+    const updateNav = () => {
+      const max = track.scrollWidth - track.clientWidth;
+      nav.hidden = max <= 1;
+      if (prevButton) prevButton.disabled = track.scrollLeft <= 1;
+      if (nextButton) nextButton.disabled = track.scrollLeft >= max - 1;
+    };
+
+    prevButton?.addEventListener("click", () => scrollByCard(-1));
+    nextButton?.addEventListener("click", () => scrollByCard(1));
+    track.addEventListener("scroll", onScrollFrame(updateNav), { passive: true });
+    window.addEventListener("resize", debounce(updateNav, 150));
+
+    /* initScrollReveal() observes against the viewport, so a card parked to the
+       right of the fold never reaches its 15% threshold and would stay at
+       opacity 0 for good. The reel reveals its own cards instead, in the same
+       cascade, the moment the track itself arrives. */
+    if (!reducedMotion.matches && "IntersectionObserver" in window) {
+      const hidden = cards.filter((card) => card.hasAttribute("data-reveal"));
+      if (hidden.length) {
+        const revealer = new IntersectionObserver((entries, obs) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          const narrow = window.innerWidth <= 767;
+          hidden.forEach((card, i) => {
+            const delay = Math.min(i * (narrow ? 70 : 90), narrow ? 240 : 360);
+            window.setTimeout(() => card.classList.add("is-revealed"), delay);
+          });
+          obs.disconnect();
+        }, { threshold: 0.15, rootMargin: "0px 0px -8% 0px" });
+        revealer.observe(track);
+      }
+    }
+
+    updateNav();
   }
 
   /* ---------- recurring maintenance selector ---------- */
@@ -1742,6 +1812,7 @@ void main() {
     initScrollReveal();
     initFloorParallax();
     initServiceInteractions();
+    initServicesCarousel();
     initMaintenanceSelector();
     initBeforeAfter();
     /* strictly after initBeforeAfter(): the plate subscribes to the divider

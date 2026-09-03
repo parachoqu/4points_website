@@ -2024,16 +2024,99 @@
       color: #fff;
     }
 
-    .services-grid {
+    /* the nav row now carries most of the distance down to the reel */
+    .services .section-head {
+      margin-bottom: clamp(20px, 2.6vw, 30px);
+    }
+
+    /* The arrows are an accelerator, never the only way through: the track is a
+       native scroller, so wheel, trackpad, swipe and keyboard already work.
+       initServicesCarousel() hides this row outright when nothing overflows. */
+    .services-nav {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin: 0 0 clamp(16px, 2.4vw, 24px);
+    }
+
+    .services-nav[hidden] {
+      display: none;
+    }
+
+    /* Services sits on the dark canvas, so this follows .card-toggle's palette
+       rather than .t-nav-btn's, which is drawn for a paper ground. */
+    .btn-nav {
+      width: 48px;
+      height: 48px;
+      padding: 0;
+      border: 1px solid var(--line-dark);
+      border-radius: 50%;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-template-rows: repeat(2, minmax(0, 1fr));
-      gap: 24px;
+      place-items: center;
+      color: #fff;
+      background: rgba(255, 255, 255, .08);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      cursor: pointer;
+      transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
+    }
+
+    .btn-nav .icon {
+      width: 20px;
+      height: 20px;
+    }
+
+    @media (hover: hover) {
+      .btn-nav:hover {
+        border-color: var(--champagne);
+        background: rgba(255, 255, 255, .16);
+        transform: translateY(-2px);
+      }
+    }
+
+    .btn-nav:active {
+      transform: translateY(0) scale(.94);
+    }
+
+    .btn-nav:focus-visible {
+      outline: 3px solid var(--line-gold);
+      outline-offset: 3px;
+    }
+
+    .btn-nav:disabled {
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    /* A horizontal reel, not a fixed grid: how many services exist is no longer
+       a constant of the layout. Every breakpoint sets only the two tokens below,
+       so a sixth card costs nothing. */
+    .services-grid {
+      --services-gap: 24px;
+      --services-card-w: calc(50% - (var(--services-gap) / 2));
+      display: flex;
+      gap: var(--services-gap);
       margin-top: 8px;
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-behavior: smooth;
+      /* overflow-x on one axis forces the other to `auto`, so the card's own
+         drop shadow would be clipped and raise a vertical scrollbar. The track
+         carries the shadow's room as padding and gives the space back below. */
+      padding-block: 6px 34px;
+      margin-bottom: -28px;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .services-grid::-webkit-scrollbar {
+      display: none;
     }
 
     .service-card {
       position: relative;
+      flex: 0 0 var(--services-card-w);
+      scroll-snap-align: start;
       border-radius: var(--radius-lg);
       overflow: hidden;
       color: #fff;
@@ -2087,7 +2170,6 @@
     }
 
     .service-card.is-commercial {
-      grid-row: auto;
       min-height: 420px;
     }
 
@@ -2123,6 +2205,11 @@
     .service-card.is-post-construction .card-media {
       background-image: linear-gradient(190deg, rgba(200, 169, 106, .12), rgba(7, 27, 46, .9)), var(--img-post-construction);
       background-color: var(--petrol-deep);
+    }
+
+    .service-card.is-window .card-media {
+      background-image: linear-gradient(190deg, rgba(31, 111, 139, .12), rgba(7, 27, 46, .9)), var(--img-window);
+      background-color: var(--petrol);
     }
 
     .card-body {
@@ -4938,14 +5025,10 @@
    19. RESPONSIVE
    ========================================================= */
     @media (max-width:1200px) {
+      /* two cards no longer fit side by side, so the reel shows one and a
+         half: the cut edge is what tells the reader there is more to the right */
       .services-grid {
-        grid-template-columns: 1fr;
-        grid-template-rows: none;
-      }
-
-      .service-card.is-commercial {
-        grid-row: auto;
-        min-height: 480px;
+        --services-card-w: 68%;
       }
 
       /* between the desktop nav and the hamburger the header ran past its
@@ -5228,8 +5311,10 @@
         --tabbar-h: calc(56px + env(safe-area-inset-bottom));
       }
 
-      /* The document remains the only scroller. Cards offer soft landing
-         points below the fixed header, but never trap a swipe inside Services. */
+      /* The document remains the only vertical scroller. Services is now the one
+         exception: its track scrolls sideways, which makes it the cards' nearest
+         scroll container, so they answer to its x-snap and no longer to the
+         document's y-snap. Their landing points moved axis, they did not vanish. */
       @media (prefers-reduced-motion: no-preference) {
         html {
           scroll-snap-type: y proximity;
@@ -5241,8 +5326,6 @@
         }
 
         .services-grid .service-card {
-          scroll-snap-align: start;
-          scroll-snap-stop: normal;
           z-index: 0;
         }
 
@@ -5763,19 +5846,16 @@
         line-height: 1.62;
       }
 
-      /* ---------- 07. SERVICES — hierarchy that states the priority ---------- */
+      /* ---------- 07. SERVICES — one reel, swiped ---------- */
       .services-grid {
-        gap: 16px;
+        --services-gap: 16px;
       }
 
+      /* every card is now the same size by construction: in a row they share a
+         height, and the reel gives each one the same share of the screen */
       .service-card {
         border-radius: var(--radius-md);
-        min-height: 250px;
-      }
-
-      /* the priority focus gets the format to match */
-      .service-card.is-commercial {
-        min-height: 470px;
+        min-height: 420px;
       }
 
       .service-card::after {
@@ -7220,30 +7300,15 @@
          the per-section rules above at equal specificity.
          ========================================================= */
 
-      /* ---------- 07. SERVICES — a catalogue, read top to bottom ----------
-         Commercial keeps the dominant format; the other three settle into an
-         even, browsable rank below it. The "+" stops promising an accordion
-         and becomes a disclosure chevron, because tapping now opens a page. */
+      /* ---------- 07. SERVICES — a reel, swiped left to right ----------
+         The old vertical rank named .is-floor, .is-residential and
+         .is-post-construction one by one, which is why a fifth service could not
+         join it. Every card now takes the same slice of the screen, so the list
+         is open-ended. The "+" is still a disclosure chevron, because tapping
+         a card still opens a page. */
       .services-grid {
-        gap: 14px;
-      }
-
-      .service-card.is-floor,
-      .service-card.is-residential,
-      .service-card.is-post-construction {
-        min-height: 186px;
-      }
-
-      .service-card.is-floor .card-body,
-      .service-card.is-residential .card-body,
-      .service-card.is-post-construction .card-body {
-        padding: 18px 62px 18px 20px;
-      }
-
-      .service-card.is-floor .card-body h3,
-      .service-card.is-residential .card-body h3,
-      .service-card.is-post-construction .card-body h3 {
-        font-size: 1.32rem;
+        --services-gap: 14px;
+        --services-card-w: 85vw;
       }
 
       .card-toggle {
@@ -7506,13 +7571,14 @@
    re-framed by compressing space, never by cropping, clipping or shrinking
    what it has to say.
 
-   WHY THIS BREAKPOINT. 1200px is where `.services-grid` collapses to a single
-   column (§19). Below it the asymmetric desktop composition does not exist, so
-   the scene system has nothing to frame. `min-height: 640px` keeps it away
-   from window shapes where a full-viewport chapter would be absurd. The block
-   lives last in the file so it wins by source order over the base rules for
-   `.section`, `.hero`, `.floorcare` and `[id]`, which share its specificity —
-   and it can never reach the Mobile Edition, whose range is disjoint.
+   WHY THIS BREAKPOINT. 1200px is where the services reel stops showing two
+   cards side by side (§19). Below it the asymmetric desktop composition does
+   not exist, so the scene system has nothing to frame. `min-height: 640px`
+   keeps it away from window shapes where a full-viewport chapter would be
+   absurd. The block lives last in the file so it wins by source order over the
+   base rules for `.section`, `.hero`, `.floorcare` and `[id]`, which share its
+   specificity — and it can never reach the Mobile Edition, whose range is
+   disjoint.
    ========================================================= */
     /* Desktop keeps native document scrolling: wheel and trackpad momentum are
        never captured by a service-card snap point. */
@@ -7603,25 +7669,34 @@
       }
 
       /* ---------- SERVICES ----------
-         Section head, then a balanced 2 × 2 card grid. Each service receives
-         the same visual weight and the grid uses the remaining scene height. */
+         Section head, arrows, then the reel. Three rows now, not two: without
+         the third track the nav row would take the 1fr and the cards would be
+         squeezed into an implicit one. */
       .services.scroll-snap-section>.container {
         flex: 1;
         min-height: auto;
         display: grid;
-        grid-template-rows: auto minmax(min-content, 1fr);
+        grid-template-rows: auto auto minmax(min-content, 1fr);
       }
 
       .services .section-head {
+        margin-bottom: clamp(10px, 1.6dvh, 20px);
+      }
+
+      .services-nav {
         margin-bottom: var(--scene-gap);
       }
 
+      /* Pinned to the third row rather than auto-placed: when every card fits,
+         initServicesCarousel() hides the nav outright, and an auto-placed reel
+         would slide up into the `auto` track and collapse to its content height.
+         NB: no `overflow: visible` here either. It would win over the base
+         `overflow-x: auto` and quietly turn the reel back into a static row. */
       .services-grid {
-        grid-template-rows: repeat(2, minmax(max-content, 1fr));
-        gap: clamp(14px, 2.2dvh, 24px);
+        --services-gap: clamp(14px, 2.2dvh, 24px);
+        grid-row: 3;
         margin-top: 0;
         min-height: min-content;
-        overflow: visible;
       }
 
       .service-card,

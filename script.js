@@ -566,60 +566,95 @@
   /* ---------- services carousel ----------
      The track is a native scroll-snap scroller, so wheel, trackpad, swipe and
      keyboard already move it and nothing here touches touch events: a swipe
-     must stay the browser's. These arrows are an accelerator on top, and they
-     sit outside [data-service-card] so the capture handler in
+     must stay the browser's. The dots only report position and offer a shortcut,
+     and they sit outside [data-service-card] so the capture handler in
      initServiceCovers() never swallows their clicks on a phone. */
   function initServicesCarousel() {
     const track = document.querySelector(".services-grid");
-    const nav = document.querySelector("[data-services-nav]");
-    if (!track || !nav) return;
+    const dots = document.querySelector("[data-services-dots]");
+    if (!track || !dots) return;
 
-    const prevButton = nav.querySelector("[data-services-prev]");
-    const nextButton = nav.querySelector("[data-services-next]");
     const cards = [...track.querySelectorAll("[data-service-card]")];
-    if (!cards.length) { nav.hidden = true; return; }
+    if (!cards.length) { dots.hidden = true; return; }
 
-    /* measured, never assumed: the card width and the gap are both tokens that
-       change at every breakpoint, so one card's travel is read back from layout */
-    const step = () => {
-      const gap = parseFloat(getComputedStyle(track).columnGap) || 0;
-      return cards[0].getBoundingClientRect().width + gap;
+    /* One stop per snap position the track can actually reach — not one per
+       card. Two cards show at once on desktop, so the last card's own offset
+       lies past the end of the scroll range and a dot for it would be dead.
+       offsetLeft, not getBoundingClientRect(): the cards carry
+       [data-reveal="scale"], and measuring a scaled box before the reveal would
+       count the stops wrong. The 2px slack absorbs sub-pixel rounding. */
+    const stopOffsets = () => {
+      const max = Math.max(0, track.scrollWidth - track.clientWidth);
+      const base = cards[0].offsetLeft;
+      const list = cards.map((card) => card.offsetLeft - base).filter((offset) => offset <= max + 2);
+      if (!list.length) list.push(0);
+      /* the tail past the final snap stop is still somewhere the reader can be */
+      if (max - list[list.length - 1] > 2) list.push(max);
+      return list;
+    };
+
+    /* empty until buildDots() runs, so the first pass always creates the row */
+    let stops = [];
+
+    /* Whoever moved the track — a finger, the wheel, a dot, the keyboard — the
+       lit dot is simply the nearest stop, so every input is handled once. */
+    const markActive = (forced) => {
+      const near = forced ?? stops.reduce((best, offset, i) => (
+        Math.abs(offset - track.scrollLeft) < Math.abs(stops[best] - track.scrollLeft) ? i : best
+      ), 0);
+      [...dots.children].forEach((dot, i) => dot.setAttribute("aria-current", String(i === near)));
     };
 
     /* "instant", not "auto": the track declares scroll-behavior: smooth, and
        "auto" would defer to exactly that declaration instead of overriding it */
-    const scrollByCard = (direction) => {
-      track.scrollBy({
-        left: direction * step(),
+    const scrollToStop = (i) => {
+      track.scrollTo({
+        left: stops[i],
         behavior: reducedMotion.matches ? "instant" : "smooth"
       });
+      /* the click already knows its answer: lighting the dot here rather than
+         waiting for the scroll listener keeps the response immediate, which
+         matters most under reduced motion, where no animation covers the gap */
+      markActive(i);
     };
 
-    /* an arrow that cannot travel says so rather than going quiet, and the whole
-       row stands down when every card already fits */
-    const updateNav = () => {
-      const max = track.scrollWidth - track.clientWidth;
-      nav.hidden = max <= 1;
-      if (prevButton) prevButton.disabled = track.scrollLeft <= 1;
-      if (nextButton) nextButton.disabled = track.scrollLeft >= max - 1;
+    const buildDots = () => {
+      const next = stopOffsets();
+      const resized = next.length !== stops.length;
+      stops = next;
+      dots.hidden = stops.length < 2;
+      /* a resize that did not change the count keeps its buttons: rebuilding
+         would drop focus for anyone tabbing through the row */
+      if (resized) {
+        dots.textContent = "";
+        stops.forEach((_, i) => {
+          const dot = document.createElement("button");
+          dot.type = "button";
+          dot.className = "carousel-dot";
+          dot.setAttribute("aria-controls", "services-track");
+          dot.setAttribute("aria-label", `Show services ${i + 1} of ${stops.length}`);
+          dot.innerHTML = "<i></i>";
+          dot.addEventListener("click", () => scrollToStop(i));
+          dots.appendChild(dot);
+        });
+      }
+      markActive();
     };
 
-    prevButton?.addEventListener("click", () => scrollByCard(-1));
-    nextButton?.addEventListener("click", () => scrollByCard(1));
-    track.addEventListener("scroll", onScrollFrame(updateNav), { passive: true });
-    window.addEventListener("resize", debounce(updateNav, 150));
+    track.addEventListener("scroll", onScrollFrame(markActive), { passive: true });
+    window.addEventListener("resize", debounce(buildDots, 150));
 
     /* initScrollReveal() observes against the viewport, so a card parked to the
        right of the fold never reaches its 15% threshold and would stay at
        opacity 0 for good. The reel reveals its own cards instead, in the same
        cascade, the moment the track itself arrives. */
     if (!reducedMotion.matches && "IntersectionObserver" in window) {
-      const hidden = cards.filter((card) => card.hasAttribute("data-reveal"));
-      if (hidden.length) {
+      const revealing = cards.filter((card) => card.hasAttribute("data-reveal"));
+      if (revealing.length) {
         const revealer = new IntersectionObserver((entries, obs) => {
           if (!entries.some((entry) => entry.isIntersecting)) return;
           const narrow = window.innerWidth <= 767;
-          hidden.forEach((card, i) => {
+          revealing.forEach((card, i) => {
             const delay = Math.min(i * (narrow ? 70 : 90), narrow ? 240 : 360);
             window.setTimeout(() => card.classList.add("is-revealed"), delay);
           });
@@ -629,7 +664,7 @@
       }
     }
 
-    updateNav();
+    buildDots();
   }
 
   /* ---------- recurring maintenance selector ---------- */

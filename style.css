@@ -2024,68 +2024,64 @@
       color: #fff;
     }
 
-    /* the nav row now carries most of the distance down to the reel */
-    .services .section-head {
-      margin-bottom: clamp(20px, 2.6vw, 30px);
-    }
-
-    /* The arrows are an accelerator, never the only way through: the track is a
-       native scroller, so wheel, trackpad, swipe and keyboard already work.
-       initServicesCarousel() hides this row outright when nothing overflows. */
-    .services-nav {
+    /* Paging, not driving: the reel already answers to wheel, trackpad, swipe
+       and keyboard, so these say where the reader is and how far the list runs.
+       Same anatomy as .hero-rail-ticks — the <i> is the mark, the <button>
+       around it carries the 44px target. initServicesCarousel() builds one per
+       reachable snap stop and hides the row when nothing overflows. */
+    .carousel-dots {
       display: flex;
-      justify-content: flex-end;
+      justify-content: center;
+      align-items: center;
       gap: 10px;
-      margin: 0 0 clamp(16px, 2.4vw, 24px);
+      /* the track holds the card shadow in a bottom padding it then takes back
+         with a negative margin; the dots have to clear what is left of it */
+      margin-top: clamp(16px, 2.2vw, 24px);
+      /* the 44px targets reach up into that reclaimed band, and .service-card is
+         positioned — without a layer of their own the cards would win the
+         hit-test and a tap meant for a dot would open a service instead */
+      position: relative;
+      z-index: 1;
     }
 
-    .services-nav[hidden] {
+    .carousel-dots[hidden] {
       display: none;
     }
 
-    /* Services sits on the dark canvas, so this follows .card-toggle's palette
-       rather than .t-nav-btn's, which is drawn for a paper ground. */
-    .btn-nav {
-      width: 48px;
-      height: 48px;
-      padding: 0;
-      border: 1px solid var(--line-dark);
+    /* an 8px mark with a 44px target around it */
+    .carousel-dot {
+      display: block;
+      border: 0;
+      background: none;
+      padding: 18px 6px;
+      margin: -18px 0;
       border-radius: 50%;
-      display: grid;
-      place-items: center;
-      color: #fff;
-      background: rgba(255, 255, 255, .08);
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
       cursor: pointer;
-      transition: transform var(--dur-fast) var(--ease), background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease), opacity var(--dur-fast) var(--ease);
     }
 
-    .btn-nav .icon {
-      width: 20px;
-      height: 20px;
+    .carousel-dot i {
+      display: block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .26);
+      transition: background var(--dur-fast) var(--ease), transform var(--dur-fast) var(--ease);
+    }
+
+    .carousel-dot[aria-current="true"] i {
+      background: var(--champagne);
+      transform: scale(1.35);
     }
 
     @media (hover: hover) {
-      .btn-nav:hover {
-        border-color: var(--champagne);
-        background: rgba(255, 255, 255, .16);
-        transform: translateY(-2px);
+      .carousel-dot:hover i {
+        background: rgba(255, 255, 255, .5);
       }
     }
 
-    .btn-nav:active {
-      transform: translateY(0) scale(.94);
-    }
-
-    .btn-nav:focus-visible {
+    .carousel-dot:focus-visible {
       outline: 3px solid var(--line-gold);
-      outline-offset: 3px;
-    }
-
-    .btn-nav:disabled {
-      opacity: .35;
-      pointer-events: none;
+      outline-offset: 2px;
     }
 
     /* A horizontal reel, not a fixed grid: how many services exist is no longer
@@ -7669,32 +7665,31 @@
       }
 
       /* ---------- SERVICES ----------
-         Section head, arrows, then the reel. Three rows now, not two: without
-         the third track the nav row would take the 1fr and the cards would be
-         squeezed into an implicit one. */
+         Section head, the reel, then the dots. The reel takes the 1fr and the
+         two rows around it are intrinsic. */
       .services.scroll-snap-section>.container {
         flex: 1;
         min-height: auto;
         display: grid;
-        grid-template-rows: auto auto minmax(min-content, 1fr);
+        grid-template-rows: auto minmax(min-content, 1fr) auto;
       }
 
       .services .section-head {
-        margin-bottom: clamp(10px, 1.6dvh, 20px);
-      }
-
-      .services-nav {
         margin-bottom: var(--scene-gap);
       }
 
-      /* Pinned to the third row rather than auto-placed: when every card fits,
-         initServicesCarousel() hides the nav outright, and an auto-placed reel
-         would slide up into the `auto` track and collapse to its content height.
+      .carousel-dots {
+        margin-top: clamp(10px, 1.6dvh, 20px);
+      }
+
+      /* Pinned to the second row rather than auto-placed: when every card fits,
+         initServicesCarousel() hides the dots outright, and an auto-placed reel
+         would slide into an `auto` track and collapse to its content height.
          NB: no `overflow: visible` here either. It would win over the base
          `overflow-x: auto` and quietly turn the reel back into a static row. */
       .services-grid {
         --services-gap: clamp(14px, 2.2dvh, 24px);
-        grid-row: 3;
+        grid-row: 2;
         margin-top: 0;
         min-height: min-content;
       }

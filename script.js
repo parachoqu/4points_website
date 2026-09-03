@@ -550,6 +550,16 @@
         e.stopPropagation();
         setActive(!card.classList.contains("is-active"));
       });
+      card.addEventListener("mouseenter", () => {
+        if (!card.classList.contains("is-active")) {
+          toggle?.setAttribute("aria-expanded", "true");
+        }
+      });
+      card.addEventListener("mouseleave", () => {
+        if (!card.classList.contains("is-active")) {
+          toggle?.setAttribute("aria-expanded", "false");
+        }
+      });
       /* the card's quote line is styled as a call to action and reads as one,
          so it has to behave like one: on a phone a dead link is a dead end */
       card.querySelector(".card-cta")?.addEventListener("click", (e) => {
@@ -620,6 +630,94 @@
       markActive(i);
     };
 
+    /* ---------- automatic carousel autoplay (every 4s, pauses ONLY on card interaction) ---------- */
+    const AUTOPLAY_INTERVAL = 4000;
+    let autoplayTimer = null;
+    let hoveredCard = null;
+    let isDraggingCard = false;
+    let focusedCard = null;
+    let isSectionVisible = true;
+
+    const hasActiveCard = () => cards.some((c) => c.classList.contains("is-active"));
+
+    /* Only pauses if user is interacting with a card (hover, click/active, drag, or focus) */
+    const isUserInteractingWithCard = () => (
+      hoveredCard !== null ||
+      isDraggingCard ||
+      focusedCard !== null ||
+      hasActiveCard()
+    );
+
+    const shouldAutoplay = () => (
+      stops.length > 1 &&
+      !reducedMotion.matches &&
+      !isUserInteractingWithCard() &&
+      isSectionVisible &&
+      !document.hidden
+    );
+
+    const stopAutoplay = () => {
+      if (autoplayTimer) {
+        clearInterval(autoplayTimer);
+        autoplayTimer = null;
+      }
+    };
+
+    const advance = () => {
+      if (!shouldAutoplay()) return;
+      const validStops = stopOffsets();
+      if (validStops.length > 1) stops = validStops;
+      if (stops.length < 2) return;
+      const current = nearestStop();
+      const next = (current + 1) % stops.length;
+      scrollToStop(next);
+    };
+
+    const startAutoplay = () => {
+      stopAutoplay();
+      if (!shouldAutoplay()) return;
+      autoplayTimer = setInterval(() => {
+        if (!shouldAutoplay()) {
+          stopAutoplay();
+          return;
+        }
+        advance();
+      }, AUTOPLAY_INTERVAL);
+    };
+
+    const resetAutoplay = () => {
+      stopAutoplay();
+      startAutoplay();
+    };
+
+    /* Attach card-specific interaction handlers so hover/click outside cards NEVER stops autoplay */
+    cards.forEach((card) => {
+      card.addEventListener("mouseenter", () => {
+        hoveredCard = card;
+        stopAutoplay();
+      });
+      card.addEventListener("mouseleave", () => {
+        if (hoveredCard === card) hoveredCard = null;
+        if (!isUserInteractingWithCard()) resetAutoplay();
+      });
+      card.addEventListener("click", () => {
+        window.setTimeout(() => {
+          if (isUserInteractingWithCard()) stopAutoplay();
+          else resetAutoplay();
+        }, 60);
+      });
+      card.addEventListener("focusin", () => {
+        focusedCard = card;
+        stopAutoplay();
+      });
+      card.addEventListener("focusout", (e) => {
+        if (!card.contains(e.relatedTarget)) {
+          focusedCard = null;
+          if (!isUserInteractingWithCard()) resetAutoplay();
+        }
+      });
+    });
+
     const buildDots = () => {
       const next = stopOffsets();
       const resized = next.length !== stops.length;
@@ -637,15 +735,33 @@
           dot.setAttribute("aria-controls", "services-track");
           dot.setAttribute("aria-label", `Show services ${i + 1} of ${stops.length}`);
           dot.innerHTML = "<i></i>";
-          dot.addEventListener("click", () => scrollToStop(i));
+          dot.addEventListener("click", () => {
+            scrollToStop(i);
+            resetAutoplay();
+          });
           dots.appendChild(dot);
         });
       }
       markActive();
+      resetAutoplay();
     };
 
     track.addEventListener("scroll", onScrollFrame(markActive), { passive: true });
     window.addEventListener("resize", debounce(buildDots, 150));
+    window.addEventListener("load", () => { buildDots(); startAutoplay(); });
+
+    /* Visibility changes (e.g. switching tabs) */
+    document.addEventListener("visibilitychange", () => {
+      if (document.hidden) stopAutoplay();
+      else if (!isUserInteractingWithCard()) startAutoplay();
+    });
+
+    if ("addEventListener" in reducedMotion) {
+      reducedMotion.addEventListener("change", () => {
+        if (reducedMotion.matches) stopAutoplay();
+        else if (!isUserInteractingWithCard()) startAutoplay();
+      });
+    }
 
     /* ---------- drag to scroll ----------
        Mouse and pen only. A finger already has the native scroller, and
@@ -665,6 +781,8 @@
          is a press, not the start of a drag */
       if (e.target.closest("a, button, input")) return;
       if (stops.length < 2) return;
+      isDraggingCard = true;
+      stopAutoplay();
       dragId = e.pointerId;
       dragFromX = lastX = e.clientX;
       dragFromScroll = track.scrollLeft;
@@ -702,6 +820,8 @@
       if (dragId !== e.pointerId) return;
       try { track.releasePointerCapture(dragId); } catch { /* never captured */ }
       dragId = null;
+      isDraggingCard = false;
+      if (!isUserInteractingWithCard()) resetAutoplay();
       if (!dragged) return;
       dragged = false;
       /* whatever the pointer is over, this gesture was a drag: the click the
@@ -731,7 +851,10 @@
     };
 
     track.addEventListener("pointerup", endDrag);
-    track.addEventListener("pointercancel", endDrag);
+    track.addEventListener("pointercancel", (e) => {
+      isDraggingCard = false;
+      endDrag(e);
+    });
 
     /* Capture runs root → target, so this sees the click before the capture
        handler initServiceCovers() puts on each card — and stopping it there
@@ -763,7 +886,20 @@
       }
     }
 
+    /* Track visibility to pause autoplay when scrolled completely offscreen */
+    const servicesSection = track.closest("section") || track;
+    if ("IntersectionObserver" in window) {
+      const carouselObserver = new IntersectionObserver((entries) => {
+        const entry = entries[0];
+        isSectionVisible = entry && entry.isIntersecting;
+        if (isSectionVisible && !isUserInteractingWithCard()) startAutoplay();
+        else stopAutoplay();
+      }, { threshold: 0 });
+      carouselObserver.observe(servicesSection);
+    }
+
     buildDots();
+    startAutoplay();
   }
 
   /* ---------- recurring maintenance selector ---------- */

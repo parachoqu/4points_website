@@ -2295,7 +2295,7 @@
 
     .service-card:hover .card-more,
     .service-card.is-active .card-more {
-      max-height: 380px;
+      max-height: 580px;
       opacity: 1;
     }
 
@@ -2419,6 +2419,7 @@
       transform: scale(.9);
     }
 
+    .service-card:hover .card-toggle,
     .service-card.is-active .card-toggle {
       transform: rotate(45deg);
       background: var(--champagne);
@@ -2426,6 +2427,7 @@
       color: var(--navy-dark);
     }
 
+    .service-card:hover .card-toggle:active,
     .service-card.is-active .card-toggle:active {
       transform: rotate(45deg) scale(.9);
     }
@@ -5926,8 +5928,9 @@
         max-height: 0;
       }
 
+      .service-card:hover .card-more,
       .service-card.is-active .card-more {
-        max-height: 560px;
+        max-height: 580px;
       }
 
       .card-more p {
@@ -7614,13 +7617,10 @@
         scroll-snap-type: none;
       }
 
-      /* Keep hover paint-only on wide desktop. Expanding an intrinsic grid row
-         while a stationary pointer crosses it during wheel scroll makes browser
-         scroll anchoring push the document backwards. The explicit + control
-         still opens the details through .is-active. */
-      .service-card:not(.is-active):hover .card-more {
-        max-height: 0;
-        opacity: 0;
+      .service-card:hover .card-more,
+      .service-card.is-active .card-more {
+        max-height: 580px;
+        opacity: 1;
       }
     }
 

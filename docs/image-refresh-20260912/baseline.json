@@ -1,0 +1,118 @@
+{
+  "assets/images/4points-floorcare-dossier-behance.png": {
+    "bytes": 2028252,
+    "sha256": "b7ad2e6ec5f903e1e123f4027896e53b6424876abec7ad6689d3f752eab3fb07",
+    "dimensions": [
+      1672,
+      941
+    ]
+  },
+  "assets/images/LOGO TIPOGRAFICA.png": {
+    "bytes": 22498,
+    "sha256": "112d67eb8a29430b6b32299ae714eb75f53a44785801d595725ec9fef0d1cf59",
+    "dimensions": [
+      749,
+      215
+    ]
+  },
+  "assets/images/after-floor.jpg": {
+    "bytes": 730003,
+    "sha256": "2e990a1ed44c2bd84f9fc7f257dfcad214bdb77ed1f00b0666ad2b2066686523",
+    "dimensions": [
+      1024,
+      1024
+    ]
+  },
+  "assets/images/before-floor.jpg": {
+    "bytes": 861940,
+    "sha256": "dea4f39b57dfd028a9e5211ed7c3824b6268e46dcffac2f8dfb5e7d6b2d18f0a",
+    "dimensions": [
+      1024,
+      1024
+    ]
+  },
+  "assets/images/commercial-cleaning.jpg": {
+    "bytes": 576610,
+    "sha256": "66a1d41d72be96290d4f6db4c6173841b265b6f4619c04311e1d8d9b30c8574e",
+    "dimensions": [
+      1473,
+      2200
+    ]
+  },
+  "assets/images/favicon.png": {
+    "bytes": 9293,
+    "sha256": "4456d0529e4da4d96acc00f38c8e6a0055972d80286e092680c009e65a1fff38",
+    "dimensions": [
+      250,
+      227
+    ]
+  },
+  "assets/images/floor-care.jpg": {
+    "bytes": 293029,
+    "sha256": "f3d901a8dfb92960904300108534abcdcc53ebd1e4ff97864a4771142e1fc310",
+    "dimensions": [
+      1467,
+      2200
+    ]
+  },
+  "assets/images/hero-commercial.jpg": {
+    "bytes": 264150,
+    "sha256": "8b43e458e2e3d1e2f95787e61b108c69d54b831abc88deab04f74cd5e65b0d67",
+    "dimensions": [
+      2200,
+      1467
+    ]
+  },
+  "assets/images/hero-floor-care.jpg": {
+    "bytes": 374092,
+    "sha256": "fa2901e135ca8275b21fe2384f97ad6256f15bdfe2842cd4a0bdc5e1db03661e",
+    "dimensions": [
+      2200,
+      1467
+    ]
+  },
+  "assets/images/hero-residential.jpg": {
+    "bytes": 380248,
+    "sha256": "e5dab02c090eb60384cade8a22dda627b56f8662155301a26d2acd56a4be255d",
+    "dimensions": [
+      2200,
+      1467
+    ]
+  },
+  "assets/images/residential-cleaning.jpg": {
+    "bytes": 321362,
+    "sha256": "dbb2e0b0274bbd3c57c2e3251616188a7ee642d0ce251ec819bb9d0c8a2f6284",
+    "dimensions": [
+      1467,
+      2200
+    ]
+  },
+  "assets/images/vinyl-floor-after.png": {
+    "bytes": 2822094,
+    "sha256": "be0bd0049b0d0119969d442c8722957204ffc5122d673ab643b22dfff6d8194c",
+    "dimensions": [
+      1448,
+      1086
+    ]
+  },
+  "assets/images/vinyl-floor-before.png": {
+    "bytes": 2533986,
+    "sha256": "a9fc7eebdc2ce0833b7ebe55f6d223f59831f32bf690cb0830542c89d4bf6852",
+    "dimensions": [
+      1448,
+      1086
+    ]
+  },
+  "index.html": {
+    "bytes": 67994,
+    "sha256": "621a3fb0043c1a47ed46f415416ddc8988ec56aa9977e9f04ee0636228f7d005"
+  },
+  "style.css": {
+    "bytes": 249601,
+    "sha256": "53da7d3ece7e8058cbe826480fbd8a56d4470037a64fb3786d35adccb96745da"
+  },
+  "script.js": {
+    "bytes": 85725,
+    "sha256": "8e01bff658a88562fd24db7949fe2f5a7f61981e571234ba24004bdf002b9390"
+  }
+}

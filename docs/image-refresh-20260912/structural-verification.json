@@ -1,0 +1,59 @@
+{
+  "original_images_unchanged": {
+    "assets/images/4points-floorcare-dossier-behance.png": true,
+    "assets/images/LOGO TIPOGRAFICA.png": true,
+    "assets/images/after-floor.jpg": true,
+    "assets/images/before-floor.jpg": true,
+    "assets/images/commercial-cleaning.jpg": true,
+    "assets/images/favicon.png": true,
+    "assets/images/floor-care.jpg": true,
+    "assets/images/hero-commercial.jpg": true,
+    "assets/images/hero-floor-care.jpg": true,
+    "assets/images/hero-residential.jpg": true,
+    "assets/images/residential-cleaning.jpg": true,
+    "assets/images/vinyl-floor-after.png": true,
+    "assets/images/vinyl-floor-before.png": true
+  },
+  "javascript_unchanged": true,
+  "replacements": [
+    {
+      "target": "assets/images/hero-commercial-uniformes-20260912.jpg",
+      "references": 1,
+      "expected": 1,
+      "old_references": 0
+    },
+    {
+      "target": "assets/images/hero-residential-uniformes-20260912.jpg",
+      "references": 3,
+      "expected": 3,
+      "old_references": 0
+    },
+    {
+      "target": "assets/images/commercial-cleaning-uniformes-20260912.jpg",
+      "references": 2,
+      "expected": 2,
+      "old_references": 0
+    },
+    {
+      "target": "assets/images/floor-care-uniformes-20260912.jpg",
+      "references": 3,
+      "expected": 3,
+      "old_references": 0
+    },
+    {
+      "target": "assets/images/residential-cleaning-uniformes-20260912.jpg",
+      "references": 3,
+      "expected": 3,
+      "old_references": 0
+    },
+    {
+      "target": "assets/images/post-construction-uniformes-20260912.jpg",
+      "references": 2,
+      "expected": 2,
+      "old_references": 0
+    }
+  ],
+  "html_identical_except_image_urls_and_cache_hashes": true,
+  "new_photos_total_bytes": 1597189,
+  "old_photos_total_bytes": 2565402
+}

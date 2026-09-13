@@ -1,0 +1,68 @@
+[
+  {
+    "key": "heroCommercial",
+    "name": "hero-commercial",
+    "original": "hero-commercial.jpg",
+    "placements": 1,
+    "source": "/home/https/.codex/generated_images/01a097d5-dc88-7471-a9a6-1dff47b8168c/exec-d1fb22a3-779d-4bdf-aa31-7ab8c5592710.png",
+    "target": "assets/images/hero-commercial-uniformes-20260912.jpg",
+    "master": "docs/image-refresh-20260912/masters/hero-commercial.png",
+    "method": "native image_gen",
+    "prompt": "docs/image-refresh-20260912/prompts/hero-commercial.txt"
+  },
+  {
+    "key": "heroResidential",
+    "name": "hero-residential",
+    "original": "hero-residential.jpg",
+    "placements": 3,
+    "source": "/home/https/.codex/generated_images/01a097d5-dc88-7471-a9a6-1dff47b8168c/exec-9fd97f8a-f99e-4062-849e-b0e25680fb16.png",
+    "target": "assets/images/hero-residential-uniformes-20260912.jpg",
+    "master": "docs/image-refresh-20260912/masters/hero-residential.png",
+    "method": "native image_gen",
+    "prompt": "docs/image-refresh-20260912/prompts/hero-residential.txt"
+  },
+  {
+    "key": "commercialCleaning",
+    "name": "commercial-cleaning",
+    "original": "commercial-cleaning.jpg",
+    "placements": 2,
+    "source": "/home/https/.codex/generated_images/01a097d5-dc88-7471-a9a6-1dff47b8168c/exec-ac1e2e55-f3d1-4e2e-98d0-ccc11a6ee21e.png",
+    "target": "assets/images/commercial-cleaning-uniformes-20260912.jpg",
+    "master": "docs/image-refresh-20260912/masters/commercial-cleaning.png",
+    "method": "native image_gen",
+    "prompt": "docs/image-refresh-20260912/prompts/commercial-cleaning.txt"
+  },
+  {
+    "key": "floorCare",
+    "name": "floor-care",
+    "original": "floor-care.jpg",
+    "placements": 3,
+    "source": "/home/https/.codex/generated_images/01a097d5-dc88-7471-a9a6-1dff47b8168c/exec-35ee2c27-08d0-47e3-822a-7caac5d2d254.png",
+    "target": "assets/images/floor-care-uniformes-20260912.jpg",
+    "master": "docs/image-refresh-20260912/masters/floor-care.png",
+    "method": "native image_gen",
+    "prompt": "docs/image-refresh-20260912/prompts/floor-care.txt"
+  },
+  {
+    "key": "residentialCleaning",
+    "name": "residential-cleaning",
+    "original": "residential-cleaning.jpg",
+    "placements": 3,
+    "source": "/home/https/.codex/generated_images/01a097d5-dc88-7471-a9a6-1dff47b8168c/exec-2c70069f-bb64-4acf-b296-9e7a6ddee63d.png",
+    "target": "assets/images/residential-cleaning-uniformes-20260912.jpg",
+    "master": "docs/image-refresh-20260912/masters/residential-cleaning.png",
+    "method": "native image_gen",
+    "prompt": "docs/image-refresh-20260912/prompts/residential-cleaning.txt"
+  },
+  {
+    "key": "postConstruction",
+    "name": "post-construction",
+    "original": "after-floor.jpg",
+    "placements": 2,
+    "source": "/home/https/.codex/generated_images/01a097d5-dc88-7471-a9a6-1dff47b8168c/exec-fe25b4da-5b16-402f-8e97-8ee819eb7b9e.png",
+    "target": "assets/images/post-construction-uniformes-20260912.jpg",
+    "master": "docs/image-refresh-20260912/masters/post-construction.png",
+    "method": "native image_gen",
+    "prompt": "docs/image-refresh-20260912/prompts/post-construction.txt"
+  }
+]

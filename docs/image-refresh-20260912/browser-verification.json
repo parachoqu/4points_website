@@ -1,0 +1,802 @@
+[
+  {
+    "check": "desktop-initial",
+    "result": {
+      "background": "ready",
+      "height": 900,
+      "openCover": null,
+      "overflow": false,
+      "width": 1440
+    }
+  },
+  {
+    "check": "local-photo-loads",
+    "result": [
+      {
+        "height": 1024,
+        "path": "assets/images/hero-commercial-uniformes-20260912.jpg",
+        "status": 200,
+        "width": 1536
+      },
+      {
+        "height": 1467,
+        "path": "assets/images/hero-floor-care.jpg",
+        "status": 200,
+        "width": 2200
+      },
+      {
+        "height": 1024,
+        "path": "assets/images/hero-residential-uniformes-20260912.jpg",
+        "status": 200,
+        "width": 1536
+      },
+      {
+        "height": 1536,
+        "path": "assets/images/commercial-cleaning-uniformes-20260912.jpg",
+        "status": 200,
+        "width": 1024
+      },
+      {
+        "height": 1024,
+        "path": "assets/images/floor-care-uniformes-20260912.jpg",
+        "status": 200,
+        "width": 1536
+      },
+      {
+        "height": 1536,
+        "path": "assets/images/residential-cleaning-uniformes-20260912.jpg",
+        "status": 200,
+        "width": 1024
+      },
+      {
+        "height": 1254,
+        "path": "assets/images/post-construction-uniformes-20260912.jpg",
+        "status": 200,
+        "width": 1254
+      },
+      {
+        "height": 1086,
+        "path": "assets/images/vinyl-floor-before.png",
+        "status": 200,
+        "width": 1448
+      },
+      {
+        "height": 1086,
+        "path": "assets/images/vinyl-floor-after.png",
+        "status": 200,
+        "width": 1448
+      }
+    ]
+  },
+  {
+    "check": "desktop-hero-1",
+    "result": {
+      "active": 0,
+      "image": "--hero-img:url('assets/images/hero-commercial-uniformes-20260912.jpg')"
+    }
+  },
+  {
+    "check": "desktop-hero-2",
+    "result": {
+      "active": 1,
+      "image": "--hero-img:url('assets/images/hero-floor-care.jpg')"
+    }
+  },
+  {
+    "check": "desktop-hero-3",
+    "result": {
+      "active": 2,
+      "image": "--hero-img:url('assets/images/hero-residential-uniformes-20260912.jpg')"
+    }
+  },
+  {
+    "check": "desktop-expand-commercial",
+    "result": {
+      "active": false,
+      "expanded": null,
+      "overflow": false
+    }
+  },
+  {
+    "check": "desktop-expand-floor",
+    "result": {
+      "active": true,
+      "expanded": "true",
+      "overflow": false
+    }
+  },
+  {
+    "check": "desktop-expand-residential",
+    "result": {
+      "active": true,
+      "expanded": "true",
+      "overflow": false
+    }
+  },
+  {
+    "check": "desktop-expand-post-construction",
+    "result": {
+      "active": true,
+      "expanded": "true",
+      "overflow": false
+    }
+  },
+  {
+    "check": "desktop-expand-move-in-out",
+    "result": {
+      "active": true,
+      "expanded": "true",
+      "overflow": false
+    }
+  },
+  {
+    "check": "desktop-floorcare",
+    "result": {
+      "background": "ready",
+      "height": 900,
+      "openCover": null,
+      "overflow": false,
+      "width": 1440
+    }
+  },
+  {
+    "check": "desktop-residential",
+    "result": {
+      "background": "ready",
+      "height": 900,
+      "openCover": null,
+      "overflow": false,
+      "width": 1440
+    }
+  },
+  {
+    "check": "comparator-before",
+    "result": "50"
+  },
+  {
+    "check": "comparator-after-key",
+    "result": {
+      "style": "--img-before:url('assets/images/vinyl-floor-before.png'); --img-after:url('assets/images/vinyl-floor-after.png')",
+      "value": "51"
+    }
+  },
+  {
+    "check": "viewport-1920",
+    "result": {
+      "background": "ready",
+      "height": 1080,
+      "openCover": null,
+      "overflow": false,
+      "width": 1920
+    }
+  },
+  {
+    "check": "viewport-916",
+    "result": {
+      "background": "ready",
+      "height": 900,
+      "openCover": null,
+      "overflow": false,
+      "width": 916
+    }
+  },
+  {
+    "check": "viewport-768",
+    "result": {
+      "background": "booting",
+      "height": 1024,
+      "openCover": null,
+      "overflow": false,
+      "width": 768
+    }
+  },
+  {
+    "check": "viewport-320",
+    "result": {
+      "background": "booting",
+      "height": 568,
+      "openCover": null,
+      "overflow": false,
+      "width": 320
+    }
+  },
+  {
+    "check": "viewport-320",
+    "result": {
+      "background": "booting",
+      "height": 568,
+      "openCover": null,
+      "overflow": false,
+      "width": 320
+    }
+  },
+  {
+    "check": "mobile-320-hero-1",
+    "result": {
+      "active": 0,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-hero-2",
+    "result": {
+      "active": 1,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-hero-3",
+    "result": {
+      "active": 2,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-commercial",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "commercial",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-closed-commercial",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-floor",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "floor",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-closed-floor",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-residential",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "residential",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-closed-residential",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-post-construction",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "post-construction",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-closed-post-construction",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-move-in-out",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "move-in-out",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-320-cover-closed-move-in-out",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-320-floorcare",
+    "result": {
+      "background": "booting",
+      "height": 568,
+      "openCover": null,
+      "overflow": false,
+      "width": 320
+    }
+  },
+  {
+    "check": "mobile-320-residential",
+    "result": {
+      "background": "booting",
+      "height": 568,
+      "openCover": null,
+      "overflow": false,
+      "width": 320
+    }
+  },
+  {
+    "check": "viewport-390",
+    "result": {
+      "background": "booting",
+      "height": 844,
+      "openCover": null,
+      "overflow": false,
+      "width": 390
+    }
+  },
+  {
+    "check": "mobile-390-hero-1",
+    "result": {
+      "active": 0,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-hero-2",
+    "result": {
+      "active": 1,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-hero-3",
+    "result": {
+      "active": 2,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-commercial",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "commercial",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-closed-commercial",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-floor",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "floor",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-closed-floor",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-residential",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "residential",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-closed-residential",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-post-construction",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "post-construction",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-closed-post-construction",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-move-in-out",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "move-in-out",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-390-cover-closed-move-in-out",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-390-floorcare",
+    "result": {
+      "background": "booting",
+      "height": 844,
+      "openCover": null,
+      "overflow": false,
+      "width": 390
+    }
+  },
+  {
+    "check": "mobile-390-residential",
+    "result": {
+      "background": "booting",
+      "height": 844,
+      "openCover": null,
+      "overflow": false,
+      "width": 390
+    }
+  },
+  {
+    "check": "viewport-430",
+    "result": {
+      "background": "booting",
+      "height": 932,
+      "openCover": null,
+      "overflow": false,
+      "width": 430
+    }
+  },
+  {
+    "check": "mobile-430-hero-1",
+    "result": {
+      "active": 0,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-hero-2",
+    "result": {
+      "active": 1,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-hero-3",
+    "result": {
+      "active": 2,
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-commercial",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "commercial",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-closed-commercial",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-floor",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "floor",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-closed-floor",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-residential",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "residential",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-closed-residential",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-post-construction",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "post-construction",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-closed-post-construction",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-move-in-out",
+    "result": {
+      "bodyLocked": true,
+      "hidden": "false",
+      "inert": false,
+      "open": "move-in-out",
+      "overflow": false
+    }
+  },
+  {
+    "check": "mobile-430-cover-closed-move-in-out",
+    "result": {
+      "bodyLocked": false,
+      "open": false
+    }
+  },
+  {
+    "check": "mobile-430-floorcare",
+    "result": {
+      "background": "booting",
+      "height": 932,
+      "openCover": null,
+      "overflow": false,
+      "width": 430
+    }
+  },
+  {
+    "check": "mobile-430-residential",
+    "result": {
+      "background": "booting",
+      "height": 932,
+      "openCover": null,
+      "overflow": false,
+      "width": 430
+    }
+  },
+  {
+    "check": "desktop-expand-commercial-recheck",
+    "result": {
+      "active": true,
+      "expanded": "true",
+      "overflow": false
+    }
+  },
+  {
+    "check": "faq-open",
+    "result": "true"
+  },
+  {
+    "check": "browser-errors",
+    "result": {
+      "errors": []
+    }
+  },
+  {
+    "check": "browser-console",
+    "result": {
+      "messages": []
+    }
+  },
+  {
+    "check": "final-card-1440-commercial",
+    "result": {
+      "height": 517.78125,
+      "image": "linear-gradient(190deg, rgba(7, 27, 46, 0.2), rgba(7, 27, 46, 0.94)), url(\"http://127.0.0.1:8766/assets/images/commercial-cleaning-uniformes-20260912.jpg\")",
+      "left": 144,
+      "overflow": false,
+      "position": "50% 0%, 50% 0%",
+      "visibleWidth": 566.09375,
+      "width": 566.09375
+    }
+  },
+  {
+    "check": "final-keyboard-expand-commercial",
+    "result": {
+      "active": true,
+      "expanded": "true"
+    }
+  },
+  {
+    "check": "final-card-1440-floor",
+    "result": {
+      "height": 517.78125,
+      "image": "linear-gradient(190deg, rgba(31, 111, 139, 0.15), rgba(7, 27, 46, 0.9)), url(\"http://127.0.0.1:8766/assets/images/floor-care-uniformes-20260912.jpg\")",
+      "left": 143.890625,
+      "overflow": false,
+      "position": "50% 50%, 50% 50%",
+      "visibleWidth": 565.984375,
+      "width": 566.09375
+    }
+  },
+  {
+    "check": "final-keyboard-expand-floor",
+    "result": {
+      "active": true,
+      "expanded": "true"
+    }
+  },
+  {
+    "check": "final-card-1440-residential",
+    "result": {
+      "height": 517.78125,
+      "image": "linear-gradient(190deg, rgba(139, 174, 139, 0.1), rgba(7, 27, 46, 0.86)), url(\"http://127.0.0.1:8766/assets/images/residential-cleaning-uniformes-20260912.jpg\")",
+      "left": 143.78125,
+      "overflow": false,
+      "position": "50% 0%, 50% 0%",
+      "visibleWidth": 565.875,
+      "width": 566.09375
+    }
+  },
+  {
+    "check": "final-keyboard-expand-residential",
+    "result": {
+      "active": true,
+      "expanded": "true"
+    }
+  },
+  {
+    "check": "final-card-1440-post-construction",
+    "result": {
+      "height": 517.78125,
+      "image": "linear-gradient(190deg, rgba(200, 169, 106, 0.12), rgba(7, 27, 46, 0.9)), url(\"http://127.0.0.1:8766/assets/images/post-construction-uniformes-20260912.jpg\")",
+      "left": 143.671875,
+      "overflow": false,
+      "position": "50% 50%, 50% 50%",
+      "visibleWidth": 565.765625,
+      "width": 566.09375
+    }
+  },
+  {
+    "check": "final-keyboard-expand-post-construction",
+    "result": {
+      "active": true,
+      "expanded": "true"
+    }
+  },
+  {
+    "check": "final-card-1440-move-in-out",
+    "result": {
+      "height": 517.78125,
+      "image": "linear-gradient(190deg, rgba(31, 111, 139, 0.12), rgba(7, 27, 46, 0.9)), url(\"http://127.0.0.1:8766/assets/images/hero-residential-uniformes-20260912.jpg\")",
+      "left": 729.5625,
+      "overflow": false,
+      "position": "50% 50%, 50% 50%",
+      "visibleWidth": 566.09375,
+      "width": 566.09375
+    }
+  },
+  {
+    "check": "final-keyboard-expand-move-in-out",
+    "result": {
+      "active": true,
+      "expanded": "true"
+    }
+  },
+  {
+    "check": "final-card-390-commercial",
+    "result": {
+      "height": 420,
+      "image": "linear-gradient(190deg, rgba(7, 27, 46, 0.2), rgba(7, 27, 46, 0.94)), url(\"http://127.0.0.1:8766/assets/images/commercial-cleaning-uniformes-20260912.jpg\")",
+      "left": 21.046875,
+      "overflow": false,
+      "position": "50% 0%, 50% 0%",
+      "visibleWidth": 331.5,
+      "width": 331.5
+    }
+  },
+  {
+    "check": "final-card-390-floor",
+    "result": {
+      "height": 420,
+      "image": "linear-gradient(190deg, rgba(31, 111, 139, 0.15), rgba(7, 27, 46, 0.9)), url(\"http://127.0.0.1:8766/assets/images/floor-care-uniformes-20260912.jpg\")",
+      "left": 20.546875,
+      "overflow": false,
+      "position": "50% 50%, 50% 50%",
+      "visibleWidth": 331,
+      "width": 331.5
+    }
+  },
+  {
+    "check": "final-card-390-residential",
+    "result": {
+      "height": 420,
+      "image": "linear-gradient(190deg, rgba(139, 174, 139, 0.1), rgba(7, 27, 46, 0.86)), url(\"http://127.0.0.1:8766/assets/images/residential-cleaning-uniformes-20260912.jpg\")",
+      "left": 21.046875,
+      "overflow": false,
+      "position": "50% 0%, 50% 0%",
+      "visibleWidth": 331.5,
+      "width": 331.5
+    }
+  },
+  {
+    "check": "final-card-390-post-construction",
+    "result": {
+      "height": 420,
+      "image": "linear-gradient(190deg, rgba(200, 169, 106, 0.12), rgba(7, 27, 46, 0.9)), url(\"http://127.0.0.1:8766/assets/images/post-construction-uniformes-20260912.jpg\")",
+      "left": 20.546875,
+      "overflow": false,
+      "position": "50% 50%, 50% 50%",
+      "visibleWidth": 331,
+      "width": 331.5
+    }
+  },
+  {
+    "check": "final-card-390-move-in-out",
+    "result": {
+      "height": 420,
+      "image": "linear-gradient(190deg, rgba(31, 111, 139, 0.12), rgba(7, 27, 46, 0.9)), url(\"http://127.0.0.1:8766/assets/images/hero-residential-uniformes-20260912.jpg\")",
+      "left": 37.046875,
+      "overflow": false,
+      "position": "50% 50%, 50% 50%",
+      "visibleWidth": 331.5,
+      "width": 331.5
+    }
+  },
+  {
+    "check": "final-errors",
+    "result": {
+      "errors": []
+    }
+  },
+  {
+    "check": "final-console",
+    "result": {
+      "messages": []
+    }
+  }
+]

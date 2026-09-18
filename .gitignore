@@ -1,1 +1,13 @@
 .vercel
+
+# OS generated files
+Thumbs.db
+Thumbs.db:*
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+.DS_Store
+._*
+.Spotlight-V100
+.Trashes

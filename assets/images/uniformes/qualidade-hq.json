@@ -1,0 +1,89 @@
+{
+  "method": "WebP export directly from original PNG; quality 95; no resize, sharpening or generative edits",
+  "items": [
+    {
+      "key": "hero",
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-e0ff35f9-dae5-4e67-bc5f-c45bd9405a97.png",
+      "source_sha256": "b7a579dca8ab0305224f1abc124962fd8d1049cb790134495f0b956507f3f954",
+      "file": "hero-uniformes-hq.webp",
+      "bytes": 161254,
+      "sha256": "f55ee188bb373f6f31480d23a29e11052a24d3a57d24a95b7c46353ecaf7190d",
+      "dimensions": [
+        1531,
+        1027
+      ]
+    },
+    {
+      "key": "commercial",
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-d79a6c5f-a319-4077-b822-ade550d43b40.png",
+      "source_sha256": "5dbce80be73fe3341fab033e6ad6b8a906b1eeed8cc076a7f08f1313592ace05",
+      "file": "commercial-uniformes-hq.webp",
+      "bytes": 173614,
+      "sha256": "25d875f417dd3765a7b6868da270d1d240d128725fd551122353e8e492ec0472",
+      "dimensions": [
+        1027,
+        1531
+      ]
+    },
+    {
+      "key": "floor",
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-4eac2b9b-1dbd-4e50-95d9-14ba90245885.png",
+      "source_sha256": "f77822b321f26c0044cd1f56f2389051f8b43db0013f1b92fe544c089b17d3c9",
+      "file": "floor-uniformes-hq.webp",
+      "bytes": 137442,
+      "sha256": "2c2a2a160d7fa090617e5077419b41bf8ec962647669656aee32b525d4f47ed0",
+      "dimensions": [
+        1531,
+        1027
+      ]
+    },
+    {
+      "key": "residential",
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-1a802efe-123a-42d5-b7b9-0f46b62bb1cc.png",
+      "source_sha256": "a6ccbbbd725449f52263aad363a6b2ae42c3eb36a6f5b7f328c69f99fc16cdad",
+      "file": "residential-uniformes-hq.webp",
+      "bytes": 144174,
+      "sha256": "8f5c252a5a407e8629d4b9a0373c105ba5e0818b4f599c01a8817aae569479fe",
+      "dimensions": [
+        1531,
+        1027
+      ]
+    },
+    {
+      "key": "post",
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-6b4dba4e-01a8-4dc8-8517-341e3dbd4745.png",
+      "source_sha256": "57518f692e252f9fc76e781d09a824d393891089839951e12b63223444f6fa1a",
+      "file": "post-uniformes-hq.webp",
+      "bytes": 162124,
+      "sha256": "c7d62d954a8489dd4b2433be2f7c98291ea5426c44f88264473e350e19f7dd6d",
+      "dimensions": [
+        1254,
+        1254
+      ]
+    },
+    {
+      "key": "move",
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-f197f6c6-c8a6-4ceb-8ecf-d9465e54091f.png",
+      "source_sha256": "abe199b9521522b3d2bf3937dc9971cef55533b0c246b154501a7eb6c21325ea",
+      "file": "move-uniformes-hq.webp",
+      "bytes": 176260,
+      "sha256": "baf741a37118a1451cf967f4ea3812e952e1b8bd8f5148ceb4f08cd2831e15ee",
+      "dimensions": [
+        1027,
+        1531
+      ]
+    }
+  ],
+  "comparison": {
+    "files": [
+      "../compare/before.jpg",
+      "../compare/after.jpg"
+    ],
+    "dimensions": [
+      1024,
+      1024
+    ],
+    "note": "Original JPEGs retained; no higher resolution original available."
+  },
+  "limitations": "Native source detail is 1531x1027 (landscape), 1027x1531 (portrait), and 1254x1254 (square); these are not native 4K photos."
+}

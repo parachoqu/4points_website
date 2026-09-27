@@ -1,1397 +1,654 @@
-<!doctype html>
-<html lang="en-US" class="no-canvas" data-bg-state="booting">
-
+<!DOCTYPE html>
+<html lang="en" data-art-direction="surface-plane" data-palette="atelie-operacional" data-brand-tones="logo" data-navy-flow="logo" data-navy-field="shader" data-sand-field="shader" data-cta-plate="osso" data-cta-fill="logo" data-hero-card="osso" data-header-logo="compacta" data-footer-height="compacta" data-btn-plate="rasante" data-type-scale="editorial" data-mobile-deck="baralho" data-mobile-chrome="seletor-indice">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>4Points Cleaning Services | Commercial, Janitorial &amp; Floor Care | Greater Boston, MA</title>
-  <meta name="description"
-    content="Precision commercial cleaning, janitorial services and floor care for facilities across Greater Boston and Massachusetts. Recurring plans, fully insured, 100% mobile.">
-  <link rel="icon" href="assets/images/favicon.png" sizes="150x150">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link
-    href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,600;1,9..144,400;1,9..144,500&family=Manrope:wght@400;500;600;700;800&display=swap"
-    rel="stylesheet">
-  <link rel="stylesheet" href="style.css?v=e7f9c1c74995">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>4Points Cleaning Services | Commercial, Janitorial &amp; Floor Care | Greater Boston, MA</title>
+<meta name="description" content="Precision commercial cleaning, janitorial services and floor care for facilities across Greater Boston and Massachusetts. Recurring plans, fully insured, 100% mobile.">
+<link rel="icon" href="assets/images/favicon.png" sizes="150x150">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Manrope:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,500..600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css?v=a1241d511e23">
 </head>
-
 <body>
-  <div id="loading" class="hidden" aria-hidden="true">Carregando</div>
-  <!-- Uma única superfície fixa por trás de todo o scroll: não são cenas por
-       seção, é um campo contínuo de luz/sombra que se desloca e se recolore
-       conforme a página avança. Nenhuma camada tem contorno ou forma fechada —
-       tudo é gradiente + blur, nunca linha. -->
-  <div class="bg-root" id="bgRoot" aria-hidden="true">
-    <div class="relief-layer" id="relief-a"></div>
-    <div class="relief-layer" id="relief-b"></div>
-    <div class="relief-layer" id="relief-c"></div>
-    <div class="relief-layer" id="relief-directional"></div>
-    <div class="relief-layer" id="relief-zones"></div>
-    <div class="fog-layer" id="fog-far"></div>
-    <div class="fog-layer" id="fog-mid"></div>
-    <div class="fog-layer" id="fog-near"></div>
-    <div class="relief-accent" id="accent-champagne"></div>
-    <div class="relief-accent" id="accent-sage"></div>
-    <div class="grain"></div>
-  </div>
-  <a class="skip-link" href="#main">Skip to content</a>
+<a class="skip" href="#main">Skip to main content</a>
 
-  <!-- =========================================================
-     HEADER
-     ========================================================= -->
-  <header class="site-header" data-header>
-    <div class="container header-inner">
-      <a href="#main" class="logo" aria-label="4Points Cleaning Services">
-        <img src="assets/images/LOGO%20TIPOGRAFICA.png" alt="4Points Cleaning Services" class="logo-img" width="190" height="50">
-      </a>
-      <nav class="nav-desktop" aria-label="Primary">
-        <a href="#services">Commercial</a>
-        <a href="#floorcare">Floor Care</a>
-        <a href="#residential">Residential</a>
-        <a href="#impact">Our Impact</a>
-        <a href="#areas">Areas We Serve</a>
-        <a href="#faq">About</a>
+<div class="nf-field" aria-hidden="true"><canvas class="nf-field__canvas" id="nfField"></canvas></div>
+<div class="sf-field" aria-hidden="true"><canvas class="sf-field__canvas" id="sfField"></canvas></div>
+
+<header class="site-header">
+  <canvas class="nf-mirror" id="nfHeaderField" aria-hidden="true"></canvas>
+  <div class="wrap u-relative">
+    <div class="header-bar">
+      <a class="logo" href="#top" aria-label="4Points Cleaning Services — home"></a>
+
+      <nav class="main-nav" aria-label="Main">
+        <ul>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#floorcare">Floor Care</a></li>
+          <li><a href="#approach">Standard</a></li>
+          <li><a href="#impact">Our Impact</a></li>
+          <li><a href="#coverage">Areas We Serve</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
       </nav>
+
       <div class="header-actions">
-        <a class="btn btn-ghost" href="tel:+17742043112"><svg class="icon icon-phone" viewBox="0 0 24 24"
-            aria-hidden="true">
-            <path d="M6.4 3h3.1l1.5 3.9-2 1.5a12.4 12.4 0 0 0 6.6 6.6l1.5-2 3.9 1.5v3.1a2 2 0 0 1-2.2 2A16.6 16.6 0 0 1 3 5.2 2 2 0 0 1 5 3Z" />
-          </svg><span>Call Now</span></a>
-        <a class="btn btn-primary" href="#quote">Request a Quote</a>
-        <button class="hamburger" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu"
-          aria-label="Open menu"><span></span></button>
-        <button class="m-options-toggle" type="button" data-options-sheet-toggle aria-expanded="false"
-          aria-controls="m-options-sheet" aria-label="More options">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="5" cy="12" r="1.6" />
-            <circle cx="12" cy="12" r="1.6" />
-            <circle cx="19" cy="12" r="1.6" />
-          </svg>
+        <a class="btn btn--onDark btn--sm" href="tel:+17742043112">Call Now</a>
+        <a class="btn btn--gold btn--sm js-cta" href="#quote" aria-label="Request a quote"><span><span class="btn__long">Request a </span>Quote</span></a>
+      </div>
+
+      <button class="nav-toggle" id="navToggle" type="button" aria-expanded="false" aria-controls="mobileNav">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        <span id="navToggleLabel">Menu</span>
+      </button>
+    </div>
+
+    <nav class="mobile-nav" aria-label="Mobile">
+      <canvas class="nf-mirror" id="nfNavField" aria-hidden="true"></canvas>
+      <div class="collapse" id="mobileNav" data-collapse>
+        <div class="collapse__inner">
+          <div class="nav-list">
+          <a href="#services">Services</a>
+          <a href="#planning">Planning</a>
+          <a href="#floorcare">Floor Care</a>
+          <a href="#approach">The 4Points Standard</a>
+          <a href="#impact">Our Impact</a>
+          <a href="#coverage">Areas We Serve</a>
+          <a href="#faq">FAQ</a>
+          </div>
+          <div class="nav-actions">
+          <a class="btn btn--gold js-cta" href="#quote">Request a Quote</a>
+          <a class="btn btn--onDark" href="tel:+17742043112" aria-label="Call +1 774-204-3112">Call<span class="nav-tel"> +1 774-204-3112</span></a>
+          </div>
+        </div>
+      </div>
+    </nav>
+  </div>
+</header>
+<div class="nav-scrim" id="navScrim" aria-hidden="true"></div>
+
+<main id="main">
+
+  <!-- Hero slider -->
+  <section class="hero" id="top" aria-roledescription="carousel" aria-label="4Points services">
+    <div class="hero__media" id="heroMedia" aria-hidden="true"></div>
+    <div class="hero__veil" aria-hidden="true"></div>
+
+    <div class="wrap hero__inner">
+      <div class="hero__copy" id="heroCopy">
+        <p class="hero__eyebrow" id="heroEyebrow"></p>
+        <h1 id="heroTitle"></h1>
+        <p class="hero__lead" id="heroLead"></p>
+        <div class="hero__actions">
+          <a class="btn btn--gold js-cta" href="#quote">Request a Quote</a>
+          <a class="btn btn--onDark" href="tel:+17742043112">Call 4Points</a>
+        </div>
+      </div>
+
+      <aside class="hero__card">
+        <p class="hero__count"><b id="heroCount">01 / 03</b><span id="heroKind"></span></p>
+        <ul class="cred" tabindex="0" role="group" aria-label="Credentials">
+          <li><span class="cred__ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>15+ Years Experience</li>
+          <li><span class="cred__ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l8 4v5c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></span>Fully Insured</li>
+          <li><span class="cred__ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7l6-3 6 3 6-3v13l-6 3-6-3-6 3z"/><path d="M9 4v13M15 7v13"/></svg></span>100% Mobile Service</li>
+          <li><span class="cred__ico" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s7-5.5 7-11a7 7 0 10-14 0c0 5.5 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/></svg></span>Massachusetts</li>
+        </ul>
+      </aside>
+    </div>
+
+    <div class="hero__nav">
+      <div class="hero__dots" id="heroDots" role="group" aria-label="Choose slide"></div>
+    </div>
+  </section>
+
+  <!-- Services + planning -->
+  <span id="residential" class="sr-only" aria-hidden="true"></span>
+  <section class="section bg-sand" id="services" aria-labelledby="svcTitle">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">What we do</p>
+          <h2 class="h2 u-mt-12" id="svcTitle">Built for businesses that can't compromise on clean</h2>
+        </div>
+        <p class="lead">Each service carries its own scope, schedule and contract. Your selection follows you through planning and into the quote form.</p>
+      </div>
+
+      <div class="svc-layout">
+        <div class="rail" id="rail" role="radiogroup" aria-label="Services">
+          <span class="rail__marker" id="railMarker" aria-hidden="true"></span>
+        </div>
+
+        <article class="panel" id="panel">
+          <div class="panel__photo" id="panelPhoto" role="img" aria-label="">
+            <div class="panel__layer" id="layerA"></div>
+            <div class="panel__layer" id="layerB"></div>
+            <span class="panel__kind" id="panelKind"></span>
+          </div>
+          <div class="panel__body">
+            <h3 class="h3" id="panelName"></h3>
+            <p class="panel__desc" id="panelDesc"></p>
+            <div class="panel__cols">
+              <div>
+                <h4 class="label">What's included</h4>
+                <ul class="checks" id="panelIncl"></ul>
+              </div>
+              <div>
+                <h4 class="label">Details</h4>
+                <dl class="meta" id="panelMeta"></dl>
+              </div>
+            </div>
+            <div class="panel__foot">
+              <button class="btn btn--petrol js-svc-cta" type="button" id="panelCta"></button>
+              <a class="btn btn--ghost btn--sm" href="tel:+17742043112">Call 4Points</a>
+            </div>
+          </div>
+        </article>
+
+        <div class="accordion" id="accordion"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Planning -->
+  <section class="section bg-ivory" id="planning" aria-labelledby="planTitle">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="plan__head">
+          <p class="label">For facility managers</p>
+          <h2 class="h2 u-mt-12" id="planTitle">Cleaning shouldn't be another thing you manage</h2>
+          <p class="lead u-mt-12">Set a frequency and 4Points takes it from there: the same crew, the same checklist, every time. These choices are attached to <strong id="planSvc">your selected service</strong> and carry into the form.</p>
+        </div>
+        <div class="plan__grid">
+          <div class="plan__block">
+            <h3>Frequency</h3>
+            <div class="chips" id="freqRow" role="radiogroup" aria-label="Cleaning frequency"></div>
+            <p class="plan__note" id="freqDesc"></p>
+          </div>
+          <div class="plan__block">
+            <h3>What should we prioritise?</h3>
+            <div class="chips" id="needRow" role="group" aria-label="Focus areas"></div>
+            <p class="plan__note" id="planNote"></p>
+          </div>
+        </div>
+    </div>
+  </section>
+
+  <!-- Floor care -->
+  <section class="section bg-white" id="floorcare" aria-labelledby="floorTitle">
+    <div class="wrap">
+      <div class="floor__head">
+        <div>
+          <p class="label">Floor care specialists</p>
+          <h2 class="h2 u-mt-12" id="floorTitle">Floors that reflect your standard</h2>
+          <p class="lead">A floor is the first thing anyone reads about a building, and the hardest surface to keep saying the right thing. We polish, wax and restore high-traffic commercial floors around your operation, so the room opens as though nothing happened.</p>
+          <div class="u-actions-row">
+            <a class="btn btn--petrol js-cta" href="#quote" data-service="floor">Request Floor Care Quote</a>
+            <a class="btn btn--ghost" href="tel:+17742043112">Call 4Points</a>
+          </div>
+        </div>
+        <ul class="floor__list">
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>Polishing, waxing and restoration</span></li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>Matched to the floor's existing finish</span></li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>High-traffic commercial floors</span></li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>Sunday and after-hours service available</span></li>
+          <li><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>The same crew reviews the result before handoff</span></li>
+        </ul>
+      </div>
+
+      <div class="compare" id="compare" style="--pos:50%">
+        <div class="compare__side compare__side--before" role="img" aria-label="Commercial lobby with traffic-worn vinyl plank flooring, showing soil and scuffs before treatment."></div>
+        <div class="compare__side compare__side--after" role="img" aria-label="The same lobby from the same camera position after deep cleaning and wax and buffing, with an even satin sheen."></div>
+        <span class="compare__tag compare__tag--a">Traffic-worn vinyl</span>
+        <span class="compare__tag compare__tag--b">Wax &amp; buffed</span>
+        <span class="compare__bar" aria-hidden="true"></span>
+        <button class="compare__knob" type="button" tabindex="-1" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><path d="M9 6l-5 6 5 6M15 6l5 6-5 6"/></svg>
         </button>
+        <input class="compare__range" id="cmpRange" type="range" min="0" max="100" value="50" step="1" aria-label="Before and after comparison position">
+      </div>
+      <div class="compare__foot">
+        <p class="muted">Drag the handle, or focus it and use the arrow keys. Position: <span id="cmpValue">50</span>%</p>
+        <p class="muted">One commercial lobby, one camera position, before and after deep cleaning and wax &amp; buffing.</p>
+      </div>
+      <dl class="case">
+        <div><dt class="label">Surface</dt><dd class="u-m-5-0-0">Commercial lobby, LVT vinyl plank</dd></div>
+        <div><dt class="label">Condition</dt><dd class="u-m-5-0-0">Traffic soil, scuffs, dulled sheen</dd></div>
+        <div><dt class="label">Treatment</dt><dd class="u-m-5-0-0">Deep clean · Wax &amp; buffing</dd></div>
+        <div><dt class="label">Result</dt><dd class="u-m-5-0-0">Even, revitalized satin sheen</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- The 4Points standard -->
+  <section class="section bg-paper" id="approach" aria-labelledby="approachTitle">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">The 4Points standard</p>
+          <h2 class="h2 u-mt-12" id="approachTitle">Four points. One standard.</h2>
+        </div>
+        <p class="lead">The same crew, the same checklist, the same result — whether it's a school cafeteria or a corner office.</p>
+      </div>
+
+      <div class="pillars">
+        <div class="pillars__rule" aria-hidden="true">
+          <span class="u-left-0"></span><span class="u-left-25"></span><span class="u-left-50"></span><span class="u-left-75"></span>
+        </div>
+        <div class="pillars__grid">
+          <div class="pillar">
+            <h3>Precision</h3>
+            <p>Every touchpoint, restroom and floor is cleaned to a defined standard, not to whoever's schedule allows it that day.</p>
+          </div>
+          <div class="pillar">
+            <h3>Reliability</h3>
+            <p>Recurring plans that run on schedule, week after week, so facility managers never have to think about it twice.</p>
+          </div>
+          <div class="pillar">
+            <h3>Care</h3>
+            <p>Every five residential cleanings fund one support cleaning for a family in need: precision with purpose.</p>
+          </div>
+          <div class="pillar">
+            <h3>Consistency</h3>
+            <p>The same crew, the same checklist, the same result, whether it's a school cafeteria or a corner office.</p>
+          </div>
+        </div>
+      </div>
+
+      <ol class="process" aria-label="How a visit runs">
+        <li><b>01</b>Preparation</li>
+        <li><b>02</b>Checklist</li>
+        <li><b>03</b>Execution</li>
+        <li><b>04</b>Inspection</li>
+        <li><b>05</b>Handoff</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- Team + testimonials -->
+  <section class="section bg-sand" id="team" aria-labelledby="teamTitle">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="team">
+        <div class="team__photo" role="img" aria-label="Two 4Points team members in uniform checking supplies on a janitorial cart before starting a shift."></div>
+        <div>
+          <p class="label">100% mobile service</p>
+          <h2 class="h2 u-mt-12" id="teamTitle">We come to you</h2>
+          <p class="lead">4Points has no storefront: our crews travel directly to your property, fully equipped, on schedule. That's what lets us stay flexible for facility managers and homeowners alike.</p>
+          <ul class="trust">
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M12 3l8 4v5c0 4.5-3.2 7.9-8 9-4.8-1.1-8-4.5-8-9V7z"/></svg>
+              <span><strong>Fully insured</strong><span>Commercial and residential work, including specialized floor care.</span></span>
+            </li>
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>
+              <span><strong>Crews arrive fully equipped</strong><span>No storefront and no fixed radius — the equipment travels with the crew.</span></span>
+            </li>
+            <li>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+              <span><strong>Flexible plans</strong><span>Daily, weekly, bi-weekly or monthly, with no long-term lock-in.</span></span>
+            </li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Testimonials + impact -->
+  <section class="section bg-white" id="impact" aria-label="Client feedback and our impact">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="quotes" aria-label="Client feedback">
+        <blockquote class="quote">
+          <p class="quote__kind">Commercial &amp; Janitorial</p>
+          <p>“4Points took over our office cleaning six months ago and it's the first vendor we haven't had to babysit. Restrooms, break rooms, floors, every single time.”</p>
+          <cite><span class="quote__ini" aria-hidden="true">DF</span><span><strong>Daniel Ferreira</strong><small>Facilities Manager · Waltham, MA</small></span></cite>
+        </blockquote>
+        <blockquote class="quote">
+          <p class="quote__kind">Floor Care</p>
+          <p>“We schedule floor waxing with them every other Sunday so it never disrupts the school week. Consistent, on time, and the halls look brand new every time.”</p>
+          <cite><span class="quote__ini" aria-hidden="true">MS</span><span><strong>Marlene Souza</strong><small>Operations Director · Somerville, MA</small></span></cite>
+        </blockquote>
+        <blockquote class="quote">
+          <p class="quote__kind">Residential — Move-Out</p>
+          <p>“They came for a move-out clean and the landlord returned our full deposit without a single question. Worth every dollar.”</p>
+          <cite><span class="quote__ini" aria-hidden="true">PA</span><span><strong>Priya Anand</strong><small>Homeowner · Cambridge, MA</small></span></cite>
+        </blockquote>
+        <blockquote class="quote">
+          <p class="quote__kind">Commercial &amp; Janitorial</p>
+          <p>“What sold us wasn't the price, it was how they explained the maintenance plan. Weekly touchpoint cleaning has genuinely cut down on sick days in the office.”</p>
+          <cite><span class="quote__ini" aria-hidden="true">RC</span><span><strong>Robert Chen</strong><small>Office Manager · Quincy, MA</small></span></cite>
+        </blockquote>
+      </div>
+
+      <div class="impact">
+        <div>
+          <p class="label u-label-sage">Our impact</p>
+          <h3 class="u-mt-10">Cleaning with a human purpose</h3>
+          <p>Every five residential cleanings help make one support cleaning possible, free of charge, for families and patients who need it most.</p>
+        </div>
+        <div>
+          <div class="ratio">
+            <b>5 : 1</b>
+            <span>Five residential cleanings fund one support cleaning, delivered with PPEAL.</span>
+          </div>
+          <ul>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>We partner directly with local humanitarian organizations</span></li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>PPEAL supports bedridden hospital patients with home hygiene needs</span></li>
+            <li><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg><span>Support cleanings are delivered free of charge</span></li>
+          </ul>
+        </div>
       </div>
     </div>
-    <div class="mobile-menu" id="mobile-menu" data-mobile-menu>
-      <span class="menu-eyebrow eyebrow on-dark" aria-hidden="true">Navigation</span>
-      <nav aria-label="Mobile">
-        <a href="#services" data-menu-link>Commercial</a>
-        <a href="#residential" data-menu-link>Residential</a>
-        <a href="#floorcare" data-menu-link>Floor Care</a>
-        <a href="#areas" data-menu-link>Areas We Serve</a>
-        <a href="#impact" data-menu-link>Our Impact</a>
-        <a href="#faq" data-menu-link>About</a>
-      </nav>
-      <a class="btn btn-champagne" href="#quote" data-menu-link>Request a Quote</a>
-      <a class="btn btn-outline-light" href="tel:+17742043112">Call 4Points</a>
-      <div class="menu-contact">
-        <a class="menu-call" href="tel:+17742043112"><small>Call 4Points</small>+1 774-204-3112</a>
-        <a class="menu-mail" href="mailto:4pointscontact@gmail.com">4pointscontact@gmail.com</a>
+  </section>
+
+  <!-- Coverage + FAQ -->
+  <span id="areas" class="sr-only" aria-hidden="true"></span>
+  <section class="section bg-paper" id="coverage" aria-labelledby="covTitle">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="cov">
+        <div>
+          <p class="label">Areas we serve</p>
+          <h2 class="h2 u-mt-12" id="covTitle">Greater Boston &amp; Massachusetts</h2>
+          <p class="lead">Mobile crews, no storefront and no fixed radius. Clients across Greater Boston, including Waltham, Somerville, Cambridge and Quincy.</p>
+          <dl class="cov__facts">
+            <div><dt>Coverage</dt><dd>Greater Boston &amp; Massachusetts</dd></div>
+            <div><dt>Storefront</dt><dd>None — fully mobile service</dd></div>
+            <div><dt>Equipment</dt><dd>Crews arrive fully equipped</dd></div>
+            <div><dt>Response</dt><dd>On schedule, direct to your property</dd></div>
+          </dl>
+          <ul class="serves" aria-label="Property types we serve">
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Commercial buildings</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Offices</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Schools</li>
+            <li><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 12l5 5L20 6"/></svg>Homes</li>
+          </ul>
+        </div>
+
+        <div id="faq">
+          <p class="label">Questions</p>
+          <h2 class="h2 u-mt-12">Good to know before you book</h2>
+          <div class="faq">
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq1">How much does cleaning cost?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq1" data-collapse><div class="collapse__inner">Pricing depends on property type, size and frequency. Commercial plans are quoted after a short walkthrough or photo review; residential cleanings are priced per visit. Request a quote and we'll give you a straight answer.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq2">What areas do you serve?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq2" data-collapse><div class="collapse__inner">We serve Greater Boston and the surrounding Massachusetts area as a fully mobile service: our crews come directly to your property.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq3">Are you fully insured?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq3" data-collapse><div class="collapse__inner">Yes. 4Points is fully insured for commercial and residential work, including specialized floor care.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq4">Do you require long-term contracts?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq4" data-collapse><div class="collapse__inner">No. We offer flexible recurring plans — daily, weekly, bi-weekly or monthly — that you can adjust as your needs change.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq5">Do I need to provide paper towels and trash bags?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq5" data-collapse><div class="collapse__inner">Clients provide paper towels and plastic trash bags. Everything else — products, machines and crew equipment — comes with us.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq6">Do you offer recurring commercial cleaning?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq6" data-collapse><div class="collapse__inner">Yes — recurring commercial and janitorial service is our core focus, with custom maintenance plans built around your facility.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq7">Do you provide Sunday floor care?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq7" data-collapse><div class="collapse__inner">Yes. Floor polishing and waxing is frequently scheduled on Sundays or after hours so it never disrupts your operation.</div></div>
+            </div>
+            <div class="faq__item">
+              <h3 class="faq__q"><button class="faq__btn" type="button" aria-expanded="false" aria-controls="faq8">How quickly can you start service?<span class="faq__icon" aria-hidden="true"><svg class="plus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg><svg class="minus" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M5 12h14"/></svg></span></button></h3>
+              <div class="collapse" id="faq8" data-collapse><div class="collapse__inner">Most recurring commercial plans can start within a week of your quote being confirmed. Residential and one-time visits are often scheduled sooner, depending on availability.</div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <span class="header-progress" data-header-progress aria-hidden="true"></span>
-  </header>
+  </section>
 
-  <main id="main">
-
-    <!-- =========================================================
-     HERO
-     ========================================================= -->
-    <section class="hero scroll-snap-section" data-hero-slider aria-roledescription="carousel"
-      aria-label="Featured services" tabindex="0">
-
-      <article class="hero-slide is-active" data-hero-slide aria-hidden="false"
-        style="--hero-img:url('assets/images/hero-commercial-uniformes-20260913.jpg')">
-        <div class="hero-media">
-          <div class="container hero-content">
-          <div class="hero-text">
-            <span class="eyebrow on-dark hero-eyebrow">Commercial Cleaning • Janitorial • Floor Care</span>
-            <h1>Precision cleaning for spaces that need to perform.</h1>
-            <p class="hero-support">Recurring commercial cleaning, specialized floor care and residential services
-              throughout Greater Boston.</p>
-            <div class="hero-cta">
-              <a class="btn btn-champagne" href="#quote">Request a Quote</a>
-              <a class="btn btn-outline-light" href="tel:+17742043112">Call 4Points</a>
-            </div>
-          </div>
-          <div class="hero-panel cornered">
-            <span class="hero-index">01 / 03 Commercial &amp; Janitorial</span>
-            <ul class="hero-trust">
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>15+ Years Experience</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M12 3 4.5 6v5.4c0 4.7 2.5 7.8 7.5 9.6 5-1.8 7.5-4.9 7.5-9.6V6L12 3Z" />
-                  <path d="m8.5 12 2.2 2.2 4.8-5" />
-                </svg>Fully Insured</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M3 6.5 8 4l8 2.5L21 4v13.5L16 20l-8-2.5L3 20V6.5Z" />
-                  <path d="M8 4v13.5M16 6.5V20" />
-                </svg>100% Mobile Service</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
-                  <circle cx="12" cy="9.5" r="2.2" />
-                </svg>Massachusetts</li>
-            </ul>
-          </div>
-          </div>
+  <!-- Quote -->
+  <section class="section bg-sand" id="quote" aria-labelledby="quoteTitle">
+    <div class="sf-host" aria-hidden="true"><canvas class="sf-mirror"></canvas></div>
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="label">Get started</p>
+          <h2 class="h2 u-mt-12" id="quoteTitle">Tell us about your space</h2>
         </div>
-      </article>
-
-      <article class="hero-slide" data-hero-slide aria-hidden="true"
-        style="--hero-img:url('assets/images/hero-floor-care.jpg')">
-        <div class="hero-media">
-          <div class="container hero-content">
-          <div class="hero-text">
-            <span class="eyebrow on-dark hero-eyebrow">Floor Care Specialists</span>
-            <h1>Floors that reflect your standard.</h1>
-            <p class="hero-support">Polishing, waxing and restoration for high-traffic commercial floors, scheduled
-              around your business, including Sundays.</p>
-            <div class="hero-cta">
-              <a class="btn btn-champagne" href="#quote">Request a Quote</a>
-              <a class="btn btn-outline-light" href="tel:+17742043112">Call 4Points</a>
-            </div>
-          </div>
-          <div class="hero-panel cornered">
-            <span class="hero-index">02 / 03 Floor Care</span>
-            <ul class="hero-trust">
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>15+ Years Experience</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M12 3 4.5 6v5.4c0 4.7 2.5 7.8 7.5 9.6 5-1.8 7.5-4.9 7.5-9.6V6L12 3Z" />
-                  <path d="m8.5 12 2.2 2.2 4.8-5" />
-                </svg>Fully Insured</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M3 6.5 8 4l8 2.5L21 4v13.5L16 20l-8-2.5L3 20V6.5Z" />
-                  <path d="M8 4v13.5M16 6.5V20" />
-                </svg>100% Mobile Service</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
-                  <circle cx="12" cy="9.5" r="2.2" />
-                </svg>Massachusetts</li>
-            </ul>
-          </div>
-          </div>
-        </div>
-      </article>
-
-      <article class="hero-slide" data-hero-slide aria-hidden="true"
-        style="--hero-img:url('assets/images/hero-residential-uniformes-20260913.jpg')">
-        <div class="hero-media">
-          <div class="container hero-content">
-          <div class="hero-text">
-            <span class="eyebrow on-dark hero-eyebrow">Residential Cleaning</span>
-            <h1>The same precision, brought home.</h1>
-            <p class="hero-support">Standard, deep, move-in and move-out cleaning for homes across Greater Boston,
-              booked in minutes, done right the first time.</p>
-            <div class="hero-cta">
-              <a class="btn btn-champagne" href="#quote">Request a Quote</a>
-              <a class="btn btn-outline-light" href="tel:+17742043112">Call 4Points</a>
-            </div>
-          </div>
-          <div class="hero-panel cornered">
-            <span class="hero-index">03 / 03 Residential</span>
-            <ul class="hero-trust">
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <circle cx="12" cy="12" r="9" />
-                  <path d="M12 7v5l3 2" />
-                </svg>15+ Years Experience</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M12 3 4.5 6v5.4c0 4.7 2.5 7.8 7.5 9.6 5-1.8 7.5-4.9 7.5-9.6V6L12 3Z" />
-                  <path d="m8.5 12 2.2 2.2 4.8-5" />
-                </svg>Fully Insured</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M3 6.5 8 4l8 2.5L21 4v13.5L16 20l-8-2.5L3 20V6.5Z" />
-                  <path d="M8 4v13.5M16 6.5V20" />
-                </svg>100% Mobile Service</li>
-              <li><svg class="icon" viewBox="0 0 24 24">
-                  <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
-                  <circle cx="12" cy="9.5" r="2.2" />
-                </svg>Massachusetts</li>
-            </ul>
-          </div>
-          </div>
-        </div>
-      </article>
-    </section>
-
-    <!-- Mobile-only quick-trust strip: the same 4 credentials shown inside
-         the hero panel on desktop, promoted to their own row below the photo
-         on mobile so the image and CTA stay uncluttered. -->
-    <ul class="m-trust" aria-label="Why 4Points" data-reveal>
-      <li><svg class="icon" viewBox="0 0 24 24">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 7v5l3 2" />
-        </svg>15+ Years Experience</li>
-      <li><svg class="icon" viewBox="0 0 24 24">
-          <path d="M12 3 4.5 6v5.4c0 4.7 2.5 7.8 7.5 9.6 5-1.8 7.5-4.9 7.5-9.6V6L12 3Z" />
-          <path d="m8.5 12 2.2 2.2 4.8-5" />
-        </svg>Fully Insured</li>
-      <li><svg class="icon" viewBox="0 0 24 24">
-          <path d="M3 6.5 8 4l8 2.5L21 4v13.5L16 20l-8-2.5L3 20V6.5Z" />
-          <path d="M8 4v13.5M16 6.5V20" />
-        </svg>100% Mobile Service</li>
-      <li><svg class="icon" viewBox="0 0 24 24">
-          <path d="M12 21s7-6.1 7-11.5A7 7 0 0 0 5 9.5C5 14.9 12 21 12 21Z" />
-          <circle cx="12" cy="9.5" r="2.2" />
-        </svg>Massachusetts</li>
-    </ul>
-
-    <!-- =========================================================
-     THE 4POINTS STANDARD
-     ========================================================= -->
-    <section class="section standard scroll-snap-section" data-canvas-ink>
-      <span class="watermark on-light" aria-hidden="true"></span>
-      <div class="container">
-        <div class="standard-head" data-reveal>
-          <span class="eyebrow">The 4Points Standard</span>
-          <h2>4 POINTS.<br>ONE STANDARD.</h2>
-        </div>
-
-        <div class="pillars" data-reveal="rule">
-          <div class="pillar" data-reveal>
-            <span class="pillar-num">01</span>
-            <span class="pillar-title">Precision</span>
-            <p class="pillar-copy">Every touchpoint, restroom and floor is cleaned to a defined standard, not to
-              whoever's schedule allows it that day.</p>
-          </div>
-          <div class="pillar" data-reveal>
-            <span class="pillar-num">02</span>
-            <span class="pillar-title">Reliability</span>
-            <p class="pillar-copy">Recurring plans that run on schedule, week after week, so facility managers never
-              have to think about it twice.</p>
-          </div>
-          <div class="pillar" data-reveal>
-            <span class="pillar-num">03</span>
-            <span class="pillar-title">Care</span>
-            <p class="pillar-copy">Every five residential cleanings fund one support cleaning for a family in need:
-              precision with purpose.</p>
-          </div>
-          <div class="pillar" data-reveal>
-            <span class="pillar-num">04</span>
-            <span class="pillar-title">Consistency</span>
-            <p class="pillar-copy">The same crew, the same checklist, the same result, whether it's a school cafeteria
-              or a corner office.</p>
-          </div>
-        </div>
-
-        <div class="standard-protocol" data-reveal="rule">
-          <span class="protocol-step"><b>01</b>Preparation</span>
-          <span class="protocol-step"><b>02</b>Checklist</span>
-          <span class="protocol-step"><b>03</b>Execution</span>
-          <span class="protocol-step"><b>04</b>Inspection</span>
-          <span class="protocol-step"><b>05</b>Handoff</span>
-        </div>
+        <p class="lead">Four short steps. No account, no back-and-forth: just the details we need to send you an accurate quote.</p>
       </div>
-    </section>
 
-    <!-- =========================================================
-     SERVICES
-     ========================================================= -->
-    <section class="section services scroll-snap-section" id="services">
-      <div class="container">
-        <div class="section-head" data-reveal>
-          <span class="eyebrow on-dark">What We Do</span>
-          <h2>Built for businesses that can't compromise on clean.</h2>
-        </div>
-
-        <div class="services-grid" id="services-track" role="region" aria-label="Services" tabindex="0">
-          <article class="service-card is-commercial" data-service-card data-reveal="scale"
-            style="--img-commercial:url('assets/images/commercial-cleaning-uniformes-20260913.jpg')">
-            <div class="card-media"></div>
-            <button class="card-toggle" type="button" data-service-toggle aria-label="Show commercial services details">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="card-body">
-              <span class="card-tag">Priority Focus</span>
-              <h3>Commercial &amp; Janitorial</h3>
-              <div class="card-more">
-                <p>Recurring cleaning plans for offices, schools and commercial buildings: daily, weekly, bi-weekly or
-                  monthly.</p>
-                <ul>
-                  <li>Restrooms &amp; Common Areas</li>
-                  <li>Break Rooms</li>
-                  <li>Trash Removal</li>
-                  <li>Touchpoint Cleaning</li>
-                  <li>Custom Maintenance Plans</li>
-                </ul>
-                <dl class="spec-list card-specs">
-                  <dt>Frequency</dt>
-                  <dd>Daily · Weekly · Bi-weekly · Monthly</dd>
-                  <dt>Coverage</dt>
-                  <dd>Greater Boston &amp; Massachusetts</dd>
-                  <dt>Contract</dt>
-                  <dd>Flexible, no long-term lock-in</dd>
-                </dl>
-              </div>
-              <span class="card-cta">Request Commercial Quote <svg class="icon" viewBox="0 0 24 24"
-                  style="width:14px;height:14px">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg></span>
-            </div>
-          </article>
-
-          <article class="service-card is-floor" data-service-card data-reveal="scale"
-            style="--img-floor:url('assets/images/floor-care-uniformes-20260913.jpg')">
-            <div class="card-media"></div>
-            <button class="card-toggle" type="button" data-service-toggle aria-label="Show floor care details">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="card-body">
-              <span class="card-tag">Specialized</span>
-              <h3>Floor Care</h3>
-              <div class="card-more">
-                <p>Premium polishing and waxing for high-traffic commercial floors, including Sunday and after-hours
-                  execution.</p>
-                <ul>
-                  <li>Polishing</li>
-                  <li>Waxing</li>
-                  <li>High-Traffic Floors</li>
-                  <li>Sunday Service</li>
-                </ul>
-                <dl class="spec-list card-specs">
-                  <dt>Schedule</dt>
-                  <dd>Sundays &amp; after hours</dd>
-                  <dt>Contract</dt>
-                  <dd>Recurring or one-time</dd>
-                  <dt>Coverage</dt>
-                  <dd>Greater Boston &amp; Massachusetts</dd>
-                </dl>
-              </div>
-              <span class="card-cta">Request Floor Care <svg class="icon" viewBox="0 0 24 24"
-                  style="width:14px;height:14px">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg></span>
-            </div>
-          </article>
-
-          <article class="service-card is-residential" data-service-card data-reveal="scale"
-            style="--img-residential:url('assets/images/residential-cleaning-uniformes-20260913.jpg')">
-            <div class="card-media"></div>
-            <button class="card-toggle" type="button" data-service-toggle aria-label="Show residential services details">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="card-body">
-              <span class="card-tag">Secondary</span>
-              <h3>Residential</h3>
-              <div class="card-more">
-                <p>Standard and deep cleaning, plus move-in and move-out service for homes across Greater Boston.</p>
-                <ul>
-                  <li>Standard Cleaning</li>
-                  <li>Deep Cleaning</li>
-                  <li>Move-In</li>
-                  <li>Move-Out</li>
-                </ul>
-                <dl class="spec-list card-specs">
-                  <dt>Coverage</dt>
-                  <dd>Greater Boston &amp; Massachusetts</dd>
-                  <dt>Contract</dt>
-                  <dd>Per-visit, no subscription required</dd>
-                </dl>
-              </div>
-              <span class="card-cta">Request Home Cleaning <svg class="icon" viewBox="0 0 24 24"
-                  style="width:14px;height:14px">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg></span>
-            </div>
-          </article>
-
-          <article class="service-card is-post-construction" data-service-card data-reveal="scale"
-            style="--img-post-construction:url('assets/images/post-construction-uniformes-20260913.jpg')">
-            <div class="card-media"></div>
-            <button class="card-toggle" type="button" data-service-toggle
-              aria-label="Show post-construction cleaning details">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="card-body">
-              <span class="card-tag">Specialized</span>
-              <h3>Post-Construction</h3>
-              <div class="card-more">
-                <p>Thorough cleanup after remodeling or building, removing heavy dust and residue.</p>
-                <ul>
-                  <li>Fine Dust Removal</li>
-                  <li>Debris &amp; Residue Cleanup</li>
-                  <li>Surface Detailing</li>
-                  <li>Window &amp; Frame Cleaning</li>
-                </ul>
-                <dl class="spec-list card-specs">
-                  <dt>Scheduling</dt>
-                  <dd>One-time, timed to your project close-out</dd>
-                  <dt>Coverage</dt>
-                  <dd>Greater Boston &amp; Massachusetts</dd>
-                </dl>
-              </div>
-              <span class="card-cta">Request Post-Construction <svg class="icon" viewBox="0 0 24 24"
-                  style="width:14px;height:14px">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg></span>
-            </div>
-          </article>
-
-          <article class="service-card is-move-in-out" data-service-card data-reveal="scale"
-            style="--img-move-in-out:url('assets/images/hero-residential-uniformes-20260913.jpg')">
-            <div class="card-media"></div>
-            <button class="card-toggle" type="button" data-service-toggle
-              aria-label="Show move-in and move-out deep cleaning details">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="card-body">
-              <span class="card-tag">Residential Specialty</span>
-              <h3>Move-In / Move-Out</h3>
-              <div class="card-more">
-                <p>A top-to-bottom deep cleaning that prepares your home for a fresh arrival or a smooth handoff to
-                  the owner.</p>
-                <ul>
-                  <li>Inside Ovens</li>
-                  <li>Inside Refrigerators</li>
-                  <li>Cabinet &amp; Drawer Interiors</li>
-                  <li>Floors, Baseboards &amp; Surfaces</li>
-                </ul>
-                <dl class="spec-list card-specs">
-                  <dt>Service</dt>
-                  <dd>One-Time Deep Cleaning</dd>
-                  <dt>Best For</dt>
-                  <dd>Move-In Preparation · Move-Out Handoff</dd>
-                  <dt>Coverage</dt>
-                  <dd>Greater Boston &amp; Massachusetts</dd>
-                </dl>
-              </div>
-              <span class="card-cta">Request Move-In / Move-Out Cleaning <svg class="icon" viewBox="0 0 24 24"
-                  style="width:14px;height:14px">
-                  <path d="M5 12h14M13 6l6 6-6 6" />
-                </svg></span>
-            </div>
-          </article>
-        </div>
-
-        <div class="carousel-dots" data-services-dots role="group" aria-label="Services pagination"></div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-     RECURRING MAINTENANCE
-     ========================================================= -->
-    <section class="section maintenance depth scroll-snap-section">
-      <div class="container maintenance-inner">
-        <div class="maintenance-head" data-reveal>
-          <span class="eyebrow">For Facility Managers</span>
-          <h2>Cleaning shouldn't be another thing you manage.</h2>
-          <p class="maintenance-copy">Set a frequency, and 4Points takes it from there: the same crew, the same
-            checklist, every time. No calls to make, no reminders to send.</p>
-          <div class="freq-tabs" role="tablist" aria-label="Maintenance frequency">
-            <button class="freq-tab is-active" type="button" data-freq="daily" aria-selected="true">Daily</button>
-            <button class="freq-tab" type="button" data-freq="weekly" aria-selected="false">Weekly</button>
-            <button class="freq-tab" type="button" data-freq="biweekly" aria-selected="false">Bi-Weekly</button>
-            <button class="freq-tab" type="button" data-freq="monthly" aria-selected="false">Monthly</button>
+      <div class="quote-grid">
+        <aside class="aside on-dark">
+          <h3>Your selection so far</h3>
+          <p>Kept in sync with the choices you made above.</p>
+          <dl>
+            <div class="sum-row"><dt>Service</dt><dd id="sumService">—</dd></div>
+            <div class="sum-row"><dt>Frequency</dt><dd id="sumFreq">—</dd></div>
+            <div class="sum-row"><dt>Priorities</dt><dd id="sumNeeds">None selected</dd></div>
+            <div class="sum-row"><dt>Step</dt><dd id="sumStep">1 of 4</dd></div>
+          </dl>
+          <div class="aside__contact">
+            <a href="tel:+17742043112"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a1 1 0 01-1 1A16 16 0 014 5a1 1 0 011-1z"/></svg>+1 774-204-3112</a>
+            <a href="mailto:4pointscontact@gmail.com"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>4pointscontact@gmail.com</a>
           </div>
-        </div>
+        </aside>
 
-        <div class="freq-panel cornered" data-reveal>
-          <div class="freq-panel-head">
-            <span data-freq-title>Daily Plan</span>
-            <small>Included <b data-freq-count>04</b></small>
-          </div>
-          <p class="freq-fit" data-freq-fit></p>
-          <ul class="freq-list" data-freq-list></ul>
-        </div>
-      </div>
-    </section>
+        <div class="card">
+          <div id="formShell">
+            <ol class="steps" aria-label="Form progress">
+              <li class="step-pill is-active" data-step="1"><em>1</em>Service</li>
+              <li class="step-pill" data-step="2"><em>2</em>Property</li>
+              <li class="step-pill" data-step="3"><em>3</em>Contact</li>
+              <li class="step-pill" data-step="4"><em>4</em>Review</li>
+            </ol>
+            <div class="progress"><div class="progress__bar" id="progressBar" style="width:25%"></div></div>
 
-    <!-- =========================================================
-     FLOOR CARE
-     ========================================================= -->
-    <section class="floorcare scroll-snap-section" id="floorcare"
-      style="--img-floor-lg:url('assets/images/floor-care-uniformes-20260913.jpg')">
-      <!-- Raking light over the treated floor. It shares --fc-mask with the
-           photograph and the scrim, so the three dissolve as one object and no
-           new edge is introduced at either end of the chapter. -->
-      <span class="fc-sheen" aria-hidden="true"></span>
-      <div class="container">
-        <div class="floorcare-inner">
-
-          <div class="floorcare-content" data-reveal>
-            <span class="eyebrow on-dark">Floor Care Specialists</span>
-            <h2><span>Polishing.</span><span>Waxing.</span><span>Restoring.</span></h2>
-            <p class="fc-manifesto">A floor is the first thing anyone reads about a building, and the
-              hardest surface to keep saying the right thing. We polish, wax and restore high-traffic
-              commercial floors around your operation, so the room opens as though nothing happened.</p>
-            <span class="badge"><svg class="icon" viewBox="0 0 24 24" style="width:16px;height:16px">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 2" />
-              </svg>Sunday Service Available</span>
-            <p class="fc-note">Polishing, waxing and restoration, matched to the floor's existing finish — the same crew reviews the result before handoff.</p>
-            <div><a class="btn btn-champagne" href="#quote">Request Floor Care Quote</a></div>
-          </div>
-
-          <aside class="fc-dossier" data-reveal>
-            <span class="fc-figure" aria-hidden="true"></span>
-            <span class="spec-plate">FC—01<i>Specialty</i></span>
-            <dl class="spec-list">
-              <dt>Surface</dt>
-              <dd>High-traffic commercial floors</dd>
-              <dt>Service</dt>
-              <dd>Polishing · Waxing · Restoration</dd>
-              <dt>Schedule</dt>
-              <dd>Sundays &amp; after hours</dd>
-              <dt>Contract</dt>
-              <dd>Recurring or one-time</dd>
-              <dt>Coverage</dt>
-              <dd>Greater Boston &amp; Massachusetts</dd>
-            </dl>
-          </aside>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-     BEFORE / AFTER
-     ========================================================= -->
-    <section class="section beforeafter scroll-snap-section static-ink-dark">
-      <div class="container">
-        <div class="ba-board cornered">
-
-          <div class="section-head ba-head" data-canvas-ink data-reveal>
-            <span class="eyebrow">Vinyl Floor Care</span>
-            <h2>Dull vinyl. Renewed sheen.</h2>
-          </div>
-
-          <div class="ba-plate" data-reveal>
-            <div class="ba-scale" data-canvas-ink aria-hidden="true">
-              <span class="ba-scale-end">Traffic-worn</span>
-              <span class="ba-scale-rule"><b data-ba-readout>50</b></span>
-              <span class="ba-scale-end">Wax &amp; Buffed</span>
+            <div class="form-error" id="formError" role="alert">
+              <h3 class="form-error__title" id="formErrorTitle" tabindex="-1">We couldn't send your request</h3>
+              <p>Something failed on our side and nothing was submitted. Your answers are still filled in below — try again in a moment, or call <a href="tel:+17742043112">+1 774-204-3112</a> and we'll take the details over the phone.</p>
             </div>
 
-            <div class="ba-frame" data-before-after
-              style="--img-before:url('assets/images/vinyl-floor-before.png'); --img-after:url('assets/images/vinyl-floor-after.png')">
-              <!-- Progressive enhancement only. The canvas is the base plate when
-                   WebGL is available; the two CSS layers below stay in the DOM as
-                   the full fallback and keep owning the captions. It never takes a
-                   pointer, a tab stop or a hit test: the native range still owns
-                   the whole gesture surface above it. -->
-              <div class="ba-gl" data-ba-gl aria-hidden="true"></div>
-              <div class="ba-img ba-before"><span class="ba-label">Traffic-worn vinyl</span></div>
-              <div class="ba-img ba-after" data-ba-after style="clip-path:inset(0 0 0 50%)"><span
-                  class="ba-label">Wax &amp; buff finish</span></div>
-              <div class="ba-handle-track">
-                <div class="ba-handle" data-ba-handle style="left:50%">
-                  <div class="ba-grip">
-                    <svg class="icon" viewBox="0 0 24 24" style="width:19px;height:19px">
-                      <path d="M8 8 4 12l4 4M16 8l4 4-4 4" />
-                    </svg>
+            <form id="quoteForm" novalidate>
+              <fieldset class="step" data-step="1">
+                <legend>Service and frequency</legend>
+                <p class="hint">Pre-filled from your choices above. Change either one here if you prefer.</p>
+                <div class="field">
+                  <label for="fService">Service</label>
+                  <select id="fService" name="service">
+                    <option value="commercial">Commercial &amp; Janitorial</option>
+                    <option value="floor">Floor Care</option>
+                    <option value="residential">Residential</option>
+                    <option value="post">Post-Construction</option>
+                    <option value="move">Move-In / Move-Out</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label for="fFreq">Frequency</label>
+                  <select id="fFreq" name="frequency"></select>
+                  <p class="help" id="fFreqHelp"></p>
+                </div>
+                <div class="field">
+                  <span class="lbl" id="needLbl">Priorities for this quote</span>
+                  <div class="chips" id="fNeedRow" role="group" aria-labelledby="needLbl"></div>
+                  <p class="help">Optional. These update when you change the service.</p>
+                </div>
+              </fieldset>
+
+              <fieldset class="step" data-step="2" hidden>
+                <legend>Property and requirements</legend>
+                <p class="hint">Rough numbers are fine — commercial plans are confirmed after a short walkthrough or photo review.</p>
+                <div class="two">
+                  <div class="field" id="wrapType">
+                    <label for="fType">Property type</label>
+                    <select id="fType" name="propertyType">
+                      <option value="">Select…</option>
+                      <option>Commercial building</option><option>Office</option><option>School</option>
+                      <option>Retail</option><option>Medical or clinic</option>
+                      <option>Home or apartment</option><option>Other</option>
+                    </select>
+                    <p class="err" id="errType">Please choose a property type.</p>
+                  </div>
+                  <div class="field" id="wrapSize">
+                    <label for="fSize">Approximate size (sq ft)</label>
+                    <input id="fSize" name="size" type="number" min="100" step="50" inputmode="numeric" placeholder="e.g. 4500">
+                    <p class="err" id="errSize">Enter an approximate size of 100 sq ft or more.</p>
                   </div>
                 </div>
+                <div class="two">
+                  <div class="field">
+                    <label for="fFloors">Floor surfaces</label>
+                    <select id="fFloors" name="floors">
+                      <option value="">Not sure yet</option>
+                      <option>Mostly carpet</option>
+                      <option>Vinyl or LVT</option>
+                      <option>Tile or stone</option>
+                      <option>Polished concrete</option>
+                      <option>Mixed surfaces</option>
+                    </select>
+                  </div>
+                  <div class="field">
+                    <label for="fAccess">Preferred service window</label>
+                    <select id="fAccess" name="access">
+                      <option value="">No preference</option>
+                      <option>Business hours</option><option>Evenings</option>
+                      <option>Overnight</option><option>Sundays</option><option>Weekends</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field">
+                  <label for="fNotes">Anything specific we should know</label>
+                  <textarea id="fNotes" name="notes" placeholder="Access codes, restricted areas, deadline for handover…"></textarea>
+                  <p class="help">Optional, but it usually makes the first quote more accurate.</p>
+                </div>
+              </fieldset>
+
+              <fieldset class="step" data-step="3" hidden>
+                <legend>How we reach you</legend>
+                <p class="hint">We follow up the same business day with your quote.</p>
+                <div class="two">
+                  <div class="field" id="wrapName">
+                    <label for="fName">Full name</label>
+                    <input id="fName" name="name" type="text" autocomplete="name" placeholder="Jordan Alves">
+                    <p class="err" id="errName">Please enter your name.</p>
+                  </div>
+                  <div class="field">
+                    <label for="fCompany">Company <span class="u-optional">(optional)</span></label>
+                    <input id="fCompany" name="company" type="text" autocomplete="organization" placeholder="Northline Offices">
+                  </div>
+                </div>
+                <div class="two">
+                  <div class="field" id="wrapEmail">
+                    <label for="fEmail">Email</label>
+                    <input id="fEmail" name="email" type="email" autocomplete="email" placeholder="you@company.com">
+                    <p class="err" id="errEmail">Enter a valid email address so we can send the quote.</p>
+                  </div>
+                  <div class="field">
+                    <label for="fPhone">Phone <span class="u-optional">(optional)</span></label>
+                    <input id="fPhone" name="phone" type="tel" autocomplete="tel" placeholder="(000) 000-0000">
+                  </div>
+                </div>
+                <div class="field" id="wrapAddr">
+                  <label for="fAddr">Service area or address</label>
+                  <input id="fAddr" name="address" type="text" autocomplete="street-address" placeholder="City or neighbourhood in Greater Boston">
+                  <p class="err" id="errAddr">Tell us roughly where the space is.</p>
+                </div>
+              </fieldset>
+
+              <fieldset class="step" data-step="4" hidden>
+                <legend>Review your request</legend>
+                <p class="hint">Check the details below. Use edit to jump back to any step — answers stay filled in.</p>
+                <dl class="review" id="reviewList"></dl>
+                <p class="notice">Sending this request emails your details straight to our team. We reply the same business day — usually within a few hours.</p>
+              </fieldset>
+
+              <div class="form-nav">
+                <button class="btn btn--ghost" type="button" id="btnBack" hidden>Back</button>
+                <button class="btn btn--primary" type="button" id="btnNext">Continue</button>
+                <button class="btn btn--petrol" type="submit" id="btnSubmit" hidden>Submit request</button>
+                <p class="muted" id="stepCount">Step 1 of 4</p>
               </div>
-              <span class="ba-hint" aria-hidden="true">Drag to compare vinyl care</span>
-              <input class="ba-range" type="range" min="0" max="100" value="50" data-ba-range
-                aria-label="Drag to compare traffic-worn and waxed vinyl flooring">
-            </div>
-
-            <p class="ba-caption" data-canvas-ink>One commercial lobby, one camera position, before and after deep
-              cleaning and wax &amp; buffing for vinyl flooring.</p>
-            <p class="ba-context" data-canvas-ink>One example from our recurring Floor Care service — the same polishing, waxing and restoration process used on every scheduled visit.</p>
+            </form>
           </div>
 
-          <aside class="ba-notes cornered" data-canvas-ink data-reveal>
-            <span class="spec-plate">PL—02<i>Case Study</i></span>
-            <dl class="spec-list">
-              <dt>Surface</dt>
-              <dd>Commercial lobby, LVT vinyl plank</dd>
-              <dt class="lean-worn">Condition</dt>
-              <dd class="lean-worn">Traffic soil, scuffs, dulled sheen</dd>
-              <dt>Treatment</dt>
-              <dd>Deep clean · Wax &amp; Buffing</dd>
-              <dt class="lean-restored">Result</dt>
-              <dd class="lean-restored">Even, revitalized satin sheen</dd>
-            </dl>
-          </aside>
-
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-     RESIDENTIAL
-     ========================================================= -->
-    <section class="section residential scroll-snap-section" id="residential">
-      <div class="container residential-inner">
-        <div class="residential-media" data-reveal="scale"
-          style="--img-residential:url('assets/images/residential-cleaning-uniformes-20260913.jpg')">
-          <span class="residential-caption">Homes across Greater Boston</span>
-        </div>
-        <div data-reveal>
-          <span class="eyebrow">Residential</span>
-          <h2>The same professional standard. At home.</h2>
-          <ul class="residential-list">
-            <li>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="m5 12 4 4 10-10" />
-              </svg>
-              <div><strong>Standard Cleaning</strong><span>Regular upkeep for everyday living.</span></div>
-            </li>
-            <li>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="m5 12 4 4 10-10" />
-              </svg>
-              <div><strong>Deep Cleaning</strong><span>A thorough, top-to-bottom reset.</span></div>
-            </li>
-            <li>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="m5 12 4 4 10-10" />
-              </svg>
-              <div><strong>Move-In / Move-Out</strong><span>A spotless start or a clean handoff.</span></div>
-            </li>
-          </ul>
-
-          <div class="residential-ritual" data-reveal="rule">
-            <div class="ritual-step"><span class="ritual-num">01</span>
-              <div><strong>Arrival</strong><span>A fully insured crew arrives at the scheduled time.</span></div>
-            </div>
-            <div class="ritual-step"><span class="ritual-num">02</span>
-              <div><strong>Care</strong><span>The same professional standard used across our commercial accounts, room by room.</span></div>
-            </div>
-            <div class="ritual-step"><span class="ritual-num">03</span>
-              <div><strong>Handoff</strong><span>A clean handoff, every time.</span></div>
-            </div>
+          <div class="status" id="formSending" role="status" aria-live="polite">
+            <div class="spinner" aria-hidden="true"></div>
+            <h3 class="h3 u-mb-8">Processing your request…</h3>
+            <p class="muted">Checking the details and preparing the summary.</p>
           </div>
 
-          <a class="btn btn-primary" href="#quote">Request Home Cleaning</a>
-        </div>
-      </div>
-    </section>
-
-    <!-- =========================================================
-     SOCIAL IMPACT
-     ========================================================= -->
-    <section class="section impact depth scroll-snap-section" id="impact">
-      <div class="container impact-inner">
-        <div data-reveal>
-          <span class="impact-ratio" data-impact-counter data-target-a="5" data-target-b="1"><span
-              data-impact-value>0:0</span><small>Cleanings : Support Cleaning</small></span>
-          <div class="impact-viz" data-impact-viz aria-hidden="true">
-            <span class="rv-mark"></span>
-            <span class="rv-mark"></span>
-            <span class="rv-mark"></span>
-            <span class="rv-mark"></span>
-            <span class="rv-mark"></span>
-            <span class="rv-rule"></span>
-            <span class="rv-mark is-gift"></span>
-          </div>
-          <span class="impact-viz-caption">5 residential cleanings &rarr; 1 support cleaning, delivered with PPEAL.</span>
-        </div>
-        <div data-reveal>
-          <span class="eyebrow on-sage">Our Impact</span>
-          <h2>Cleaning with a human purpose.</h2>
-          <p>Every five residential cleanings help make one support cleaning possible, free of charge, for families
-            and patients who need it most. We partner directly with local humanitarian organizations, including PPEAL,
-            which supports bedridden hospital patients with home hygiene needs.</p>
-          <div class="impact-partners">
-            <span class="tag">PPEAL Partnership</span>
-            <span class="tag">Local Humanitarian Aid</span>
+          <div class="status" id="formDone" role="status" aria-live="polite">
+            <div class="done-mark" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M4 12l5 5L20 6"/></svg></div>
+            <h3 class="h3 u-mb-10" id="doneTitle" tabindex="-1">Request received</h3>
+            <p class="lead u-mb-22">Your request is with our team and we reply the same business day. <strong>Here is exactly what we received.</strong> If it is urgent, call +1 774-204-3112 and we pick up.</p>
+            <dl class="review" id="doneList"></dl>
+            <button class="btn btn--ghost" type="button" id="btnRestart">Send another request</button>
           </div>
         </div>
       </div>
-    </section>
+    </div>
+  </section>
 
-    <!-- =========================================================
-     AREAS WE SERVE
-     ========================================================= -->
-    <section class="section areas depth scroll-snap-section" id="areas">
-      <div class="container areas-inner">
-        <div data-reveal>
-          <span class="badge">100% Mobile Service</span>
-          <h2>We come to you.</h2>
-          <p>4Points has no storefront: our crews travel directly to your property, fully equipped, on schedule. That's
-            what lets us stay flexible for facility managers and homeowners alike.</p>
-          <dl class="spec-list areas-logic">
-            <dt>Storefront</dt>
-            <dd>None — fully mobile service</dd>
-            <dt>Equipment</dt>
-            <dd>Crews arrive fully equipped</dd>
-            <dt>Response</dt>
-            <dd>On schedule, direct to your property</dd>
-          </dl>
-          <div class="areas-tags">
-            <div class="areas-group">
-              <span class="areas-group-label">Coverage</span>
-              <span class="tag">Greater Boston</span>
-              <span class="tag">Massachusetts</span>
-            </div>
-            <div class="areas-group">
-              <span class="areas-group-label">We serve</span>
-              <span class="tag">Commercial Buildings</span>
-              <span class="tag">Offices</span>
-              <span class="tag">Schools</span>
-              <span class="tag">Homes</span>
-            </div>
-          </div>
-        </div>
-        <div class="areas-graphic" data-reveal="scale" aria-hidden="true">
-          <svg viewBox="0 0 400 400">
-            <defs>
-              <radialGradient id="areaSweep" cx="50%" cy="50%" r="50%">
-                <stop offset="0%" stop-color="#2A8EAA" stop-opacity=".22" />
-                <stop offset="100%" stop-color="#2A8EAA" stop-opacity="0" />
-              </radialGradient>
-            </defs>
-            <!-- outer perimeter, slowly turning: the service radius -->
-            <circle class="ring-dash" cx="200" cy="200" r="164" fill="none" stroke="rgba(139,174,139,.22)"
-              stroke-width="1" stroke-dasharray="2 12" stroke-linecap="round" />
-            <path class="sweep" d="M200 200 L200 36 A164 164 0 0 1 316 84 Z" fill="url(#areaSweep)" />
-            <circle cx="200" cy="200" r="120" fill="none" stroke="rgba(139,174,139,.35)" stroke-width="1" />
-            <circle cx="200" cy="200" r="80" fill="none" stroke="rgba(139,174,139,.4)" stroke-width="1" />
-            <circle cx="200" cy="200" r="40" fill="none" stroke="rgba(200,169,106,.5)" stroke-width="1" />
-            <line x1="200" y1="200" x2="270" y2="140" stroke="rgba(139,174,139,.4)" stroke-width="1" />
-            <line x1="200" y1="200" x2="130" y2="260" stroke="rgba(139,174,139,.4)" stroke-width="1" />
-            <line x1="200" y1="200" x2="290" y2="250" stroke="rgba(139,174,139,.4)" stroke-width="1" />
-            <line x1="200" y1="200" x2="120" y2="150" stroke="rgba(139,174,139,.4)" stroke-width="1" />
-            <circle cx="200" cy="200" r="6" fill="#C8A96A" />
-            <circle class="pulse" cx="200" cy="200" r="6" fill="#8BAE8B" />
-            <!-- four served points, each reporting in on its own beat -->
-            <circle class="node-pulse" cx="270" cy="140" r="4" fill="#8BAE8B" style="--d:0s" />
-            <circle class="node-pulse" cx="130" cy="260" r="4" fill="#8BAE8B" style="--d:1.1s" />
-            <circle class="node-pulse" cx="290" cy="250" r="4" fill="#8BAE8B" style="--d:2.2s" />
-            <circle class="node-pulse" cx="120" cy="150" r="4" fill="#8BAE8B" style="--d:3.3s" />
-            <circle class="node" cx="270" cy="140" r="4" fill="#8BAE8B" />
-            <circle class="node" cx="130" cy="260" r="4" fill="#8BAE8B" />
-            <circle class="node" cx="290" cy="250" r="4" fill="#8BAE8B" />
-            <circle class="node" cx="120" cy="150" r="4" fill="#8BAE8B" />
-          </svg>
-          <span class="areas-graphic-caption">Mobile crews serving Greater Boston &amp; Massachusetts — no storefront, no fixed radius.</span>
-        </div>
+  <!-- Convite final -->
+  <section class="section cta-band" id="ready" aria-labelledby="ctaTitle">
+    <div class="wrap">
+      <h2 class="h2" id="ctaTitle">Ready for a cleaner space?</h2>
+      <p class="lead">Commercial, janitorial, floor care or residential: request a quote and hear back the same business day.</p>
+      <div class="cta-band__actions">
+        <a class="btn btn--gold js-cta" href="#quote">Request a Quote</a>
+        <a class="btn btn--onDark" href="tel:+17742043112">Call 4Points</a>
       </div>
-    </section>
+    </div>
+  </section>
+</main>
 
-    <!-- =========================================================
-     TESTIMONIALS
-     ========================================================= -->
-    <section class="section testimonials depth scroll-snap-section">
-      <div class="container">
-        <div class="t-carousel" data-testimonial-carousel data-reveal role="region" aria-roledescription="carousel"
-          aria-label="Customer testimonials">
-          <div class="t-track" id="testimonial-track" data-testimonial-track>
-            <div class="t-stars" aria-hidden="true">
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-              </svg>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-              </svg>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-              </svg>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-              </svg>
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 2l2.9 6.6 7.1.6-5.4 4.7L18.2 21 12 17.3 5.8 21l1.6-7.1L2 9.2l7.1-.6L12 2z" />
-              </svg>
-            </div>
-            <div class="t-slide is-active" data-testimonial-slide aria-hidden="false">
-              <span class="t-service-tag">Commercial &amp; Janitorial</span>
-              <p>4Points took over our office cleaning six months ago and it's the first vendor we haven't had to
-                babysit. Restrooms, break rooms, floors, every single time.</p>
-              <div class="t-meta"><b class="t-avatar" aria-hidden="true">DF</b>
-                <div><strong>Daniel Ferreira</strong><span>Facilities Manager, Waltham, MA</span></div>
-              </div>
-            </div>
-            <div class="t-slide" data-testimonial-slide aria-hidden="true">
-              <span class="t-service-tag">Floor Care</span>
-              <p>We schedule floor waxing with them every other Sunday so it never disrupts the school week. Consistent,
-                on time, and the halls look brand new every time.</p>
-              <div class="t-meta"><b class="t-avatar" aria-hidden="true">MS</b>
-                <div><strong>Marlene Souza</strong><span>Operations Director, Somerville, MA</span></div>
-              </div>
-            </div>
-            <div class="t-slide" data-testimonial-slide aria-hidden="true">
-              <span class="t-service-tag">Residential — Move-Out</span>
-              <p>They came for a move-out clean and the landlord returned our full deposit without a single question.
-                Worth every dollar.</p>
-              <div class="t-meta"><b class="t-avatar" aria-hidden="true">PA</b>
-                <div><strong>Priya Anand</strong><span>Homeowner, Cambridge, MA</span></div>
-              </div>
-            </div>
-            <div class="t-slide" data-testimonial-slide aria-hidden="true">
-              <span class="t-service-tag">Commercial &amp; Janitorial</span>
-              <p>What sold us wasn't the price, it was how they explained the maintenance plan. Weekly touchpoint
-                cleaning has genuinely cut down on sick days in the office.</p>
-              <div class="t-meta"><b class="t-avatar" aria-hidden="true">RC</b>
-                <div><strong>Robert Chen</strong><span>Office Manager, Quincy, MA</span></div>
-              </div>
-            </div>
-          </div>
-          <div class="t-controls" role="group" aria-label="Testimonial navigation">
-            <button class="t-nav-btn prev" type="button" aria-label="Previous testimonial"
-              aria-controls="testimonial-track">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M15 6l-6 6 6 6" />
-              </svg>
-            </button>
-            <button class="t-nav-btn next" type="button" aria-label="Next testimonial"
-              aria-controls="testimonial-track">
-              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M9 6l6 6-6 6" />
-              </svg>
-            </button>
-          </div>
-          <p class="visually-hidden" data-testimonial-status role="status" aria-live="polite"
-            aria-atomic="true"></p>
-        </div>
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div class="ft-brand">
+        <a class="logo logo--footer u-mb-18" href="#top" aria-label="4Points Cleaning Services — home"></a>
+        <p>Mobile cleaning service serving Greater Boston &amp; Massachusetts.</p>
       </div>
-    </section>
-
-    <!-- =========================================================
-     FAQ
-     ========================================================= -->
-    <section class="section faq scroll-snap-section static-ink-dark" id="faq">
-      <div class="container">
-        <div class="faq-board cornered">
-        <div class="faq-intro" data-reveal>
-          <span class="eyebrow">Questions</span>
-          <h2>Good to know before you book.</h2>
-          <dl class="spec-list faq-assurance">
-            <dt>Insured</dt>
-            <dd>Commercial and residential work</dd>
-            <dt>Coverage</dt>
-            <dd>Greater Boston &amp; Massachusetts</dd>
-            <dt>Floor care</dt>
-            <dd>Sundays &amp; after hours</dd>
-            <dt>Plans</dt>
-            <dd>Daily · Weekly · Bi-weekly · Monthly</dd>
-            <dt>Equipment</dt>
-            <dd>Crews arrive fully equipped</dd>
-            <dt>Contracts</dt>
-            <dd>Flexible, no long-term lock-in</dd>
-          </dl>
-        </div>
-
-        <div class="faq-list" data-reveal>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-1">
-              How much does cleaning cost?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-1">
-              <p>Pricing depends on property type, size and frequency. Commercial plans are quoted after a short
-                walkthrough or photo review; residential cleanings are priced per visit. Request a quote and we'll give
-                you a straight answer.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-2">
-              What areas do you serve?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-2">
-              <p>We serve Greater Boston and the surrounding Massachusetts area as a fully mobile service: our crews
-                come directly to your property.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-3">
-              Are you fully insured?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-3">
-              <p>Yes. 4Points is fully insured for commercial and residential work, including specialized floor care.
-              </p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-4">
-              Do you require long-term contracts?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-4">
-              <p>No. We offer flexible recurring plans (daily, weekly, bi-weekly or monthly) that you can adjust as
-                your needs change.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-5">
-              Do I need to provide paper towels and trash bags?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-5">
-              <p>Clients provide paper towels and plastic trash bags.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-6">
-              Do you offer recurring commercial cleaning?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-6">
-              <p>Yes, recurring commercial and janitorial service is our core focus, with custom maintenance plans
-                built around your facility.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-7">
-              Do you provide Sunday floor care?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-7">
-              <p>Yes. Floor polishing and waxing is frequently scheduled on Sundays or after-hours so it never disrupts
-                your operation.</p>
-            </div>
-          </div>
-          <div class="faq-item">
-            <button class="faq-q" type="button" data-faq-button aria-expanded="false" aria-controls="faq-8">
-              How quickly can you start service?
-              <svg class="icon" viewBox="0 0 24 24">
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </button>
-            <div class="faq-a" id="faq-8">
-              <p>Most recurring commercial plans can start within a week of your quote being confirmed. Residential
-                and one-time visits are often scheduled even sooner, depending on availability.</p>
-            </div>
-          </div>
-        </div>
-        </div>
+      <div class="ft-services">
+        <h4>Services</h4>
+        <ul>
+          <li><a href="#services" data-service="commercial">Commercial Cleaning</a></li>
+          <li><a href="#services" data-service="commercial">Janitorial Services</a></li>
+          <li><a href="#floorcare">Floor Care</a></li>
+          <li><a href="#services" data-service="residential">Residential Cleaning</a></li>
+          <li><a href="#services" data-service="move">Move-In / Move-Out</a></li>
+        </ul>
       </div>
-    </section>
-
-    <!-- =========================================================
-     QUOTE FORM
-     ========================================================= -->
-    <section class="section quote depth scroll-snap-section" id="quote">
-      <div class="container quote-inner">
-        <div data-reveal>
-          <span class="eyebrow">Get Started</span>
-          <h2>Tell us about your space.</h2>
-          <p class="quote-copy">Four short steps. No account, no back-and-forth: just the details we need to send you
-            an accurate quote.</p>
-          <div class="quote-progress" data-quote-progress>
-            <span class="is-current"><b>01</b><i>Property</i></span>
-            <span><b>02</b><i>Frequency</i></span>
-            <span><b>03</b><i>Size</i></span>
-            <span><b>04</b><i>Contact</i></span>
-          </div>
-
-          <ol class="quote-steps" data-reveal="rule">
-            <li><b>01</b><div><strong>Review</strong><span>Your request reaches our team right away.</span></div></li>
-            <li><b>02</b><div><strong>Quote</strong><span>We follow up shortly with your quote.</span></div></li>
-            <li><b>03</b><div><strong>Next Steps</strong><span>We confirm the details and next steps together.</span></div></li>
-          </ol>
-        </div>
-
-        <form class="quote-form cornered" data-quote-form data-reveal novalidate>
-
-          <div class="q-step is-active" data-q-step="1">
-            <span class="q-step-label">Step 01</span>
-            <h3>Property Type</h3>
-            <div class="q-options" data-q-group="property">
-              <button type="button" class="q-option" data-q-value="Commercial">Commercial</button>
-              <button type="button" class="q-option" data-q-value="Office">Office</button>
-              <button type="button" class="q-option" data-q-value="School">School</button>
-              <button type="button" class="q-option" data-q-value="Residential">Residential</button>
-              <button type="button" class="q-option" data-q-value="Other">Other</button>
-            </div>
-          </div>
-
-          <div class="q-step" data-q-step="2">
-            <span class="q-step-label">Step 02</span>
-            <h3>Frequency</h3>
-            <div class="q-options" data-q-group="frequency">
-              <button type="button" class="q-option" data-q-value="One-Time">One-Time</button>
-              <button type="button" class="q-option" data-q-value="Weekly">Weekly</button>
-              <button type="button" class="q-option" data-q-value="Bi-Weekly">Bi-Weekly</button>
-              <button type="button" class="q-option" data-q-value="Monthly">Monthly</button>
-              <button type="button" class="q-option" data-q-value="Custom">Custom</button>
-            </div>
-          </div>
-
-          <div class="q-step" data-q-step="3">
-            <span class="q-step-label">Step 03</span>
-            <h3>Property Size</h3>
-            <div class="q-field">
-              <label for="q-size">Approximate square footage or number of rooms</label>
-              <input type="text" id="q-size" name="size" placeholder="e.g. 3,500 sq ft, or 4 bedrooms">
-            </div>
-          </div>
-
-          <div class="q-step" data-q-step="4">
-            <span class="q-step-label">Step 04</span>
-            <h3>Contact</h3>
-            <div class="q-field"><label for="q-name">Name</label><input type="text" id="q-name" name="name"
-                placeholder="Full name" required></div>
-            <div class="q-field"><label for="q-phone">Phone</label><input type="tel" id="q-phone" name="phone"
-                placeholder="(617) 000-0000" required></div>
-            <div class="q-field"><label for="q-email">Email</label><input type="email" id="q-email" name="email"
-                placeholder="you@company.com" required></div>
-            <div class="q-field"><label for="q-area">Service Area</label><input type="text" id="q-area" name="area"
-                placeholder="City, MA"></div>
-            <div class="q-field"><label for="q-msg">Message</label><textarea id="q-msg" name="message"
-                placeholder="Anything else we should know?"></textarea></div>
-          </div>
-
-          <div class="q-success" data-q-success>
-            <svg class="icon" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="9" />
-              <path d="m8 12.5 2.5 2.5L16 9.5" />
-            </svg>
-            <h3>Request received.</h3>
-            <p>A member of the 4Points team will follow up shortly with your quote.</p>
-          </div>
-
-          <div class="q-nav" data-q-nav>
-            <button type="button" class="q-back" data-q-back disabled>Back</button>
-            <button type="button" class="btn btn-champagne" data-q-next>Continue</button>
-          </div>
-        </form>
+      <div class="ft-company">
+        <h4>Company</h4>
+        <ul>
+          <li><a href="#coverage">Areas We Serve</a></li>
+          <li><a href="#impact">Our Impact</a></li>
+          <li><a href="#approach">The 4Points Standard</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
       </div>
-    </section>
-
-  </main>
-
-  <!-- =========================================================
-     CLOSING SCENE — FINAL CTA + FOOTER
-     ========================================================= -->
-  <div class="closing-scene scroll-snap-section">
-
-    <section class="final-cta depth">
-      <span class="section-joint" aria-hidden="true"></span>
-      <div class="container">
-        <h2 data-reveal>Ready for a cleaner space?</h2>
-        <p data-reveal>Commercial, janitorial, floor care or residential: request a quote and hear back the same business
-          day.</p>
-        <div class="hero-cta" data-reveal>
-          <a class="btn btn-champagne" href="#quote">Request a Quote</a>
-          <a class="btn btn-ghost" href="tel:+17742043112">Call 4Points<small>+1 774-204-3112</small></a>
-        </div>
+      <div class="ft-contact">
+        <h4>Contact</h4>
+        <ul>
+          <li><a href="tel:+17742043112" aria-label="Call +1 774-204-3112">+1 774-204-3112</a></li>
+          <li><a href="mailto:4pointscontact@gmail.com" aria-label="Email 4pointscontact@gmail.com">4pointscontact@gmail.com</a></li>
+        </ul>
+        <a class="btn btn--gold btn--sm js-cta u-mt-12" href="#quote" aria-label="Request a quote"><span><span class="ft-long">Request a </span>Quote</span></a>
       </div>
-    </section>
-
-    <footer class="site-footer depth">
-      <div class="container footer-joint" aria-hidden="true"><span></span></div>
-      <div class="container footer-grid" data-reveal>
-        <div>
-          <div class="footer-logo">
-            <a href="#main" aria-label="4Points Cleaning Services">
-              <img src="assets/images/LOGO%20TIPOGRAFICA.png" alt="4Points Cleaning Services" class="footer-logo-img" width="206" height="54">
-            </a>
-          </div>
-          <p class="footer-tagline">Mobile Cleaning Service | Serving Greater Boston &amp; Massachusetts.</p>
-        </div>
-        <div class="footer-col">
-          <h4>Services</h4>
-          <ul>
-            <li><a href="#services">Commercial Cleaning</a></li>
-            <li><a href="#services">Janitorial Services</a></li>
-            <li><a href="#floorcare">Floor Care</a></li>
-            <li><a href="#residential">Residential Cleaning</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Company</h4>
-          <ul>
-            <li><a href="#areas">Areas We Serve</a></li>
-            <li><a href="#impact">Our Impact</a></li>
-            <li><a href="#faq">About</a></li>
-            <li><a href="#quote">Request a Quote</a></li>
-          </ul>
-        </div>
-        <div class="footer-col">
-          <h4>Contact</h4>
-          <ul>
-            <li><a href="tel:+17742043112">+1 774-204-3112</a></li>
-            <li><a href="mailto:4pointscontact@gmail.com">4pointscontact@gmail.com</a></li>
-          </ul>
-        </div>
-      </div>
-      <div class="container footer-bottom" data-reveal>
-        <span>© <span data-year></span> 4Points Cleaning Services. Mobile Cleaning Service | Serving Greater Boston &amp;
-          Massachusetts.</span>
-        <div class="footer-actions">
-          <div class="footer-social">
-            <a href="#" aria-label="Facebook"><svg class="icon" viewBox="0 0 24 24">
-                <path
-                  d="M14 8h3V4.4c-.5-.1-2.1-.4-4-.4-3.9 0-6.6 2.4-6.6 6.8V14H2v4h4.4v10h5.4V18h4.5l.7-4h-5.2v-2.8C11.8 10 12.2 8 14 8Z" />
-              </svg></a>
-            <a href="#" aria-label="Instagram"><svg class="icon" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="18" height="18" rx="5" />
-                <circle cx="12" cy="12" r="4" />
-                <circle cx="17.5" cy="6.5" r="1" />
-              </svg></a>
-          </div>
-          <a class="footer-top" href="#main">Back to top<svg class="icon" viewBox="0 0 24 24">
-              <path d="M12 19V5M5 12l7-7 7 7" />
-            </svg></a>
-        </div>
-      </div>
-    </footer>
-
-  </div>
-
-  <!-- =========================================================
-     iOS NAVIGATION SYSTEM (mobile only, ≤767px)
-     Persistent bottom tab bar, secondary-options bottom sheet, and
-     one full-screen editorial cover per service. Hidden by default
-     (base rules live near .site-header / .mobile-menu / .hero-rail
-     in style.css) and only unhidden/styled inside the existing
-     "20. MOBILE EDITION" block, sub-section "20a".
-     ========================================================= -->
-
-  <nav class="m-tabbar" data-tabbar aria-label="Primary">
-    <button type="button" class="m-tabbar-link is-current" data-tabbar-link data-tabbar-target="top"
-      aria-current="page">
-      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M4 11.5 12 4l8 7.5M6 10v9h5v-5h2v5h5v-9" />
-      </svg><span>Home</span>
-    </button>
-    <button type="button" class="m-tabbar-link" data-tabbar-link data-tabbar-target="#services">
-      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-        <rect x="4" y="4" width="7" height="7" rx="1.2" /><rect x="13" y="4" width="7" height="7" rx="1.2" />
-        <rect x="4" y="13" width="7" height="7" rx="1.2" /><rect x="13" y="13" width="7" height="7" rx="1.2" />
-      </svg><span>Services</span>
-    </button>
-    <button type="button" class="m-tabbar-link" data-tabbar-link data-tabbar-target="#impact">
-      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M12 20.5s-7.6-4.6-7.6-10.2A4.6 4.6 0 0 1 12 7.1a4.6 4.6 0 0 1 7.6 3.2c0 5.6-7.6 10.2-7.6 10.2Z" />
-      </svg><span>Impact</span>
-    </button>
-    <button type="button" class="m-tabbar-link" data-tabbar-link data-tabbar-target="#quote">
-      <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M6 3h9l4 4v14H6Z" /><path d="M15 3v4h4M9 12h7M9 16h7" />
-      </svg><span>Quote</span>
-    </button>
-    <span class="m-tabbar-indicator" aria-hidden="true"></span>
-  </nav>
-
-  <div class="m-sheet-backdrop" data-options-sheet-backdrop></div>
-  <div class="m-sheet" id="m-options-sheet" data-options-sheet role="dialog" aria-modal="true"
-    aria-label="More options" aria-hidden="true" inert>
-    <span class="m-sheet-handle" aria-hidden="true"></span>
-    <nav aria-label="Secondary">
-      <a href="#floorcare" data-options-sheet-link>Floor Care<svg class="icon" viewBox="0 0 24 24"
-          aria-hidden="true">
-          <path d="M9 6l6 6-6 6" />
-        </svg></a>
-      <a href="#areas" data-options-sheet-link>Areas We Serve<svg class="icon" viewBox="0 0 24 24"
-          aria-hidden="true">
-          <path d="M9 6l6 6-6 6" />
-        </svg></a>
-      <a href="#faq" data-options-sheet-link>FAQ<svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M9 6l6 6-6 6" />
-        </svg></a>
-    </nav>
-    <div class="m-sheet-contact">
-      <a class="menu-call" href="tel:+17742043112"><small>Call 4Points</small>+1 774-204-3112</a>
-      <a class="menu-mail" href="mailto:4pointscontact@gmail.com">4pointscontact@gmail.com</a>
+    </div>
+    <div class="footer-bottom">
+      <p>© <span id="year"></span> 4Points Cleaning Services. Mobile cleaning service | Serving Greater Boston &amp; Massachusetts.</p>
     </div>
   </div>
+</footer>
 
-  <section class="m-cover" data-service-cover="commercial" role="dialog" aria-modal="true"
-    aria-label="Commercial &amp; Janitorial" aria-hidden="true" inert>
-    <div class="m-cover-media" style="--cover-img:url('assets/images/commercial-cleaning-uniformes-20260913.jpg')">
-      <div class="m-cover-bar">
-        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-        </button>
-        <span>Commercial &amp; Janitorial</span>
-      </div>
-    </div>
-    <div class="m-cover-body">
-      <span class="card-tag">Priority Focus</span>
-      <h2>Commercial &amp; Janitorial</h2>
-      <p>Recurring cleaning plans for offices, schools and commercial buildings: daily, weekly, bi-weekly or
-        monthly.</p>
-      <ul class="m-cover-list">
-        <li>Restrooms &amp; Common Areas</li>
-        <li>Break Rooms</li>
-        <li>Trash Removal</li>
-        <li>Touchpoint Cleaning</li>
-        <li>Custom Maintenance Plans</li>
-      </ul>
-      <dl class="spec-list">
-        <dt>Frequency</dt>
-        <dd>Daily · Weekly · Bi-weekly · Monthly</dd>
-        <dt>Coverage</dt>
-        <dd>Greater Boston &amp; Massachusetts</dd>
-        <dt>Contract</dt>
-        <dd>Flexible, no long-term lock-in</dd>
-      </dl>
-    </div>
-    <div class="m-cover-cta">
-      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Commercial Quote</a>
-    </div>
-  </section>
-
-  <section class="m-cover" data-service-cover="floor" role="dialog" aria-modal="true" aria-label="Floor Care"
-    aria-hidden="true" inert>
-    <div class="m-cover-media" style="--cover-img:url('assets/images/floor-care-uniformes-20260913.jpg')">
-      <div class="m-cover-bar">
-        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-        </button>
-        <span>Floor Care</span>
-      </div>
-    </div>
-    <div class="m-cover-body">
-      <span class="card-tag">Specialized</span>
-      <h2>Floor Care</h2>
-      <p>Premium polishing and waxing for high-traffic commercial floors, including Sunday and after-hours
-        execution.</p>
-      <ul class="m-cover-list">
-        <li>Polishing</li>
-        <li>Waxing</li>
-        <li>High-Traffic Floors</li>
-        <li>Sunday Service</li>
-      </ul>
-      <dl class="spec-list">
-        <dt>Schedule</dt>
-        <dd>Sundays &amp; after hours</dd>
-        <dt>Contract</dt>
-        <dd>Recurring or one-time</dd>
-        <dt>Coverage</dt>
-        <dd>Greater Boston &amp; Massachusetts</dd>
-      </dl>
-    </div>
-    <div class="m-cover-cta">
-      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Floor Care Quote</a>
-    </div>
-  </section>
-
-  <section class="m-cover" data-service-cover="residential" role="dialog" aria-modal="true" aria-label="Residential"
-    aria-hidden="true" inert>
-    <div class="m-cover-media" style="--cover-img:url('assets/images/residential-cleaning-uniformes-20260913.jpg')">
-      <div class="m-cover-bar">
-        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-        </button>
-        <span>Residential</span>
-      </div>
-    </div>
-    <div class="m-cover-body">
-      <span class="card-tag">Secondary</span>
-      <h2>Residential</h2>
-      <p>Standard and deep cleaning, plus move-in and move-out service for homes across Greater Boston.</p>
-      <ul class="m-cover-list">
-        <li>Standard Cleaning</li>
-        <li>Deep Cleaning</li>
-        <li>Move-In</li>
-        <li>Move-Out</li>
-      </ul>
-      <dl class="spec-list">
-        <dt>Coverage</dt>
-        <dd>Greater Boston &amp; Massachusetts</dd>
-        <dt>Contract</dt>
-        <dd>Per-visit, no subscription required</dd>
-      </dl>
-    </div>
-    <div class="m-cover-cta">
-      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Home Cleaning</a>
-    </div>
-  </section>
-
-  <section class="m-cover" data-service-cover="post-construction" role="dialog" aria-modal="true"
-    aria-label="Post-Construction" aria-hidden="true" inert>
-    <div class="m-cover-media" style="--cover-img:url('assets/images/post-construction-uniformes-20260913.jpg')">
-      <div class="m-cover-bar">
-        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-        </button>
-        <span>Post-Construction</span>
-      </div>
-    </div>
-    <div class="m-cover-body">
-      <span class="card-tag">Specialized</span>
-      <h2>Post-Construction</h2>
-      <p>Thorough cleanup after remodeling or building, removing heavy dust and residue.</p>
-      <ul class="m-cover-list">
-        <li>Fine Dust Removal</li>
-        <li>Debris &amp; Residue Cleanup</li>
-        <li>Surface Detailing</li>
-        <li>Window &amp; Frame Cleaning</li>
-      </ul>
-      <dl class="spec-list">
-        <dt>Scheduling</dt>
-        <dd>One-time, timed to your project close-out</dd>
-        <dt>Coverage</dt>
-        <dd>Greater Boston &amp; Massachusetts</dd>
-      </dl>
-    </div>
-    <div class="m-cover-cta">
-      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Post-Construction</a>
-    </div>
-  </section>
-
-  <section class="m-cover" data-service-cover="move-in-out" role="dialog" aria-modal="true"
-    aria-label="Move-In / Move-Out" aria-hidden="true" inert>
-    <div class="m-cover-media" style="--cover-img:url('assets/images/hero-residential-uniformes-20260913.jpg')">
-      <div class="m-cover-bar">
-        <button type="button" class="m-cover-back" data-service-cover-close aria-label="Back to Services">
-          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M15 6l-6 6 6 6" />
-          </svg>
-        </button>
-        <span>Move-In / Move-Out</span>
-      </div>
-    </div>
-    <div class="m-cover-body">
-      <span class="card-tag">Residential Specialty</span>
-      <h2>Move-In / Move-Out</h2>
-      <p>A top-to-bottom deep cleaning that prepares your home for a fresh arrival or a smooth handoff to the
-        owner.</p>
-      <ul class="m-cover-list">
-        <li>Inside Ovens</li>
-        <li>Inside Refrigerators</li>
-        <li>Cabinet &amp; Drawer Interiors</li>
-        <li>Floors, Baseboards &amp; Surfaces</li>
-      </ul>
-      <dl class="spec-list">
-        <dt>Service</dt>
-        <dd>One-Time Deep Cleaning</dd>
-        <dt>Best For</dt>
-        <dd>Move-In Preparation · Move-Out Handoff</dd>
-        <dt>Coverage</dt>
-        <dd>Greater Boston &amp; Massachusetts</dd>
-      </dl>
-    </div>
-    <div class="m-cover-cta">
-      <a class="btn btn-champagne" href="#quote" data-service-cover-close>Request Move-In / Move-Out Cleaning</a>
-    </div>
-  </section>
-
-  <script type="module" src="script.js?v=8e01bff658a8"></script>
+<script src="js/main.js?v=3da232d80d12"></script>
 </body>
-
 </html>

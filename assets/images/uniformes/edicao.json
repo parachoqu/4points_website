@@ -1,0 +1,123 @@
+{
+  "tool": "image_gen (built-in)",
+  "referencePdf": "4Points_Colecao_de_Uniformes.pdf",
+  "backup": "backup/uniformes-20260921-195036",
+  "items": [
+    {
+      "key": "hero",
+      "models": [
+        "05",
+        "06"
+      ],
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-e0ff35f9-dae5-4e67-bc5f-c45bd9405a97.png",
+      "dimensions": [
+        1264,
+        848
+      ],
+      "filename": "hero-uniformes-20260921.jpg",
+      "prompt": "Edit this exact original photograph very minimally, preserving it rather than recreating it. Only retouch the two polo shirts. On the man's navy polo add fine subtle gold piping along the collar outer edge, a tiny horizontal gold stitch immediately below the button placket, and a tiny gold CLEANING SERVICES subtitle below the existing white 4POINTS chest logo. Keep dark navy buttons, the exact original navy color, shape and drape. On the woman's cream polo change fabric to clean white, add fine gold collar edging and ONLY one small horizontal gold stitch below the button placket, retain white buttons and make the existing small chest logo navy with tiny gold subtitle. No vertical gold piping beside buttons. No L-shaped piping. No gold sleeve edging. No stripe across chest. Logo stays small same original size.\nAbsolutely preserve both people's original faces, hair, hands, arms, posture, trousers, shoes. Absolutely preserve the entire cleaning cart, exact original hose loop shape, handle, bottles, gray tray, blue rag, wheels and footplate. Absolutely preserve original background and all positions, lighting and floor reflection. Do not sharpen or beautify the picture. Keep original framing 1264x848 and positions, do not move or resize anything. Output should be the same photograph with just these small garment trim/color adjustments.",
+      "references": [
+        "img-hero.jpeg",
+        "conceito-004.png",
+        "conceito-005.png"
+      ],
+      "bytes": 135748,
+      "sha256": "aff45d60e1b1d758a412d1e4277a5ede570234acb822b9d01f2963d3e27e1646"
+    },
+    {
+      "key": "commercial",
+      "models": [
+        "02"
+      ],
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-d79a6c5f-a319-4077-b822-ade550d43b40.png",
+      "dimensions": [
+        760,
+        1133
+      ],
+      "filename": "commercial-uniformes-20260921.jpg",
+      "prompt": "Use case: identity-preserve. EDIT ONLY the upper-body uniform shirts in image 1, the original website photo. Image 1 is the edit target; the other image(s) are garment design references only. Strictly preserve the original photograph: identical people and facial identity, expressions, hair, skin, arms, hands, fingers, body proportions, poses, pants, shoes, cleaning tools, architecture, furniture, objects, lighting, shadows, camera position, framing, and composition. Treat everything outside the shirts as locked. Do not redraw or beautify faces. Do not move, enlarge, or crop the subjects. Keep the original image aspect ratio and full frame. Photorealistic fabric, natural seams, folds and embroidery following the existing pose and light. Preserve the existing shirt silhouette/fit wherever possible. The logo reads \"4POINTS\" with small \"CLEANING SERVICES\" beneath, copied faithfully from the reference, small and proportionate on the wearer's left chest. No floating graphics, no extra text or watermarks, no collage. Return only the edited photo.\nReplace only the woman's T-shirt with model 02, the exact navy crew-neck T-shirt from image 2: navy short sleeves, thin continuous gold piping horizontally across upper chest above the logo, small white-and-gold embroidered logo on wearer's left chest, a small white numeral 4 on the wearer's LEFT sleeve (the sleeve at viewer right). Gold stripe follows fabric folds and reference position, not a broad stripe. Back nape logo only if naturally visible; do not force hidden details into the front. Preserve tucked-in fit, hands and mop. Original is 760x1133 portrait.",
+      "references": [
+        "img-commercial.jpeg",
+        "conceito-001.png"
+      ],
+      "bytes": 111405,
+      "sha256": "ad1558fda026b69cd4870c31521bb907a9c13bbb67e94e6467c763e8b5cd3724"
+    },
+    {
+      "key": "floor",
+      "models": [
+        "05"
+      ],
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-4eac2b9b-1dbd-4e50-95d9-14ba90245885.png",
+      "dimensions": [
+        1040,
+        698
+      ],
+      "filename": "floor-uniformes-20260921.jpg",
+      "prompt": "Precise localized retouch to image 1. Image 1 is the original photograph, keep it intact and make ONLY these tiny changes on the man's existing navy polo: add a thin gold line to the collar edge, add a short tiny horizontal gold line at the base of its button placket, and update existing left-chest logo to the small white-and-gold 4POINTS / CLEANING SERVICES embroidery in reference image 2. Keep buttons NAVY, not gold. Keep original shirt silhouette and navy shade. Plain sleeves, no stripe across chest.\nAll other parts of the original photo are locked: exact same original face and hair, hands/fingers, pose, arms, trousers, shoes, polisher, polisher handle and cord, office furniture, walls, windows, lighting, framing. Especially preserve the floor completely: original smooth gray polished floor and straight window reflections unchanged, NO new circular polishing marks or swirls, NO new reflections, no extra shine. Do not reinterpret the distant office objects or plant positions. Do not shift or resize the man or equipment. Match original full frame and original 1040:698 aspect ratio. This should look like the original photo with only small gold collar/placket trim and chest embroidery added, not a regenerated photo. Return just the edited photograph.",
+      "references": [
+        "img-floor.jpeg",
+        "conceito-004.png"
+      ],
+      "bytes": 91796,
+      "sha256": "7f9cdcb06a047f12a241c2876b1a4077dcccf571ee0fa9ff876d82c65b6ebf9b"
+    },
+    {
+      "key": "residential",
+      "models": [
+        "06"
+      ],
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-1a802efe-123a-42d5-b7b9-0f46b62bb1cc.png",
+      "dimensions": [
+        1040,
+        698
+      ],
+      "filename": "residential-uniformes-20260921.jpg",
+      "prompt": "Use case: identity-preserve. EDIT ONLY the upper-body uniform shirts in image 1, the original website photo. Image 1 is the edit target; the other image(s) are garment design references only. Strictly preserve the original photograph: identical people and facial identity, expressions, hair, skin, arms, hands, fingers, body proportions, poses, pants, shoes, cleaning tools, architecture, furniture, objects, lighting, shadows, camera position, framing, and composition. Treat everything outside the shirts as locked. Do not redraw or beautify faces. Do not move, enlarge, or crop the subjects. Keep the original image aspect ratio and full frame. Photorealistic fabric, natural seams, folds and embroidery following the existing pose and light. Preserve the existing shirt silhouette/fit wherever possible. The logo reads \"4POINTS\" with small \"CLEANING SERVICES\" beneath, copied faithfully from the reference, small and proportionate on the wearer's left chest. No floating graphics, no extra text or watermarks, no collage. Return only the edited photo.\nReplace only the woman's polo with model 06, the exact WHITE polo from image 2: white fabric (not beige/cream), white buttons, thin gold piping along the collar edge, a short thin gold horizontal stitch at bottom of button placket, small navy-and-gold embroidered logo on wearer's left chest. Plain sleeves and back, NO horizontal chest stripe. Preserve tucked-in fit, her exact face and both hands, the purple vacuum, all room details. Original is 1040x698 landscape.",
+      "references": [
+        "img-residential.jpeg",
+        "conceito-005.png"
+      ],
+      "bytes": 88993,
+      "sha256": "8a7aa8b8e1ad5dd884b1b5deb4724fb0041a11fc8755966cef848a085b23b987"
+    },
+    {
+      "key": "post",
+      "models": [
+        "05"
+      ],
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-6b4dba4e-01a8-4dc8-8517-341e3dbd4745.png",
+      "dimensions": [
+        900,
+        900
+      ],
+      "filename": "post-uniformes-20260921.jpg",
+      "prompt": "Use case: identity-preserve. EDIT ONLY the upper-body uniform shirts in image 1, the original website photo. Image 1 is the edit target; the other image(s) are garment design references only. Strictly preserve the original photograph: identical people and facial identity, expressions, hair, skin, arms, hands, fingers, body proportions, poses, pants, shoes, cleaning tools, architecture, furniture, objects, lighting, shadows, camera position, framing, and composition. Treat everything outside the shirts as locked. Do not redraw or beautify faces. Do not move, enlarge, or crop the subjects. Keep the original image aspect ratio and full frame. Photorealistic fabric, natural seams, folds and embroidery following the existing pose and light. Preserve the existing shirt silhouette/fit wherever possible. The logo reads \"4POINTS\" with small \"CLEANING SERVICES\" beneath, copied faithfully from the reference, small and proportionate on the wearer's left chest. No floating graphics, no extra text or watermarks, no collage. Return only the edited photo.\nReplace the man's polo with model 05, the exact navy polo in reference image 2: dark navy fabric, navy buttons, thin gold piping along the collar edge, a short thin gold horizontal stitch at the bottom of the button placket, small white-and-gold embroidered chest logo. Back plain, sleeves plain, NO horizontal chest stripe. Preserve his exact face, both hands, mop and handle, the reception counter, lighting and room. Original is 900x900 square.",
+      "references": [
+        "img-post.jpeg",
+        "conceito-004.png"
+      ],
+      "bytes": 109495,
+      "sha256": "0e5b77f97e7779a98b40cd37a766148db576437a992dad69bbd8c951bbf0fb97"
+    },
+    {
+      "key": "move",
+      "models": [
+        "04"
+      ],
+      "source": "/home/https/.codex/generated_images/01a0c621-393d-7612-a990-50c040ebb1dc/exec-f197f6c6-c8a6-4ceb-8ecf-d9465e54091f.png",
+      "dimensions": [
+        760,
+        1133
+      ],
+      "filename": "move-uniformes-20260921.jpg",
+      "prompt": "Use case: identity-preserve. EDIT ONLY the upper-body uniform shirts in image 1, the original website photo. Image 1 is the edit target; the other image(s) are garment design references only. Strictly preserve the original photograph: identical people and facial identity, expressions, hair, skin, arms, hands, fingers, body proportions, poses, pants, shoes, cleaning tools, architecture, furniture, objects, lighting, shadows, camera position, framing, and composition. Treat everything outside the shirts as locked. Do not redraw or beautify faces. Do not move, enlarge, or crop the subjects. Keep the original image aspect ratio and full frame. Photorealistic fabric, natural seams, folds and embroidery following the existing pose and light. Preserve the existing shirt silhouette/fit wherever possible. The logo reads \"4POINTS\" with small \"CLEANING SERVICES\" beneath, copied faithfully from the reference, small and proportionate on the wearer's left chest. No floating graphics, no extra text or watermarks, no collage. Return only the edited photo.\nReplace only the woman's cream V-neck shirt with model 04, the exact LIGHT GRAY crew-neck T-shirt from image 2. New shirt must have a round crew neck (not V-neck), light gray subtly heathered short-sleeve fabric, thin continuous gold piping horizontally across the upper chest above the logo, small navy-and-gold embroidered logo on wearer's left chest, a small navy numeral 4 on the wearer's LEFT sleeve (the sleeve at viewer right). Back nape logo only if naturally visible. Shirt fit and lower hem should follow original pose and waist; preserve face, neck except neckline coverage, arms, hands, blue cloth, tabletop, sofa and all scenery. Original is 760x1133 portrait.",
+      "references": [
+        "img-move.jpeg",
+        "conceito-003.png"
+      ],
+      "bytes": 111751,
+      "sha256": "a33d252181a149e8b7e98923e5db42b9b239f4350402ff45d29baedb1aa30ce5"
+    }
+  ]
+}
